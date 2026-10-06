@@ -1,0 +1,90 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# Flutter / Dart / Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Android Studio & Gradle build artifacts
+/android/app/debug
+/android/app/profile
+/android/app/release
+**/android/.gradle/
+**/android/**/build/
+**/android/**/.cxx/
+**/android/**/bin/
+bin/
+**/bin/
+
+# iOS & macOS Flutter ephemeral / generated files
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/app.flx
+**/ios/Flutter/debug/
+**/ios/Flutter/profile/
+**/ios/Flutter/release/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/macos/Flutter/ephemeral/
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+**/windows/flutter/ephemeral/
+**/linux/flutter/ephemeral/
+**/Pods/
+**/.symlinks/
+
+# Symbolication & Obfuscation
+app.*.symbols
+app.*.map.json
+
+# Binaries & Package builds (Release artifacts belong on GitHub Releases)
+*.apk
+*.aab
+*.ipa
+
+# Test codes excluded per request
+/test/
+**/test/
+RunnerTests/
+**/RunnerTests/
+
+# Confidential, Private Keys & Local Environment Files
+**/local.properties
+**/key.properties
+**/*.keystore
+**/*.jks
+**/*.p12
+**/*.p8
+**/*.key
+**/*.pem
+**/*.cer
+*.env
+*.env.*
+**/*credentials*.json
+**/*google-services*.json
+**/*GoogleService-Info*.plist
