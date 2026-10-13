@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart' as drift;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -97,6 +98,27 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
   }
 
   Future<void> _disableBiometricLock() async {
+    try {
+      final didAuth = await _auth.authenticate(
+        localizedReason: 'Authenticate to disable biometric protection',
+        options: const AuthenticationOptions(
+          biometricOnly: false,
+          stickyAuth: true,
+        ),
+      );
+      if (!didAuth) return;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.danger,
+            content: Text('Authentication required to disable lock: $e'),
+          ),
+        );
+      }
+      return;
+    }
+
     await ref.read(profileRepositoryProvider).updateProfile(
           const UserProfileTableCompanion(
             biometricLockEnabled: drift.Value(false),
@@ -238,33 +260,34 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: OutlinedButton.icon(
-                      onPressed: () => setState(() => _isUnlocked = true),
-                      icon: const Icon(Icons.lock_open_rounded, size: 18),
-                      label: const Text(
-                        'Bypass Lock (Emulator Fallback)',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                  if (kDebugMode) ...[
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: OutlinedButton.icon(
+                        onPressed: () => setState(() => _isUnlocked = true),
+                        icon: const Icon(Icons.bug_report_outlined, size: 18),
+                        label: const Text(
+                          'Bypass Lock (Emulator Fallback)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
                         ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.textPrimary,
-                        backgroundColor: AppColors.surfaceHigh,
-                        side: BorderSide(
-                          color: AppColors.outline.withValues(alpha: 0.8),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.warning,
+                          backgroundColor: AppColors.surfaceHigh,
+                          side: BorderSide(
+                            color: AppColors.warning.withValues(alpha: 0.5),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                   const SizedBox(height: 8),
 
                   TextButton.icon(

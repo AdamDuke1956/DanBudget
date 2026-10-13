@@ -556,9 +556,30 @@ class MoreScreen extends ConsumerWidget {
                   'Backup ready: ${expenses.length} expenses, ${commitments.length} commitments, and ${checklist.length} checklist items.',
                   style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Container(
-                  height: 180,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.shield_outlined, size: 16, color: AppColors.warning),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Keep your exported JSON private. It contains personal income, debt, and expense records.',
+                          style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  height: 160,
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: AppColors.surfaceHigh,
@@ -584,7 +605,9 @@ class MoreScreen extends ConsumerWidget {
                 Clipboard.setData(ClipboardData(text: jsonStr));
                 Navigator.of(ctx).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Copied complete local JSON backup to clipboard!')),
+                  const SnackBar(
+                    content: Text('Copied backup to clipboard. Paste securely and avoid pasting in untrusted apps.'),
+                  ),
                 );
               },
               icon: const Icon(Icons.copy_rounded, size: 16),
