@@ -67,7 +67,6 @@ class CommitmentRepository {
           (commitment.remainingTenureMonths - 1).clamp(0, 9999);
       final isStillActive = newRemainingSen > 0 && newRemainingMonths > 0;
 
-      // Update commitment
       await (_db.update(_db.commitmentsTable)
             ..where((t) => t.id.equals(commitmentId)))
           .write(
@@ -78,7 +77,6 @@ class CommitmentRepository {
         ),
       );
 
-      // Log expense under 'bills' or commitment payment
       await _db.into(_db.expensesTable).insert(
             ExpensesTableCompanion.insert(
               amountSen: paymentAmountSen,

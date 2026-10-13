@@ -51,7 +51,7 @@ abstract final class FinancialHealthEngine {
 
     final List<String> recs = [];
 
-    // 1. DSR Score (max 35)
+    // DSR Score (max 35)
     final double dsr = totalCommitments.sen / netSalary.sen;
     int dsrScore = 0;
     if (dsr <= 0.30) {
@@ -69,7 +69,7 @@ abstract final class FinancialHealthEngine {
       recs.add('Critical debt ratio (>60%). Risk of loan rejection and cashflow crisis.');
     }
 
-    // 2. Savings Score (max 25)
+    // Savings Score (max 25)
     final double savingsRate = monthlySavingsTarget.sen / netSalary.sen;
     int savingsScore = 0;
     if (savingsRate >= 0.20) {
@@ -87,8 +87,7 @@ abstract final class FinancialHealthEngine {
       recs.add('Zero or near-zero savings! Start with RM 50/month to build the habit.');
     }
 
-    // 3. Emergency Fund Score (max 25)
-    // Target: 3 months of net salary
+    // Emergency Fund Score (max 25; target 3 months net salary)
     final int targetFundSen = netSalary.sen * 3;
     final double fundRatio = targetFundSen > 0
         ? (currentEmergencyFund.sen / targetFundSen).clamp(0.0, 1.0)
@@ -98,7 +97,7 @@ abstract final class FinancialHealthEngine {
       recs.add('Build at least 1 full month of emergency buffer in a separate savings account.');
     }
 
-    // 4. BNPL Safety Score (max 15)
+    // BNPL Safety Score (max 15)
     int bnplScore = 15;
     final bnplCount = activeCommitments
         .where((c) =>

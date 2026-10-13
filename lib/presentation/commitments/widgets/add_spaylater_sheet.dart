@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/app_icons.dart';
 import '../../../core/utils/money.dart';
 import '../../../data/local/app_database.dart';
 import '../../../data/providers/dashboard_provider.dart';
@@ -44,6 +45,9 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
   int _monthsAlreadyPaid = 0;
   bool _includeShopeeFee = true;
   int _dueDay = 10; // Shopee default cycle 1
+  int _shopeeCycle = 0; // 0: 1st->10th, 1: 11th->20th, 2: 21st->1st, 3: 25th->5th, 4: manual
+  int _manualDueDay = 10;
+  final _manualDueDayController = TextEditingController(text: '10');
   String _selectedCategoryTag = '🎧 Tech';
 
   static const _categoryTags = [
@@ -82,6 +86,19 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
       _monthsAlreadyPaid = (item.totalTenureMonths - item.remainingTenureMonths).clamp(0, 999);
       _includeShopeeFee = item.interestRateAnnual > 0;
       _dueDay = item.dueDayOfMonth;
+      _manualDueDay = item.dueDayOfMonth;
+      _manualDueDayController.text = item.dueDayOfMonth.toString();
+      if (_dueDay == 10) {
+        _shopeeCycle = 0;
+      } else if (_dueDay == 20) {
+        _shopeeCycle = 1;
+      } else if (_dueDay == 1) {
+        _shopeeCycle = 2;
+      } else if (_dueDay == 5) {
+        _shopeeCycle = 3;
+      } else {
+        _shopeeCycle = 4;
+      }
     }
   }
 
@@ -90,6 +107,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
     _nameController.dispose();
     _priceController.dispose();
     _customMonthlyController.dispose();
+    _manualDueDayController.dispose();
     super.dispose();
   }
 
@@ -192,7 +210,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
             widget.isEditing
                 ? 'Updated $rawName (RM ${_activeMonthly.toStringAsFixed(2)}/mo, $_remainingTenure months left)'
                 : 'Added $rawName (RM ${_activeMonthly.toStringAsFixed(2)}/mo, $_remainingTenure months left)',
-            style: const TextStyle(color: AppColors.textPrimary),
+            style: TextStyle(color: AppColors.textPrimary),
           ),
         ),
       );
@@ -211,7 +229,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
         top: 20,
         bottom: 24 + bottomInset,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -231,8 +249,6 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Header with Shopee badge
             Row(
               children: [
                 Container(
@@ -244,7 +260,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                       color: const Color(0xFFEE4D2D).withValues(alpha: 0.4),
                     ),
                   ),
-                  child: const Text('🛍️', style: TextStyle(fontSize: 22)),
+                  child: const Icon(Icons.shopping_bag_rounded, size: 22, color: Color(0xFFEE4D2D)),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -255,14 +271,14 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                         widget.isEditing
                             ? 'Edit SPayLater Purchase'
                             : 'Add SPayLater Purchase',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
-                      const Text(
+                      Text(
                         'Track item, months left & allowance impact',
                         style: TextStyle(
                           fontSize: 12,
@@ -275,9 +291,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
               ],
             ),
             const SizedBox(height: 18),
-
-            // Category tag chips
-            const Text(
+            Text(
               'Category Tag',
               style: TextStyle(
                 fontSize: 12,
@@ -296,6 +310,11 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                   final tag = _categoryTags[i];
                   final isSelected = tag == _selectedCategoryTag;
                   return ChoiceChip(
+                    avatar: Icon(
+                      AppIcons.getSpayLaterTagIcon(tag),
+                      size: 14,
+                      color: isSelected ? AppColors.accent : AppColors.textSecondary,
+                    ),
                     label: Text(tag, style: const TextStyle(fontSize: 12)),
                     selected: isSelected,
                     selectedColor: AppColors.accent.withValues(alpha: 0.25),
@@ -315,11 +334,9 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
               ),
             ),
             const SizedBox(height: 14),
-
-            // Item Name
             TextField(
               controller: _nameController,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: AppColors.textPrimary),
               decoration: _inputDecoration(
                 hint: 'e.g. Mechanical Keyboard, Sneakers, Earbuds',
                 label: 'Item Name / Description',
@@ -327,12 +344,10 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
               ),
             ),
             const SizedBox(height: 12),
-
-            // Purchase Price
             TextField(
               controller: _priceController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: AppColors.textPrimary),
               onChanged: (_) => setState(() {}),
               decoration: _inputDecoration(
                 hint: 'e.g. 180.00',
@@ -342,9 +357,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Tenure Plan Selector (1x, 3x, 6x, 12x)
-            const Text(
+            Text(
               'Installment Plan (Tenure)',
               style: TextStyle(
                 fontSize: 12,
@@ -417,8 +430,6 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
               }).toList(),
             ),
             const SizedBox(height: 12),
-
-            // Shopee Fee Toggle (only relevant for 3, 6, 12 months)
             if (_selectedTenure > 1)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -430,7 +441,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -464,8 +475,6 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                 ),
               ),
             const SizedBox(height: 12),
-
-            // Months Already Paid Stepper (if adding an in-progress purchase)
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -479,7 +488,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Payment Progress',
                           style: TextStyle(
                             fontSize: 12,
@@ -490,7 +499,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                         const SizedBox(height: 2),
                         Text(
                           '$_monthsAlreadyPaid paid · $_remainingTenure months left',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             color: AppColors.accent,
                             fontWeight: FontWeight.w600,
@@ -510,7 +519,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                   ),
                   Text(
                     '$_monthsAlreadyPaid',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -529,60 +538,125 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
               ),
             ),
             const SizedBox(height: 12),
-
-            // Due Day selector
-            Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 8,
-              runSpacing: 6,
-              children: [
-                const Text(
-                  'Shopee Due Date:',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceHigh,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.outline),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.calendar_today_rounded, size: 16, color: Color(0xFFEE4D2D)),
+                          SizedBox(width: 8),
+                          Text(
+                            'Shopee Due Date Cycle',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEE4D2D).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Due on ${_dueDay == 1 ? "1st" : _dueDay == 2 ? "2nd" : _dueDay == 3 ? "3rd" : "${_dueDay}th"}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFEE4D2D),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                ChoiceChip(
-                  label: const Text('10th of month'),
-                  selected: _dueDay == 10,
-                  selectedColor: AppColors.accent.withValues(alpha: 0.25),
-                  backgroundColor: AppColors.surfaceHigh,
-                  labelStyle: TextStyle(
-                    fontSize: 11,
-                    color: _dueDay == 10 ? AppColors.accent : AppColors.textSecondary,
-                    fontWeight: _dueDay == 10 ? FontWeight.bold : FontWeight.normal,
+                  const SizedBox(height: 6),
+                  Text(
+                    'Select your Shopee bill cycle or set manually:',
+                    style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                   ),
-                  side: BorderSide(
-                    color: _dueDay == 10 ? AppColors.accent : AppColors.outline,
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildShopeeCycleChip(0, 'Bill: 1st', 'Due: 10th', 10),
+                      _buildShopeeCycleChip(1, 'Bill: 11th', 'Due: 20th', 20),
+                      _buildShopeeCycleChip(2, 'Bill: 21st', 'Due: 1st', 1),
+                      _buildShopeeCycleChip(3, 'Bill: 25th', 'Due: 5th', 5),
+                      ChoiceChip(
+                        label: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.tune_rounded, size: 12, color: _shopeeCycle == 4 ? AppColors.accent : AppColors.textSecondary),
+                            const SizedBox(width: 4),
+                            const Text('Manual Set'),
+                          ],
+                        ),
+                        selected: _shopeeCycle == 4,
+                        selectedColor: AppColors.accent.withValues(alpha: 0.25),
+                        backgroundColor: AppColors.surface,
+                        labelStyle: TextStyle(
+                          fontSize: 11,
+                          color: _shopeeCycle == 4 ? AppColors.accent : AppColors.textSecondary,
+                          fontWeight: _shopeeCycle == 4 ? FontWeight.bold : FontWeight.normal,
+                        ),
+                        side: BorderSide(
+                          color: _shopeeCycle == 4 ? AppColors.accent : AppColors.outline,
+                        ),
+                        onSelected: (_) => setState(() {
+                          _shopeeCycle = 4;
+                          _dueDay = _manualDueDay;
+                        }),
+                      ),
+                    ],
                   ),
-                  onSelected: (_) => setState(() => _dueDay = 10),
-                ),
-                ChoiceChip(
-                  label: const Text('25th of month'),
-                  selected: _dueDay == 25,
-                  selectedColor: AppColors.accent.withValues(alpha: 0.25),
-                  backgroundColor: AppColors.surfaceHigh,
-                  labelStyle: TextStyle(
-                    fontSize: 11,
-                    color: _dueDay == 25 ? AppColors.accent : AppColors.textSecondary,
-                    fontWeight: _dueDay == 25 ? FontWeight.bold : FontWeight.normal,
-                  ),
-                  side: BorderSide(
-                    color: _dueDay == 25 ? AppColors.accent : AppColors.outline,
-                  ),
-                  onSelected: (_) => setState(() => _dueDay = 25),
-                ),
-              ],
+                  if (_shopeeCycle == 4) ...[
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _manualDueDayController,
+                      keyboardType: TextInputType.number,
+                      style: TextStyle(color: AppColors.textPrimary),
+                      decoration: InputDecoration(
+                        labelText: 'Manual Due Day of Month (1 - 31)',
+                        labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                        hintText: 'e.g. 15',
+                        filled: true,
+                        fillColor: AppColors.surface,
+                        isDense: true,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onChanged: (val) {
+                        final parsed = int.tryParse(val.trim());
+                        if (parsed != null && parsed >= 1 && parsed <= 31) {
+                          setState(() {
+                            _manualDueDay = parsed;
+                            _dueDay = parsed;
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ],
+              ),
             ),
             const SizedBox(height: 12),
-
-            // Optional exact monthly override
             TextField(
               controller: _customMonthlyController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: AppColors.textPrimary),
               onChanged: (_) => setState(() {}),
               decoration: _inputDecoration(
                 hint: _calculatedMonthly > 0 ? _calculatedMonthly.toStringAsFixed(2) : 'e.g. 52.25',
@@ -592,8 +666,6 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Live Financial Impact Card
             dashboardAsync.maybeWhen(
               data: (dash) {
                 final netIncome = dash.netSalary.netSalary;
@@ -649,7 +721,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                                 Icon(Icons.analytics_rounded,
                                     color: impactColor, size: 18),
                                 const SizedBox(width: 6),
-                                const Expanded(
+                                Expanded(
                                   child: Text(
                                     'Financial Impact Breakdown',
                                     style: TextStyle(
@@ -683,21 +755,19 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                         ],
                       ),
                       const SizedBox(height: 10),
-
-                      // Metrics Row
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Monthly Installment',
+                              Text('Monthly Installment',
                                   style: TextStyle(
                                       fontSize: 10,
                                       color: AppColors.textSecondary)),
                               Text(
                                 'RM ${monthlyRinggit.toStringAsFixed(2)} / mo',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.textPrimary,
@@ -708,13 +778,13 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              const Text('Total with Fees',
+                              Text('Total with Fees',
                                   style: TextStyle(
                                       fontSize: 10,
                                       color: AppColors.textSecondary)),
                               Text(
                                 'RM ${_totalCost.toStringAsFixed(2)}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.textPrimary,
@@ -725,8 +795,6 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                         ],
                       ),
                       const SizedBox(height: 8),
-
-                      // Allowance lock-in preview
                       Text(
                         'This item will consume ${itemImpactRatio.toStringAsFixed(1)}% of your ${netIncome.formatted} ${dash.employmentType.isIntern ? 'allowance' : 'salary'}. Total SPayLater will lock up ${totalImpactRatio.toStringAsFixed(1)}% (${Money(newTotalSpayLaterSen).formatted}/mo).',
                         style: TextStyle(
@@ -742,8 +810,6 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
               orElse: () => const SizedBox.shrink(),
             ),
             const SizedBox(height: 20),
-
-            // Save Button
             ElevatedButton(
               onPressed: _saveSpayLaterItem,
               style: ElevatedButton.styleFrom(
@@ -776,11 +842,11 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
   }) {
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+      labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
       hintText: hint,
-      hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+      hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
       prefixText: prefixText,
-      prefixStyle: const TextStyle(
+      prefixStyle: TextStyle(
           color: AppColors.textPrimary, fontWeight: FontWeight.bold),
       prefixIcon: Icon(icon, color: AppColors.accent, size: 20),
       filled: true,
@@ -788,16 +854,42 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.outline),
+        borderSide: BorderSide(color: AppColors.outline),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.outline),
+        borderSide: BorderSide(color: AppColors.outline),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.accent, width: 2),
+        borderSide: BorderSide(color: AppColors.accent, width: 2),
       ),
+    );
+  }
+
+  Widget _buildShopeeCycleChip(int cycleIndex, String billLabel, String dueLabel, int targetDueDay) {
+    final isSelected = _shopeeCycle == cycleIndex;
+    return ChoiceChip(
+      label: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(billLabel, style: TextStyle(fontSize: 10, color: isSelected ? const Color(0xFFEE4D2D) : AppColors.textSecondary)),
+          Text(dueLabel, style: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.bold : FontWeight.w600, color: isSelected ? AppColors.textPrimary : AppColors.textPrimary)),
+        ],
+      ),
+      selected: isSelected,
+      selectedColor: const Color(0xFFEE4D2D).withValues(alpha: 0.25),
+      backgroundColor: AppColors.surface,
+      side: BorderSide(
+        color: isSelected ? const Color(0xFFEE4D2D) : AppColors.outline,
+        width: isSelected ? 1.5 : 1.0,
+      ),
+      onSelected: (_) {
+        setState(() {
+          _shopeeCycle = cycleIndex;
+          _dueDay = targetDueDay;
+        });
+      },
     );
   }
 }

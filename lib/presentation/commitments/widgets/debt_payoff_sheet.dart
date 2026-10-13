@@ -43,7 +43,7 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -51,7 +51,6 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Drag handle
           Center(
             child: Container(
               width: 44,
@@ -67,7 +66,7 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
+              Row(
                 children: [
                   Icon(Icons.trending_down_rounded, color: AppColors.accent, size: 24),
                   SizedBox(width: 10),
@@ -82,14 +81,13 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
                 ],
               ),
               IconButton(
-                icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
+                icon: Icon(Icons.close_rounded, color: AppColors.textSecondary),
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ],
           ),
           const SizedBox(height: 12),
 
-          // Strategy Selector Switch
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
@@ -108,13 +106,24 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Center(
-                        child: Text(
-                          '❄️ Snowball (Quick Wins)',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: _useSnowball ? Colors.white : AppColors.textSecondary,
-                          ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.ac_unit_rounded,
+                              size: 15,
+                              color: _useSnowball ? Colors.white : AppColors.textSecondary,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Snowball (Quick Wins)',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: _useSnowball ? Colors.white : AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -129,15 +138,24 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
                         color: !_useSnowball ? AppColors.accent : Colors.transparent,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Center(
-                        child: Text(
-                          '⚡ Avalanche (Save Fees)',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.bolt_rounded,
+                            size: 16,
                             color: !_useSnowball ? Colors.white : AppColors.textSecondary,
                           ),
-                        ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Avalanche (Save Fees)',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: !_useSnowball ? Colors.white : AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -147,7 +165,6 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
           ),
           const SizedBox(height: 14),
 
-          // Strategy description callout
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -159,7 +176,7 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
               _useSnowball
                   ? 'Snowball Method: Pay off smallest balances first (e.g. SPayLater) for quick psychological momentum and to eliminate monthly commitments fast.'
                   : 'Avalanche Method: Attacks highest interest/fee rate first (e.g. SLoan / Credit Card) to minimize total money paid in fees over time.',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 color: AppColors.textPrimary,
                 height: 1.4,
@@ -168,7 +185,6 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
           ),
           const SizedBox(height: 14),
 
-          // Summary Stats Cards
           Row(
             children: [
               Expanded(
@@ -177,14 +193,14 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Total Balance',
                         style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         plan.totalRemainingDebt.formatted,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -201,14 +217,14 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Debt-Free In',
                         style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '~${plan.estimatedMonthsToDebtFree} Months',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
@@ -222,7 +238,7 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
           ),
           const SizedBox(height: 14),
 
-          const Text(
+          Text(
             'Recommended Payoff Order:',
             style: TextStyle(
               fontSize: 13,
@@ -232,7 +248,6 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
           ),
           const SizedBox(height: 8),
 
-          // Scrollable priority list
           Flexible(
             child: ListView.builder(
               shrinkWrap: true,
@@ -271,7 +286,7 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: isTopPriority
-                                  ? const Color(0xFF04291F)
+                                  ? AppColors.onPrimary
                                   : AppColors.textPrimary,
                             ),
                           ),
@@ -286,7 +301,7 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
                               children: [
                                 Text(
                                   item.name,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
                                     color: AppColors.textPrimary,
@@ -301,7 +316,7 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
                                       color: AppColors.primary.withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
-                                    child: const Text(
+                                    child: Text(
                                       'Target 1st',
                                       style: TextStyle(
                                         fontSize: 9,
@@ -315,7 +330,7 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
                             const SizedBox(height: 2),
                             Text(
                               '${item.type.displayName} • ${item.remainingMonths} mos remaining',
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontSize: 11, color: AppColors.textSecondary),
                             ),
                           ],
@@ -326,7 +341,7 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
                         children: [
                           Text(
                             item.remainingBalance.formatted,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                               color: AppColors.textPrimary,
@@ -334,7 +349,7 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
                           ),
                           Text(
                             '${item.monthlyAmount.formatted} / mo',
-                            style: const TextStyle(
+                            style: TextStyle(
                                 fontSize: 10, color: AppColors.textSecondary),
                           ),
                         ],

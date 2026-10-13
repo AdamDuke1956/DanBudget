@@ -134,7 +134,7 @@ class _AdjustPlanSheetState extends ConsumerState<AdjustPlanSheet> {
     if (mounted) {
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           backgroundColor: AppColors.surfaceHigh,
           content: Text(
             'Budget allocation updated!',
@@ -167,7 +167,7 @@ class _AdjustPlanSheetState extends ConsumerState<AdjustPlanSheet> {
         top: 20,
         bottom: 24 + bottomInset,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -191,7 +191,7 @@ class _AdjustPlanSheetState extends ConsumerState<AdjustPlanSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Adjust Budget Plan',
                   style: TextStyle(
                     fontSize: 20,
@@ -224,12 +224,11 @@ class _AdjustPlanSheetState extends ConsumerState<AdjustPlanSheet> {
             const SizedBox(height: 6),
             Text(
               'Customize how your ${isIntern ? "RM 900 allowance" : "net take-home pay"} is split across buckets.',
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 16),
 
-            // Presets row
-            const Text(
+            Text(
               'Plan Strategy Presets',
               style: TextStyle(
                 fontSize: 12,
@@ -245,28 +244,27 @@ class _AdjustPlanSheetState extends ConsumerState<AdjustPlanSheet> {
                 _buildPresetChip(
                   key: 'recommended',
                   label: isIntern ? 'Recommended (60/20/15/5)' : 'Recommended (40/30/20/10)',
-                  icon: '✨',
+                  icon: Icons.recommend_rounded,
                 ),
                 _buildPresetChip(
                   key: 'fire_saver',
                   label: isIntern ? 'FIRE Saver (50/10/35/5)' : 'FIRE Saver (35/15/45/5)',
-                  icon: '🔥',
+                  icon: Icons.savings_rounded,
                 ),
                 _buildPresetChip(
                   key: 'lean',
                   label: isIntern ? 'Lean / Survival (70/15/10/5)' : 'Lean (55/20/20/5)',
-                  icon: '🛡️',
+                  icon: Icons.shield_rounded,
                 ),
                 _buildPresetChip(
                   key: 'custom',
                   label: 'Custom Sliders',
-                  icon: '🎛️',
+                  icon: Icons.tune_rounded,
                 ),
               ],
             ),
             const SizedBox(height: 16),
 
-            // Visual distribution preview bar
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: SizedBox(
@@ -299,7 +297,6 @@ class _AdjustPlanSheetState extends ConsumerState<AdjustPlanSheet> {
             ),
             const SizedBox(height: 16),
 
-            // Fixed Commitments Warning
             if (commitmentsExceedNeeds)
               Container(
                 margin: const EdgeInsets.only(bottom: 14),
@@ -311,19 +308,18 @@ class _AdjustPlanSheetState extends ConsumerState<AdjustPlanSheet> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline_rounded, color: AppColors.warning, size: 20),
+                    Icon(Icons.info_outline_rounded, color: AppColors.warning, size: 20),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         'Your fixed loans (${widget.totalCommitments.formatted}) exceed this Needs cap (${needsRinggit.formatted}). Needs will automatically expand to keep you solvent.',
-                        style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, height: 1.3),
+                        style: TextStyle(fontSize: 11, color: AppColors.textPrimary, height: 1.3),
                       ),
                     ),
                   ],
                 ),
               ),
 
-            // 4 Sliders
             _buildSliderRow(
               name: 'Needs (Bills & Survival)',
               pct: _needsPct,
@@ -361,7 +357,7 @@ class _AdjustPlanSheetState extends ConsumerState<AdjustPlanSheet> {
               },
             ),
             _buildSliderRow(
-              name: 'Giving & Parents',
+              name: 'Charity',
               pct: _givingPct,
               amount: givingRinggit,
               color: AppColors.giving,
@@ -381,7 +377,7 @@ class _AdjustPlanSheetState extends ConsumerState<AdjustPlanSheet> {
                 label: const Text('Auto-Balance to 100%'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary),
+                  side: BorderSide(color: AppColors.primary),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
               ),
@@ -393,7 +389,7 @@ class _AdjustPlanSheetState extends ConsumerState<AdjustPlanSheet> {
               onPressed: isBalanced ? _savePlan : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: const Color(0xFF04291F),
+                foregroundColor: AppColors.onPrimary,
                 disabledBackgroundColor: AppColors.surfaceHigh,
                 disabledForegroundColor: AppColors.textSecondary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -414,13 +410,18 @@ class _AdjustPlanSheetState extends ConsumerState<AdjustPlanSheet> {
   Widget _buildPresetChip({
     required String key,
     required String label,
-    required String icon,
+    required IconData icon,
   }) {
     final isSelected = _selectedPreset == key;
     return ChoiceChip(
-      label: Text('$icon $label'),
+      avatar: Icon(
+        icon,
+        size: 15,
+        color: isSelected ? AppColors.primary : AppColors.textSecondary,
+      ),
+      label: Text(label),
       selected: isSelected,
-      selectedColor: AppColors.primary.withValues(alpha: 0.25),
+      selectedColor: AppColors.primary.withValues(alpha: 0.22),
       backgroundColor: AppColors.surfaceHigh,
       labelStyle: TextStyle(
         fontSize: 12,
@@ -457,7 +458,7 @@ class _AdjustPlanSheetState extends ConsumerState<AdjustPlanSheet> {
                 const SizedBox(width: 8),
                 Text(
                   name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,

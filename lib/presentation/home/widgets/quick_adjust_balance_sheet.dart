@@ -54,7 +54,7 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
         if (accounts.isEmpty) {
           return Container(
             padding: const EdgeInsets.all(24),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
             ),
@@ -86,7 +86,7 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
             top: 20,
             bottom: 24 + bottomInset,
           ),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
           ),
@@ -95,7 +95,6 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Handle bar
                 Center(
                   child: Container(
                     width: 44,
@@ -111,7 +110,7 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Reconcile Balance',
                       style: TextStyle(
                         fontSize: 20,
@@ -137,13 +136,12 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                   ],
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Match your pocket balance with your banking app or physical cash.',
+                Text(
+                  'Match your account balance with your banking app or physical cash.',
                   style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 16),
 
-                // Pocket Selector
                 SizedBox(
                   height: 42,
                   child: ListView.separated(
@@ -197,7 +195,6 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                 ),
                 const SizedBox(height: 16),
 
-                // Balance input hero
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
@@ -207,7 +204,7 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                   ),
                   child: Row(
                     children: [
-                      const Text(
+                      Text(
                         'RM ',
                         style: TextStyle(
                           fontSize: 32,
@@ -219,12 +216,12 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                         child: TextField(
                           controller: _amountController,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
                           ),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             hintText: '0.00',
                             hintStyle: TextStyle(color: AppColors.textSecondary),
                             border: InputBorder.none,
@@ -237,7 +234,6 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                 ),
                 const SizedBox(height: 12),
 
-                // Adjustment Delta Indicator
                 if (deltaSen != 0)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -269,7 +265,6 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                   ),
                 const SizedBox(height: 20),
 
-                // Update Button
                 ElevatedButton(
                   onPressed: () async {
                     final text = _amountController.text.trim();
@@ -294,11 +289,11 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                           backgroundColor: AppColors.surfaceHigh,
                           content: Row(
                             children: [
-                              const Icon(Icons.check_circle_rounded, color: AppColors.primary),
+                              Icon(Icons.check_circle_rounded, color: AppColors.primary),
                               const SizedBox(width: 12),
                               Text(
                                 '${selectedAccount.name} updated to ${Money(newSen).formatted}',
-                                style: const TextStyle(color: AppColors.textPrimary),
+                                style: TextStyle(color: AppColors.textPrimary),
                               ),
                             ],
                           ),
@@ -308,7 +303,7 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    foregroundColor: const Color(0xFF04291F),
+                    foregroundColor: AppColors.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                     elevation: 0,

@@ -20,7 +20,7 @@
 ### Option 1: Install the Android APK (Quickest)
 You can directly download and install the pre-built APK without installing Flutter or Android Studio:
 1. Go to the [Releases](https://github.com/AdamDuke1956/DanBudget/releases) section.
-2. Download `DanBudget-v1.0.0.apk`.
+2. Download `DanBudget-v1.5.0.apk`.
 3. Open the downloaded `.apk` file on your Android device to install.
 
 ### Option 2: Run from Source

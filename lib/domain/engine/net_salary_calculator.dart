@@ -63,33 +63,31 @@ abstract final class NetSalaryCalculator {
       );
     }
 
-    // 1. EPF (KWSP)
+    // EPF (KWSP)
     final Money epf = isMalaysianCitizen
         ? grossSalary.scale(epfRate)
         : const Money(0);
 
-    // 2. SOCSO (PERKESO) - capped at RM 6,000
+    // SOCSO (PERKESO) employee share (~0.5%, capped at RM 6,000 ceiling)
     final int socsoSubjectSen = grossSalary.sen > wageCeilingSen
         ? wageCeilingSen
         : grossSalary.sen;
-    // Employee share is ~0.495% (rounded to nearest 5 sen in official tables, ~0.5%)
     final Money socso =
         hasSocso ? Money((socsoSubjectSen * 0.005).round()) : const Money(0);
 
-    // 3. EIS (SIP) - capped at RM 6,000 (0.2% employee rate)
+    // EIS (SIP) employee share (0.2%, capped at RM 6,000 ceiling)
     final int eisSubjectSen = grossSalary.sen > wageCeilingSen
         ? wageCeilingSen
         : grossSalary.sen;
     final Money eis =
         hasEis ? Money((eisSubjectSen * 0.002).round()) : const Money(0);
 
-    // 4. PCB (Monthly Tax Deduction) estimation for single fresh graduate
+    // PCB (Monthly Tax Deduction) estimation for single fresh graduate
     final Money pcb = _estimateMonthlyPcb(
       annualGrossIncome: Money(grossSalary.sen * 12),
       annualEpf: Money(epf.sen * 12),
     );
 
-    // 5. Net Salary = (Gross + Allowances) - Deductions
     final Money net = (grossSalary + allowances) - (epf + socso + eis + pcb);
 
     return NetSalaryResult(

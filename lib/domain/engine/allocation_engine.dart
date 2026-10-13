@@ -53,7 +53,7 @@ class AllocationResult {
   final BudgetBucket needs; // 40% (or expanded if commitments > 40%)
   final BudgetBucket wants; // 30% (compressed if commitments exceed standard 40%)
   final BudgetBucket savings; // 20%
-  final BudgetBucket giving; // 10% (Family & Giving)
+  final BudgetBucket giving; // 10% (Charity)
 
   final double dsrRatio; // Commitments / Net Salary (0.0 to 1.0+)
   final DsrStatus dsrStatus;
@@ -271,10 +271,10 @@ abstract final class AllocationEngine {
         fixedCommitmentPortion: const Money(0),
       ),
       giving: BudgetBucket(
-        name: 'Family & Giving',
+        name: 'Charity',
         percentage: givingRatio,
         targetAmount: givingAmount,
-        description: 'Duit Mak Ayah, Sedekah, Zakat Pendapatan',
+        description: 'Sedekah, Zakat Pendapatan, Donations',
         fixedCommitmentPortion: const Money(0),
       ),
       dsrRatio: dsr,
@@ -337,7 +337,7 @@ abstract final class AllocationEngine {
         fixedCommitmentPortion: Money(0),
       ),
       giving: const BudgetBucket(
-        name: 'Family & Giving',
+        name: 'Charity',
         percentage: 0.1,
         targetAmount: Money(0),
         description: '',

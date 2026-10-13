@@ -85,7 +85,7 @@ class DefaultSeeds {
     ),
     ExpenseCategoriesTableData(
       id: 'giving',
-      name: 'Family & Giving (Mak Ayah)',
+      name: 'Charity',
       icon: '🤲',
       colorHex: 0xFF2ECC71, // Green
       bucket: 'giving',

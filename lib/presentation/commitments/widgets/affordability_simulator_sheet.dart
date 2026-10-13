@@ -50,7 +50,7 @@ class _AffordabilitySimulatorSheetState
         top: 20,
         bottom: 24 + bottomInset,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -66,7 +66,6 @@ class _AffordabilitySimulatorSheetState
           final proposedSen = Money.fromRinggit(proposedMonthly).sen;
           final proposedMoney = Money(proposedSen);
 
-          // Combined simulated metrics
           final simulatedTotalCommitments = currentCommitments + proposedMoney;
           final simulatedAllocation = AllocationEngine.calculate(
             netSalary: netSalary,
@@ -77,7 +76,6 @@ class _AffordabilitySimulatorSheetState
           final currentDsr = state.allocation.dsrRatio * 100;
           final simulatedDsr = simulatedAllocation.dsrRatio * 100;
 
-          // Impact on daily safe spend
           final currentDaily = state.safeToSpend.safeDailyAmount;
           final remainingSimulatedFlexible = Money(
             (simulatedAllocation.needs.flexibleAmount.sen +
@@ -96,7 +94,6 @@ class _AffordabilitySimulatorSheetState
 
           final dailyDiff = currentDaily.sen - simulatedSafe.safeDailyAmount.sen;
 
-          // Verdict & status
           Color verdictColor;
           IconData verdictIcon;
           String verdictTitle;
@@ -141,10 +138,10 @@ class _AffordabilitySimulatorSheetState
 
                 Row(
                   children: [
-                    const Icon(Icons.psychology_alt_rounded,
+                    Icon(Icons.psychology_alt_rounded,
                         color: AppColors.accent, size: 26),
                     const SizedBox(width: 10),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         '"Can I Afford It?" Simulator',
                         style: TextStyle(
@@ -157,29 +154,28 @@ class _AffordabilitySimulatorSheetState
                   ],
                 ),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   'Test a new SPayLater or loan before committing to protect your fresh grad cashflow.',
                   style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 16),
 
-                // Inputs
                 Row(
                   children: [
                     Expanded(
                       flex: 2,
                       child: TextField(
                         controller: _titleController,
-                        style: const TextStyle(color: AppColors.textPrimary),
+                        style: TextStyle(color: AppColors.textPrimary),
                         decoration: InputDecoration(
                           labelText: 'Purchase Name',
-                          labelStyle: const TextStyle(
+                          labelStyle: TextStyle(
                               color: AppColors.textSecondary, fontSize: 12),
                           filled: true,
                           fillColor: AppColors.surfaceHigh,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(color: AppColors.outline),
+                            borderSide: BorderSide(color: AppColors.outline),
                           ),
                         ),
                       ),
@@ -191,21 +187,21 @@ class _AffordabilitySimulatorSheetState
                         controller: _monthlyCostController,
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                         onChanged: (_) => setState(() {}),
                         decoration: InputDecoration(
                           labelText: 'Monthly (RM)',
-                          labelStyle: const TextStyle(
+                          labelStyle: TextStyle(
                               color: AppColors.textSecondary, fontSize: 12),
                           prefixText: 'RM ',
                           filled: true,
                           fillColor: AppColors.surfaceHigh,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(color: AppColors.outline),
+                            borderSide: BorderSide(color: AppColors.outline),
                           ),
                         ),
                       ),
@@ -214,7 +210,6 @@ class _AffordabilitySimulatorSheetState
                 ),
                 const SizedBox(height: 16),
 
-                // Verdict Card
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -242,7 +237,7 @@ class _AffordabilitySimulatorSheetState
                       const SizedBox(height: 8),
                       Text(
                         verdictDesc,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textPrimary,
                           height: 1.4,
@@ -253,7 +248,6 @@ class _AffordabilitySimulatorSheetState
                 ),
                 const SizedBox(height: 16),
 
-                // Side-by-side simulation comparison
                 Row(
                   children: [
                     Expanded(
@@ -280,7 +274,6 @@ class _AffordabilitySimulatorSheetState
                 ),
                 const SizedBox(height: 20),
 
-                // Action buttons
                 Row(
                   children: [
                     Expanded(
@@ -288,11 +281,11 @@ class _AffordabilitySimulatorSheetState
                         onPressed: () => Navigator.of(context).pop(),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: const BorderSide(color: AppColors.outline),
+                          side: BorderSide(color: AppColors.outline),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16)),
                         ),
-                        child: const Text('Cancel',
+                        child: Text('Cancel',
                             style: TextStyle(color: AppColors.textSecondary)),
                       ),
                     ),
@@ -328,7 +321,7 @@ class _AffordabilitySimulatorSheetState
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
-                          foregroundColor: const Color(0xFF04291F),
+                          foregroundColor: AppColors.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16)),
@@ -365,20 +358,20 @@ class _AffordabilitySimulatorSheetState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title,
-              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+              style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
           const SizedBox(height: 6),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(current,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 13,
                       color: AppColors.textSecondary,
                       decoration: TextDecoration.lineThrough)),
-              const Icon(Icons.arrow_forward_rounded,
+              Icon(Icons.arrow_forward_rounded,
                   size: 14, color: AppColors.textSecondary),
               Text(simulated,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary)),
@@ -387,7 +380,7 @@ class _AffordabilitySimulatorSheetState
           if (diffLabel != null) ...[
             const SizedBox(height: 4),
             Text(diffLabel,
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     color: AppColors.danger)),

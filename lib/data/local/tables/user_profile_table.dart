@@ -42,5 +42,10 @@ class UserProfileTable extends Table {
   RealColumn get customSavingsRatio => real().nullable()();
   RealColumn get customGivingRatio => real().nullable()();
 
+  // Safe-to-Spend & Daily Targets preferences
+  BoolColumn get workdaysOnlySafeToSpend => boolean().withDefault(const Constant(false))();
+  IntColumn get defaultWorkdayTargetSen => integer().withDefault(const Constant(1000))(); // RM 10.00
+  IntColumn get defaultWeekendTargetSen => integer().withDefault(const Constant(2000))(); // RM 20.00
+
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }

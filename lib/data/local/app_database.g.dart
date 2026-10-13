@@ -259,6 +259,45 @@ class $UserProfileTableTable extends UserProfileTable
         type: DriftSqlType.double,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _workdaysOnlySafeToSpendMeta =
+      const VerificationMeta('workdaysOnlySafeToSpend');
+  @override
+  late final GeneratedColumn<bool> workdaysOnlySafeToSpend =
+      GeneratedColumn<bool>(
+        'workdays_only_safe_to_spend',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("workdays_only_safe_to_spend" IN (0, 1))',
+        ),
+        defaultValue: const Constant(false),
+      );
+  static const VerificationMeta _defaultWorkdayTargetSenMeta =
+      const VerificationMeta('defaultWorkdayTargetSen');
+  @override
+  late final GeneratedColumn<int> defaultWorkdayTargetSen =
+      GeneratedColumn<int>(
+        'default_workday_target_sen',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(1000),
+      );
+  static const VerificationMeta _defaultWeekendTargetSenMeta =
+      const VerificationMeta('defaultWeekendTargetSen');
+  @override
+  late final GeneratedColumn<int> defaultWeekendTargetSen =
+      GeneratedColumn<int>(
+        'default_weekend_target_sen',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(2000),
+      );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -293,6 +332,9 @@ class $UserProfileTableTable extends UserProfileTable
     customWantsRatio,
     customSavingsRatio,
     customGivingRatio,
+    workdaysOnlySafeToSpend,
+    defaultWorkdayTargetSen,
+    defaultWeekendTargetSen,
     updatedAt,
   ];
   @override
@@ -469,6 +511,33 @@ class $UserProfileTableTable extends UserProfileTable
         ),
       );
     }
+    if (data.containsKey('workdays_only_safe_to_spend')) {
+      context.handle(
+        _workdaysOnlySafeToSpendMeta,
+        workdaysOnlySafeToSpend.isAcceptableOrUnknown(
+          data['workdays_only_safe_to_spend']!,
+          _workdaysOnlySafeToSpendMeta,
+        ),
+      );
+    }
+    if (data.containsKey('default_workday_target_sen')) {
+      context.handle(
+        _defaultWorkdayTargetSenMeta,
+        defaultWorkdayTargetSen.isAcceptableOrUnknown(
+          data['default_workday_target_sen']!,
+          _defaultWorkdayTargetSenMeta,
+        ),
+      );
+    }
+    if (data.containsKey('default_weekend_target_sen')) {
+      context.handle(
+        _defaultWeekendTargetSenMeta,
+        defaultWeekendTargetSen.isAcceptableOrUnknown(
+          data['default_weekend_target_sen']!,
+          _defaultWeekendTargetSenMeta,
+        ),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -580,6 +649,21 @@ class $UserProfileTableTable extends UserProfileTable
         DriftSqlType.double,
         data['${effectivePrefix}custom_giving_ratio'],
       ),
+      workdaysOnlySafeToSpend:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}workdays_only_safe_to_spend'],
+          )!,
+      defaultWorkdayTargetSen:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}default_workday_target_sen'],
+          )!,
+      defaultWeekendTargetSen:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}default_weekend_target_sen'],
+          )!,
       updatedAt:
           attachedDatabase.typeMapping.read(
             DriftSqlType.dateTime,
@@ -623,6 +707,9 @@ class UserProfileTableData extends DataClass
   final double? customWantsRatio;
   final double? customSavingsRatio;
   final double? customGivingRatio;
+  final bool workdaysOnlySafeToSpend;
+  final int defaultWorkdayTargetSen;
+  final int defaultWeekendTargetSen;
   final DateTime updatedAt;
   const UserProfileTableData({
     required this.id,
@@ -645,6 +732,9 @@ class UserProfileTableData extends DataClass
     this.customWantsRatio,
     this.customSavingsRatio,
     this.customGivingRatio,
+    required this.workdaysOnlySafeToSpend,
+    required this.defaultWorkdayTargetSen,
+    required this.defaultWeekendTargetSen,
     required this.updatedAt,
   });
   @override
@@ -680,6 +770,11 @@ class UserProfileTableData extends DataClass
     if (!nullToAbsent || customGivingRatio != null) {
       map['custom_giving_ratio'] = Variable<double>(customGivingRatio);
     }
+    map['workdays_only_safe_to_spend'] = Variable<bool>(
+      workdaysOnlySafeToSpend,
+    );
+    map['default_workday_target_sen'] = Variable<int>(defaultWorkdayTargetSen);
+    map['default_weekend_target_sen'] = Variable<int>(defaultWeekendTargetSen);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
   }
@@ -718,6 +813,9 @@ class UserProfileTableData extends DataClass
           customGivingRatio == null && nullToAbsent
               ? const Value.absent()
               : Value(customGivingRatio),
+      workdaysOnlySafeToSpend: Value(workdaysOnlySafeToSpend),
+      defaultWorkdayTargetSen: Value(defaultWorkdayTargetSen),
+      defaultWeekendTargetSen: Value(defaultWeekendTargetSen),
       updatedAt: Value(updatedAt),
     );
   }
@@ -758,6 +856,15 @@ class UserProfileTableData extends DataClass
       customGivingRatio: serializer.fromJson<double?>(
         json['customGivingRatio'],
       ),
+      workdaysOnlySafeToSpend: serializer.fromJson<bool>(
+        json['workdaysOnlySafeToSpend'],
+      ),
+      defaultWorkdayTargetSen: serializer.fromJson<int>(
+        json['defaultWorkdayTargetSen'],
+      ),
+      defaultWeekendTargetSen: serializer.fromJson<int>(
+        json['defaultWeekendTargetSen'],
+      ),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
@@ -787,6 +894,15 @@ class UserProfileTableData extends DataClass
       'customWantsRatio': serializer.toJson<double?>(customWantsRatio),
       'customSavingsRatio': serializer.toJson<double?>(customSavingsRatio),
       'customGivingRatio': serializer.toJson<double?>(customGivingRatio),
+      'workdaysOnlySafeToSpend': serializer.toJson<bool>(
+        workdaysOnlySafeToSpend,
+      ),
+      'defaultWorkdayTargetSen': serializer.toJson<int>(
+        defaultWorkdayTargetSen,
+      ),
+      'defaultWeekendTargetSen': serializer.toJson<int>(
+        defaultWeekendTargetSen,
+      ),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
@@ -812,6 +928,9 @@ class UserProfileTableData extends DataClass
     Value<double?> customWantsRatio = const Value.absent(),
     Value<double?> customSavingsRatio = const Value.absent(),
     Value<double?> customGivingRatio = const Value.absent(),
+    bool? workdaysOnlySafeToSpend,
+    int? defaultWorkdayTargetSen,
+    int? defaultWeekendTargetSen,
     DateTime? updatedAt,
   }) => UserProfileTableData(
     id: id ?? this.id,
@@ -847,6 +966,12 @@ class UserProfileTableData extends DataClass
         customGivingRatio.present
             ? customGivingRatio.value
             : this.customGivingRatio,
+    workdaysOnlySafeToSpend:
+        workdaysOnlySafeToSpend ?? this.workdaysOnlySafeToSpend,
+    defaultWorkdayTargetSen:
+        defaultWorkdayTargetSen ?? this.defaultWorkdayTargetSen,
+    defaultWeekendTargetSen:
+        defaultWeekendTargetSen ?? this.defaultWeekendTargetSen,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   UserProfileTableData copyWithCompanion(UserProfileTableCompanion data) {
@@ -914,6 +1039,18 @@ class UserProfileTableData extends DataClass
           data.customGivingRatio.present
               ? data.customGivingRatio.value
               : this.customGivingRatio,
+      workdaysOnlySafeToSpend:
+          data.workdaysOnlySafeToSpend.present
+              ? data.workdaysOnlySafeToSpend.value
+              : this.workdaysOnlySafeToSpend,
+      defaultWorkdayTargetSen:
+          data.defaultWorkdayTargetSen.present
+              ? data.defaultWorkdayTargetSen.value
+              : this.defaultWorkdayTargetSen,
+      defaultWeekendTargetSen:
+          data.defaultWeekendTargetSen.present
+              ? data.defaultWeekendTargetSen.value
+              : this.defaultWeekendTargetSen,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
@@ -941,6 +1078,9 @@ class UserProfileTableData extends DataClass
           ..write('customWantsRatio: $customWantsRatio, ')
           ..write('customSavingsRatio: $customSavingsRatio, ')
           ..write('customGivingRatio: $customGivingRatio, ')
+          ..write('workdaysOnlySafeToSpend: $workdaysOnlySafeToSpend, ')
+          ..write('defaultWorkdayTargetSen: $defaultWorkdayTargetSen, ')
+          ..write('defaultWeekendTargetSen: $defaultWeekendTargetSen, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
@@ -968,6 +1108,9 @@ class UserProfileTableData extends DataClass
     customWantsRatio,
     customSavingsRatio,
     customGivingRatio,
+    workdaysOnlySafeToSpend,
+    defaultWorkdayTargetSen,
+    defaultWeekendTargetSen,
     updatedAt,
   ]);
   @override
@@ -994,6 +1137,9 @@ class UserProfileTableData extends DataClass
           other.customWantsRatio == this.customWantsRatio &&
           other.customSavingsRatio == this.customSavingsRatio &&
           other.customGivingRatio == this.customGivingRatio &&
+          other.workdaysOnlySafeToSpend == this.workdaysOnlySafeToSpend &&
+          other.defaultWorkdayTargetSen == this.defaultWorkdayTargetSen &&
+          other.defaultWeekendTargetSen == this.defaultWeekendTargetSen &&
           other.updatedAt == this.updatedAt);
 }
 
@@ -1018,6 +1164,9 @@ class UserProfileTableCompanion extends UpdateCompanion<UserProfileTableData> {
   final Value<double?> customWantsRatio;
   final Value<double?> customSavingsRatio;
   final Value<double?> customGivingRatio;
+  final Value<bool> workdaysOnlySafeToSpend;
+  final Value<int> defaultWorkdayTargetSen;
+  final Value<int> defaultWeekendTargetSen;
   final Value<DateTime> updatedAt;
   const UserProfileTableCompanion({
     this.id = const Value.absent(),
@@ -1040,6 +1189,9 @@ class UserProfileTableCompanion extends UpdateCompanion<UserProfileTableData> {
     this.customWantsRatio = const Value.absent(),
     this.customSavingsRatio = const Value.absent(),
     this.customGivingRatio = const Value.absent(),
+    this.workdaysOnlySafeToSpend = const Value.absent(),
+    this.defaultWorkdayTargetSen = const Value.absent(),
+    this.defaultWeekendTargetSen = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
   UserProfileTableCompanion.insert({
@@ -1063,6 +1215,9 @@ class UserProfileTableCompanion extends UpdateCompanion<UserProfileTableData> {
     this.customWantsRatio = const Value.absent(),
     this.customSavingsRatio = const Value.absent(),
     this.customGivingRatio = const Value.absent(),
+    this.workdaysOnlySafeToSpend = const Value.absent(),
+    this.defaultWorkdayTargetSen = const Value.absent(),
+    this.defaultWeekendTargetSen = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
   static Insertable<UserProfileTableData> custom({
@@ -1086,6 +1241,9 @@ class UserProfileTableCompanion extends UpdateCompanion<UserProfileTableData> {
     Expression<double>? customWantsRatio,
     Expression<double>? customSavingsRatio,
     Expression<double>? customGivingRatio,
+    Expression<bool>? workdaysOnlySafeToSpend,
+    Expression<int>? defaultWorkdayTargetSen,
+    Expression<int>? defaultWeekendTargetSen,
     Expression<DateTime>? updatedAt,
   }) {
     return RawValuesInsertable({
@@ -1113,6 +1271,12 @@ class UserProfileTableCompanion extends UpdateCompanion<UserProfileTableData> {
       if (customSavingsRatio != null)
         'custom_savings_ratio': customSavingsRatio,
       if (customGivingRatio != null) 'custom_giving_ratio': customGivingRatio,
+      if (workdaysOnlySafeToSpend != null)
+        'workdays_only_safe_to_spend': workdaysOnlySafeToSpend,
+      if (defaultWorkdayTargetSen != null)
+        'default_workday_target_sen': defaultWorkdayTargetSen,
+      if (defaultWeekendTargetSen != null)
+        'default_weekend_target_sen': defaultWeekendTargetSen,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
   }
@@ -1138,6 +1302,9 @@ class UserProfileTableCompanion extends UpdateCompanion<UserProfileTableData> {
     Value<double?>? customWantsRatio,
     Value<double?>? customSavingsRatio,
     Value<double?>? customGivingRatio,
+    Value<bool>? workdaysOnlySafeToSpend,
+    Value<int>? defaultWorkdayTargetSen,
+    Value<int>? defaultWeekendTargetSen,
     Value<DateTime>? updatedAt,
   }) {
     return UserProfileTableCompanion(
@@ -1162,6 +1329,12 @@ class UserProfileTableCompanion extends UpdateCompanion<UserProfileTableData> {
       customWantsRatio: customWantsRatio ?? this.customWantsRatio,
       customSavingsRatio: customSavingsRatio ?? this.customSavingsRatio,
       customGivingRatio: customGivingRatio ?? this.customGivingRatio,
+      workdaysOnlySafeToSpend:
+          workdaysOnlySafeToSpend ?? this.workdaysOnlySafeToSpend,
+      defaultWorkdayTargetSen:
+          defaultWorkdayTargetSen ?? this.defaultWorkdayTargetSen,
+      defaultWeekendTargetSen:
+          defaultWeekendTargetSen ?? this.defaultWeekendTargetSen,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
@@ -1235,6 +1408,21 @@ class UserProfileTableCompanion extends UpdateCompanion<UserProfileTableData> {
     if (customGivingRatio.present) {
       map['custom_giving_ratio'] = Variable<double>(customGivingRatio.value);
     }
+    if (workdaysOnlySafeToSpend.present) {
+      map['workdays_only_safe_to_spend'] = Variable<bool>(
+        workdaysOnlySafeToSpend.value,
+      );
+    }
+    if (defaultWorkdayTargetSen.present) {
+      map['default_workday_target_sen'] = Variable<int>(
+        defaultWorkdayTargetSen.value,
+      );
+    }
+    if (defaultWeekendTargetSen.present) {
+      map['default_weekend_target_sen'] = Variable<int>(
+        defaultWeekendTargetSen.value,
+      );
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -1264,6 +1452,9 @@ class UserProfileTableCompanion extends UpdateCompanion<UserProfileTableData> {
           ..write('customWantsRatio: $customWantsRatio, ')
           ..write('customSavingsRatio: $customSavingsRatio, ')
           ..write('customGivingRatio: $customGivingRatio, ')
+          ..write('workdaysOnlySafeToSpend: $workdaysOnlySafeToSpend, ')
+          ..write('defaultWorkdayTargetSen: $defaultWorkdayTargetSen, ')
+          ..write('defaultWeekendTargetSen: $defaultWeekendTargetSen, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
@@ -3684,6 +3875,17 @@ class $ChecklistItemsTableTable extends ChecklistItemsTable
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _targetDateMeta = const VerificationMeta(
+    'targetDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> targetDate = GeneratedColumn<DateTime>(
+    'target_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _sortOrderMeta = const VerificationMeta(
     'sortOrder',
   );
@@ -3704,6 +3906,7 @@ class $ChecklistItemsTableTable extends ChecklistItemsTable
     category,
     isCompleted,
     completedAt,
+    targetDate,
     sortOrder,
   ];
   @override
@@ -3768,6 +3971,12 @@ class $ChecklistItemsTableTable extends ChecklistItemsTable
         ),
       );
     }
+    if (data.containsKey('target_date')) {
+      context.handle(
+        _targetDateMeta,
+        targetDate.isAcceptableOrUnknown(data['target_date']!, _targetDateMeta),
+      );
+    }
     if (data.containsKey('sort_order')) {
       context.handle(
         _sortOrderMeta,
@@ -3815,6 +4024,10 @@ class $ChecklistItemsTableTable extends ChecklistItemsTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}completed_at'],
       ),
+      targetDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}target_date'],
+      ),
       sortOrder:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
@@ -3837,6 +4050,7 @@ class ChecklistItemsTableData extends DataClass
   final String category;
   final bool isCompleted;
   final DateTime? completedAt;
+  final DateTime? targetDate;
   final int sortOrder;
   const ChecklistItemsTableData({
     required this.id,
@@ -3845,6 +4059,7 @@ class ChecklistItemsTableData extends DataClass
     required this.category,
     required this.isCompleted,
     this.completedAt,
+    this.targetDate,
     required this.sortOrder,
   });
   @override
@@ -3857,6 +4072,9 @@ class ChecklistItemsTableData extends DataClass
     map['is_completed'] = Variable<bool>(isCompleted);
     if (!nullToAbsent || completedAt != null) {
       map['completed_at'] = Variable<DateTime>(completedAt);
+    }
+    if (!nullToAbsent || targetDate != null) {
+      map['target_date'] = Variable<DateTime>(targetDate);
     }
     map['sort_order'] = Variable<int>(sortOrder);
     return map;
@@ -3873,6 +4091,10 @@ class ChecklistItemsTableData extends DataClass
           completedAt == null && nullToAbsent
               ? const Value.absent()
               : Value(completedAt),
+      targetDate:
+          targetDate == null && nullToAbsent
+              ? const Value.absent()
+              : Value(targetDate),
       sortOrder: Value(sortOrder),
     );
   }
@@ -3889,6 +4111,7 @@ class ChecklistItemsTableData extends DataClass
       category: serializer.fromJson<String>(json['category']),
       isCompleted: serializer.fromJson<bool>(json['isCompleted']),
       completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
+      targetDate: serializer.fromJson<DateTime?>(json['targetDate']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
     );
   }
@@ -3902,6 +4125,7 @@ class ChecklistItemsTableData extends DataClass
       'category': serializer.toJson<String>(category),
       'isCompleted': serializer.toJson<bool>(isCompleted),
       'completedAt': serializer.toJson<DateTime?>(completedAt),
+      'targetDate': serializer.toJson<DateTime?>(targetDate),
       'sortOrder': serializer.toJson<int>(sortOrder),
     };
   }
@@ -3913,6 +4137,7 @@ class ChecklistItemsTableData extends DataClass
     String? category,
     bool? isCompleted,
     Value<DateTime?> completedAt = const Value.absent(),
+    Value<DateTime?> targetDate = const Value.absent(),
     int? sortOrder,
   }) => ChecklistItemsTableData(
     id: id ?? this.id,
@@ -3921,6 +4146,7 @@ class ChecklistItemsTableData extends DataClass
     category: category ?? this.category,
     isCompleted: isCompleted ?? this.isCompleted,
     completedAt: completedAt.present ? completedAt.value : this.completedAt,
+    targetDate: targetDate.present ? targetDate.value : this.targetDate,
     sortOrder: sortOrder ?? this.sortOrder,
   );
   ChecklistItemsTableData copyWithCompanion(ChecklistItemsTableCompanion data) {
@@ -3934,6 +4160,8 @@ class ChecklistItemsTableData extends DataClass
           data.isCompleted.present ? data.isCompleted.value : this.isCompleted,
       completedAt:
           data.completedAt.present ? data.completedAt.value : this.completedAt,
+      targetDate:
+          data.targetDate.present ? data.targetDate.value : this.targetDate,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
     );
   }
@@ -3947,6 +4175,7 @@ class ChecklistItemsTableData extends DataClass
           ..write('category: $category, ')
           ..write('isCompleted: $isCompleted, ')
           ..write('completedAt: $completedAt, ')
+          ..write('targetDate: $targetDate, ')
           ..write('sortOrder: $sortOrder')
           ..write(')'))
         .toString();
@@ -3960,6 +4189,7 @@ class ChecklistItemsTableData extends DataClass
     category,
     isCompleted,
     completedAt,
+    targetDate,
     sortOrder,
   );
   @override
@@ -3972,6 +4202,7 @@ class ChecklistItemsTableData extends DataClass
           other.category == this.category &&
           other.isCompleted == this.isCompleted &&
           other.completedAt == this.completedAt &&
+          other.targetDate == this.targetDate &&
           other.sortOrder == this.sortOrder);
 }
 
@@ -3983,6 +4214,7 @@ class ChecklistItemsTableCompanion
   final Value<String> category;
   final Value<bool> isCompleted;
   final Value<DateTime?> completedAt;
+  final Value<DateTime?> targetDate;
   final Value<int> sortOrder;
   final Value<int> rowid;
   const ChecklistItemsTableCompanion({
@@ -3992,6 +4224,7 @@ class ChecklistItemsTableCompanion
     this.category = const Value.absent(),
     this.isCompleted = const Value.absent(),
     this.completedAt = const Value.absent(),
+    this.targetDate = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -4002,6 +4235,7 @@ class ChecklistItemsTableCompanion
     required String category,
     this.isCompleted = const Value.absent(),
     this.completedAt = const Value.absent(),
+    this.targetDate = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -4015,6 +4249,7 @@ class ChecklistItemsTableCompanion
     Expression<String>? category,
     Expression<bool>? isCompleted,
     Expression<DateTime>? completedAt,
+    Expression<DateTime>? targetDate,
     Expression<int>? sortOrder,
     Expression<int>? rowid,
   }) {
@@ -4025,6 +4260,7 @@ class ChecklistItemsTableCompanion
       if (category != null) 'category': category,
       if (isCompleted != null) 'is_completed': isCompleted,
       if (completedAt != null) 'completed_at': completedAt,
+      if (targetDate != null) 'target_date': targetDate,
       if (sortOrder != null) 'sort_order': sortOrder,
       if (rowid != null) 'rowid': rowid,
     });
@@ -4037,6 +4273,7 @@ class ChecklistItemsTableCompanion
     Value<String>? category,
     Value<bool>? isCompleted,
     Value<DateTime?>? completedAt,
+    Value<DateTime?>? targetDate,
     Value<int>? sortOrder,
     Value<int>? rowid,
   }) {
@@ -4047,6 +4284,7 @@ class ChecklistItemsTableCompanion
       category: category ?? this.category,
       isCompleted: isCompleted ?? this.isCompleted,
       completedAt: completedAt ?? this.completedAt,
+      targetDate: targetDate ?? this.targetDate,
       sortOrder: sortOrder ?? this.sortOrder,
       rowid: rowid ?? this.rowid,
     );
@@ -4073,6 +4311,9 @@ class ChecklistItemsTableCompanion
     if (completedAt.present) {
       map['completed_at'] = Variable<DateTime>(completedAt.value);
     }
+    if (targetDate.present) {
+      map['target_date'] = Variable<DateTime>(targetDate.value);
+    }
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
@@ -4091,6 +4332,7 @@ class ChecklistItemsTableCompanion
           ..write('category: $category, ')
           ..write('isCompleted: $isCompleted, ')
           ..write('completedAt: $completedAt, ')
+          ..write('targetDate: $targetDate, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -4572,6 +4814,480 @@ class AccountTransfersTableCompanion
   }
 }
 
+class $DailySpendingPlansTableTable extends DailySpendingPlansTable
+    with TableInfo<$DailySpendingPlansTableTable, DailySpendingPlansTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DailySpendingPlansTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _targetAmountSenMeta = const VerificationMeta(
+    'targetAmountSen',
+  );
+  @override
+  late final GeneratedColumn<int> targetAmountSen = GeneratedColumn<int>(
+    'target_amount_sen',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _whatToSpendOnMeta = const VerificationMeta(
+    'whatToSpendOn',
+  );
+  @override
+  late final GeneratedColumn<String> whatToSpendOn = GeneratedColumn<String>(
+    'what_to_spend_on',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isWorkdayMeta = const VerificationMeta(
+    'isWorkday',
+  );
+  @override
+  late final GeneratedColumn<bool> isWorkday = GeneratedColumn<bool>(
+    'is_workday',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_workday" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    date,
+    targetAmountSen,
+    whatToSpendOn,
+    reason,
+    isWorkday,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'daily_spending_plans';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DailySpendingPlansTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('target_amount_sen')) {
+      context.handle(
+        _targetAmountSenMeta,
+        targetAmountSen.isAcceptableOrUnknown(
+          data['target_amount_sen']!,
+          _targetAmountSenMeta,
+        ),
+      );
+    }
+    if (data.containsKey('what_to_spend_on')) {
+      context.handle(
+        _whatToSpendOnMeta,
+        whatToSpendOn.isAcceptableOrUnknown(
+          data['what_to_spend_on']!,
+          _whatToSpendOnMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    }
+    if (data.containsKey('is_workday')) {
+      context.handle(
+        _isWorkdayMeta,
+        isWorkday.isAcceptableOrUnknown(data['is_workday']!, _isWorkdayMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DailySpendingPlansTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DailySpendingPlansTableData(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}id'],
+          )!,
+      date:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}date'],
+          )!,
+      targetAmountSen:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}target_amount_sen'],
+          )!,
+      whatToSpendOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}what_to_spend_on'],
+      ),
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      ),
+      isWorkday:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}is_workday'],
+          )!,
+      updatedAt:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}updated_at'],
+          )!,
+    );
+  }
+
+  @override
+  $DailySpendingPlansTableTable createAlias(String alias) {
+    return $DailySpendingPlansTableTable(attachedDatabase, alias);
+  }
+}
+
+class DailySpendingPlansTableData extends DataClass
+    implements Insertable<DailySpendingPlansTableData> {
+  final int id;
+  final DateTime date;
+  final int targetAmountSen;
+  final String? whatToSpendOn;
+  final String? reason;
+  final bool isWorkday;
+  final DateTime updatedAt;
+  const DailySpendingPlansTableData({
+    required this.id,
+    required this.date,
+    required this.targetAmountSen,
+    this.whatToSpendOn,
+    this.reason,
+    required this.isWorkday,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['date'] = Variable<DateTime>(date);
+    map['target_amount_sen'] = Variable<int>(targetAmountSen);
+    if (!nullToAbsent || whatToSpendOn != null) {
+      map['what_to_spend_on'] = Variable<String>(whatToSpendOn);
+    }
+    if (!nullToAbsent || reason != null) {
+      map['reason'] = Variable<String>(reason);
+    }
+    map['is_workday'] = Variable<bool>(isWorkday);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  DailySpendingPlansTableCompanion toCompanion(bool nullToAbsent) {
+    return DailySpendingPlansTableCompanion(
+      id: Value(id),
+      date: Value(date),
+      targetAmountSen: Value(targetAmountSen),
+      whatToSpendOn:
+          whatToSpendOn == null && nullToAbsent
+              ? const Value.absent()
+              : Value(whatToSpendOn),
+      reason:
+          reason == null && nullToAbsent ? const Value.absent() : Value(reason),
+      isWorkday: Value(isWorkday),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory DailySpendingPlansTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DailySpendingPlansTableData(
+      id: serializer.fromJson<int>(json['id']),
+      date: serializer.fromJson<DateTime>(json['date']),
+      targetAmountSen: serializer.fromJson<int>(json['targetAmountSen']),
+      whatToSpendOn: serializer.fromJson<String?>(json['whatToSpendOn']),
+      reason: serializer.fromJson<String?>(json['reason']),
+      isWorkday: serializer.fromJson<bool>(json['isWorkday']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'date': serializer.toJson<DateTime>(date),
+      'targetAmountSen': serializer.toJson<int>(targetAmountSen),
+      'whatToSpendOn': serializer.toJson<String?>(whatToSpendOn),
+      'reason': serializer.toJson<String?>(reason),
+      'isWorkday': serializer.toJson<bool>(isWorkday),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  DailySpendingPlansTableData copyWith({
+    int? id,
+    DateTime? date,
+    int? targetAmountSen,
+    Value<String?> whatToSpendOn = const Value.absent(),
+    Value<String?> reason = const Value.absent(),
+    bool? isWorkday,
+    DateTime? updatedAt,
+  }) => DailySpendingPlansTableData(
+    id: id ?? this.id,
+    date: date ?? this.date,
+    targetAmountSen: targetAmountSen ?? this.targetAmountSen,
+    whatToSpendOn:
+        whatToSpendOn.present ? whatToSpendOn.value : this.whatToSpendOn,
+    reason: reason.present ? reason.value : this.reason,
+    isWorkday: isWorkday ?? this.isWorkday,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  DailySpendingPlansTableData copyWithCompanion(
+    DailySpendingPlansTableCompanion data,
+  ) {
+    return DailySpendingPlansTableData(
+      id: data.id.present ? data.id.value : this.id,
+      date: data.date.present ? data.date.value : this.date,
+      targetAmountSen:
+          data.targetAmountSen.present
+              ? data.targetAmountSen.value
+              : this.targetAmountSen,
+      whatToSpendOn:
+          data.whatToSpendOn.present
+              ? data.whatToSpendOn.value
+              : this.whatToSpendOn,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      isWorkday: data.isWorkday.present ? data.isWorkday.value : this.isWorkday,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DailySpendingPlansTableData(')
+          ..write('id: $id, ')
+          ..write('date: $date, ')
+          ..write('targetAmountSen: $targetAmountSen, ')
+          ..write('whatToSpendOn: $whatToSpendOn, ')
+          ..write('reason: $reason, ')
+          ..write('isWorkday: $isWorkday, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    date,
+    targetAmountSen,
+    whatToSpendOn,
+    reason,
+    isWorkday,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DailySpendingPlansTableData &&
+          other.id == this.id &&
+          other.date == this.date &&
+          other.targetAmountSen == this.targetAmountSen &&
+          other.whatToSpendOn == this.whatToSpendOn &&
+          other.reason == this.reason &&
+          other.isWorkday == this.isWorkday &&
+          other.updatedAt == this.updatedAt);
+}
+
+class DailySpendingPlansTableCompanion
+    extends UpdateCompanion<DailySpendingPlansTableData> {
+  final Value<int> id;
+  final Value<DateTime> date;
+  final Value<int> targetAmountSen;
+  final Value<String?> whatToSpendOn;
+  final Value<String?> reason;
+  final Value<bool> isWorkday;
+  final Value<DateTime> updatedAt;
+  const DailySpendingPlansTableCompanion({
+    this.id = const Value.absent(),
+    this.date = const Value.absent(),
+    this.targetAmountSen = const Value.absent(),
+    this.whatToSpendOn = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.isWorkday = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  DailySpendingPlansTableCompanion.insert({
+    this.id = const Value.absent(),
+    required DateTime date,
+    this.targetAmountSen = const Value.absent(),
+    this.whatToSpendOn = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.isWorkday = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  }) : date = Value(date);
+  static Insertable<DailySpendingPlansTableData> custom({
+    Expression<int>? id,
+    Expression<DateTime>? date,
+    Expression<int>? targetAmountSen,
+    Expression<String>? whatToSpendOn,
+    Expression<String>? reason,
+    Expression<bool>? isWorkday,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (date != null) 'date': date,
+      if (targetAmountSen != null) 'target_amount_sen': targetAmountSen,
+      if (whatToSpendOn != null) 'what_to_spend_on': whatToSpendOn,
+      if (reason != null) 'reason': reason,
+      if (isWorkday != null) 'is_workday': isWorkday,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  DailySpendingPlansTableCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? date,
+    Value<int>? targetAmountSen,
+    Value<String?>? whatToSpendOn,
+    Value<String?>? reason,
+    Value<bool>? isWorkday,
+    Value<DateTime>? updatedAt,
+  }) {
+    return DailySpendingPlansTableCompanion(
+      id: id ?? this.id,
+      date: date ?? this.date,
+      targetAmountSen: targetAmountSen ?? this.targetAmountSen,
+      whatToSpendOn: whatToSpendOn ?? this.whatToSpendOn,
+      reason: reason ?? this.reason,
+      isWorkday: isWorkday ?? this.isWorkday,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (targetAmountSen.present) {
+      map['target_amount_sen'] = Variable<int>(targetAmountSen.value);
+    }
+    if (whatToSpendOn.present) {
+      map['what_to_spend_on'] = Variable<String>(whatToSpendOn.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (isWorkday.present) {
+      map['is_workday'] = Variable<bool>(isWorkday.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DailySpendingPlansTableCompanion(')
+          ..write('id: $id, ')
+          ..write('date: $date, ')
+          ..write('targetAmountSen: $targetAmountSen, ')
+          ..write('whatToSpendOn: $whatToSpendOn, ')
+          ..write('reason: $reason, ')
+          ..write('isWorkday: $isWorkday, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4589,6 +5305,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ChecklistItemsTableTable(this);
   late final $AccountTransfersTableTable accountTransfersTable =
       $AccountTransfersTableTable(this);
+  late final $DailySpendingPlansTableTable dailySpendingPlansTable =
+      $DailySpendingPlansTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4601,6 +5319,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     expensesTable,
     checklistItemsTable,
     accountTransfersTable,
+    dailySpendingPlansTable,
   ];
 }
 
@@ -4626,6 +5345,9 @@ typedef $$UserProfileTableTableCreateCompanionBuilder =
       Value<double?> customWantsRatio,
       Value<double?> customSavingsRatio,
       Value<double?> customGivingRatio,
+      Value<bool> workdaysOnlySafeToSpend,
+      Value<int> defaultWorkdayTargetSen,
+      Value<int> defaultWeekendTargetSen,
       Value<DateTime> updatedAt,
     });
 typedef $$UserProfileTableTableUpdateCompanionBuilder =
@@ -4650,6 +5372,9 @@ typedef $$UserProfileTableTableUpdateCompanionBuilder =
       Value<double?> customWantsRatio,
       Value<double?> customSavingsRatio,
       Value<double?> customGivingRatio,
+      Value<bool> workdaysOnlySafeToSpend,
+      Value<int> defaultWorkdayTargetSen,
+      Value<int> defaultWeekendTargetSen,
       Value<DateTime> updatedAt,
     });
 
@@ -4759,6 +5484,21 @@ class $$UserProfileTableTableFilterComposer
 
   ColumnFilters<double> get customGivingRatio => $composableBuilder(
     column: $table.customGivingRatio,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get workdaysOnlySafeToSpend => $composableBuilder(
+    column: $table.workdaysOnlySafeToSpend,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get defaultWorkdayTargetSen => $composableBuilder(
+    column: $table.defaultWorkdayTargetSen,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get defaultWeekendTargetSen => $composableBuilder(
+    column: $table.defaultWeekendTargetSen,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4877,6 +5617,21 @@ class $$UserProfileTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get workdaysOnlySafeToSpend => $composableBuilder(
+    column: $table.workdaysOnlySafeToSpend,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get defaultWorkdayTargetSen => $composableBuilder(
+    column: $table.defaultWorkdayTargetSen,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get defaultWeekendTargetSen => $composableBuilder(
+    column: $table.defaultWeekendTargetSen,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
@@ -4982,6 +5737,21 @@ class $$UserProfileTableTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<bool> get workdaysOnlySafeToSpend => $composableBuilder(
+    column: $table.workdaysOnlySafeToSpend,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get defaultWorkdayTargetSen => $composableBuilder(
+    column: $table.defaultWorkdayTargetSen,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get defaultWeekendTargetSen => $composableBuilder(
+    column: $table.defaultWeekendTargetSen,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 }
@@ -5050,6 +5820,9 @@ class $$UserProfileTableTableTableManager
                 Value<double?> customWantsRatio = const Value.absent(),
                 Value<double?> customSavingsRatio = const Value.absent(),
                 Value<double?> customGivingRatio = const Value.absent(),
+                Value<bool> workdaysOnlySafeToSpend = const Value.absent(),
+                Value<int> defaultWorkdayTargetSen = const Value.absent(),
+                Value<int> defaultWeekendTargetSen = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => UserProfileTableCompanion(
                 id: id,
@@ -5072,6 +5845,9 @@ class $$UserProfileTableTableTableManager
                 customWantsRatio: customWantsRatio,
                 customSavingsRatio: customSavingsRatio,
                 customGivingRatio: customGivingRatio,
+                workdaysOnlySafeToSpend: workdaysOnlySafeToSpend,
+                defaultWorkdayTargetSen: defaultWorkdayTargetSen,
+                defaultWeekendTargetSen: defaultWeekendTargetSen,
                 updatedAt: updatedAt,
               ),
           createCompanionCallback:
@@ -5096,6 +5872,9 @@ class $$UserProfileTableTableTableManager
                 Value<double?> customWantsRatio = const Value.absent(),
                 Value<double?> customSavingsRatio = const Value.absent(),
                 Value<double?> customGivingRatio = const Value.absent(),
+                Value<bool> workdaysOnlySafeToSpend = const Value.absent(),
+                Value<int> defaultWorkdayTargetSen = const Value.absent(),
+                Value<int> defaultWeekendTargetSen = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => UserProfileTableCompanion.insert(
                 id: id,
@@ -5118,6 +5897,9 @@ class $$UserProfileTableTableTableManager
                 customWantsRatio: customWantsRatio,
                 customSavingsRatio: customSavingsRatio,
                 customGivingRatio: customGivingRatio,
+                workdaysOnlySafeToSpend: workdaysOnlySafeToSpend,
+                defaultWorkdayTargetSen: defaultWorkdayTargetSen,
+                defaultWeekendTargetSen: defaultWeekendTargetSen,
                 updatedAt: updatedAt,
               ),
           withReferenceMapper:
@@ -6049,6 +6831,54 @@ final class $$AccountsTableTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $AccountTransfersTableTable,
+    List<AccountTransfersTableData>
+  >
+  _outgoingTransfersTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.accountTransfersTable,
+    aliasName: $_aliasNameGenerator(
+      db.accountsTable.id,
+      db.accountTransfersTable.fromAccountId,
+    ),
+  );
+
+  $$AccountTransfersTableTableProcessedTableManager get outgoingTransfers {
+    final manager = $$AccountTransfersTableTableTableManager(
+      $_db,
+      $_db.accountTransfersTable,
+    ).filter((f) => f.fromAccountId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_outgoingTransfersTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $AccountTransfersTableTable,
+    List<AccountTransfersTableData>
+  >
+  _incomingTransfersTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.accountTransfersTable,
+    aliasName: $_aliasNameGenerator(
+      db.accountsTable.id,
+      db.accountTransfersTable.toAccountId,
+    ),
+  );
+
+  $$AccountTransfersTableTableProcessedTableManager get incomingTransfers {
+    final manager = $$AccountTransfersTableTableTableManager(
+      $_db,
+      $_db.accountTransfersTable,
+    ).filter((f) => f.toAccountId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_incomingTransfersTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$AccountsTableTableFilterComposer
@@ -6127,6 +6957,58 @@ class $$AccountsTableTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> outgoingTransfers(
+    Expression<bool> Function($$AccountTransfersTableTableFilterComposer f) f,
+  ) {
+    final $$AccountTransfersTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.accountTransfersTable,
+          getReferencedColumn: (t) => t.fromAccountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountTransfersTableTableFilterComposer(
+                $db: $db,
+                $table: $db.accountTransfersTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> incomingTransfers(
+    Expression<bool> Function($$AccountTransfersTableTableFilterComposer f) f,
+  ) {
+    final $$AccountTransfersTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.accountTransfersTable,
+          getReferencedColumn: (t) => t.toAccountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountTransfersTableTableFilterComposer(
+                $db: $db,
+                $table: $db.accountTransfersTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -6250,6 +7132,58 @@ class $$AccountsTableTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> outgoingTransfers<T extends Object>(
+    Expression<T> Function($$AccountTransfersTableTableAnnotationComposer a) f,
+  ) {
+    final $$AccountTransfersTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.accountTransfersTable,
+          getReferencedColumn: (t) => t.fromAccountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountTransfersTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.accountTransfersTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> incomingTransfers<T extends Object>(
+    Expression<T> Function($$AccountTransfersTableTableAnnotationComposer a) f,
+  ) {
+    final $$AccountTransfersTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.accountTransfersTable,
+          getReferencedColumn: (t) => t.toAccountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountTransfersTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.accountTransfersTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$AccountsTableTableTableManager
@@ -6265,7 +7199,11 @@ class $$AccountsTableTableTableManager
           $$AccountsTableTableUpdateCompanionBuilder,
           (AccountsTableData, $$AccountsTableTableReferences),
           AccountsTableData,
-          PrefetchHooks Function({bool expensesTableRefs})
+          PrefetchHooks Function({
+            bool expensesTableRefs,
+            bool outgoingTransfers,
+            bool incomingTransfers,
+          })
         > {
   $$AccountsTableTableTableManager(_$AppDatabase db, $AccountsTableTable table)
     : super(
@@ -6336,11 +7274,17 @@ class $$AccountsTableTableTableManager
                         ),
                       )
                       .toList(),
-          prefetchHooksCallback: ({expensesTableRefs = false}) {
+          prefetchHooksCallback: ({
+            expensesTableRefs = false,
+            outgoingTransfers = false,
+            incomingTransfers = false,
+          }) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (expensesTableRefs) db.expensesTable,
+                if (outgoingTransfers) db.accountTransfersTable,
+                if (incomingTransfers) db.accountTransfersTable,
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -6367,6 +7311,50 @@ class $$AccountsTableTableTableManager
                           ),
                       typedResults: items,
                     ),
+                  if (outgoingTransfers)
+                    await $_getPrefetchedData<
+                      AccountsTableData,
+                      $AccountsTableTable,
+                      AccountTransfersTableData
+                    >(
+                      currentTable: table,
+                      referencedTable: $$AccountsTableTableReferences
+                          ._outgoingTransfersTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$AccountsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).outgoingTransfers,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.fromAccountId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                  if (incomingTransfers)
+                    await $_getPrefetchedData<
+                      AccountsTableData,
+                      $AccountsTableTable,
+                      AccountTransfersTableData
+                    >(
+                      currentTable: table,
+                      referencedTable: $$AccountsTableTableReferences
+                          ._incomingTransfersTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$AccountsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).incomingTransfers,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.toAccountId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
                 ];
               },
             );
@@ -6387,7 +7375,11 @@ typedef $$AccountsTableTableProcessedTableManager =
       $$AccountsTableTableUpdateCompanionBuilder,
       (AccountsTableData, $$AccountsTableTableReferences),
       AccountsTableData,
-      PrefetchHooks Function({bool expensesTableRefs})
+      PrefetchHooks Function({
+        bool expensesTableRefs,
+        bool outgoingTransfers,
+        bool incomingTransfers,
+      })
     >;
 typedef $$ExpensesTableTableCreateCompanionBuilder =
     ExpensesTableCompanion Function({
@@ -6998,6 +7990,7 @@ typedef $$ChecklistItemsTableTableCreateCompanionBuilder =
       required String category,
       Value<bool> isCompleted,
       Value<DateTime?> completedAt,
+      Value<DateTime?> targetDate,
       Value<int> sortOrder,
       Value<int> rowid,
     });
@@ -7009,6 +8002,7 @@ typedef $$ChecklistItemsTableTableUpdateCompanionBuilder =
       Value<String> category,
       Value<bool> isCompleted,
       Value<DateTime?> completedAt,
+      Value<DateTime?> targetDate,
       Value<int> sortOrder,
       Value<int> rowid,
     });
@@ -7049,6 +8043,11 @@ class $$ChecklistItemsTableTableFilterComposer
 
   ColumnFilters<DateTime> get completedAt => $composableBuilder(
     column: $table.completedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get targetDate => $composableBuilder(
+    column: $table.targetDate,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7097,6 +8096,11 @@ class $$ChecklistItemsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get targetDate => $composableBuilder(
+    column: $table.targetDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get sortOrder => $composableBuilder(
     column: $table.sortOrder,
     builder: (column) => ColumnOrderings(column),
@@ -7133,6 +8137,11 @@ class $$ChecklistItemsTableTableAnnotationComposer
 
   GeneratedColumn<DateTime> get completedAt => $composableBuilder(
     column: $table.completedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get targetDate => $composableBuilder(
+    column: $table.targetDate,
     builder: (column) => column,
   );
 
@@ -7192,6 +8201,7 @@ class $$ChecklistItemsTableTableTableManager
                 Value<String> category = const Value.absent(),
                 Value<bool> isCompleted = const Value.absent(),
                 Value<DateTime?> completedAt = const Value.absent(),
+                Value<DateTime?> targetDate = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ChecklistItemsTableCompanion(
@@ -7201,6 +8211,7 @@ class $$ChecklistItemsTableTableTableManager
                 category: category,
                 isCompleted: isCompleted,
                 completedAt: completedAt,
+                targetDate: targetDate,
                 sortOrder: sortOrder,
                 rowid: rowid,
               ),
@@ -7212,6 +8223,7 @@ class $$ChecklistItemsTableTableTableManager
                 required String category,
                 Value<bool> isCompleted = const Value.absent(),
                 Value<DateTime?> completedAt = const Value.absent(),
+                Value<DateTime?> targetDate = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ChecklistItemsTableCompanion.insert(
@@ -7221,6 +8233,7 @@ class $$ChecklistItemsTableTableTableManager
                 category: category,
                 isCompleted: isCompleted,
                 completedAt: completedAt,
+                targetDate: targetDate,
                 sortOrder: sortOrder,
                 rowid: rowid,
               ),
@@ -7733,6 +8746,268 @@ typedef $$AccountTransfersTableTableProcessedTableManager =
       AccountTransfersTableData,
       PrefetchHooks Function({bool fromAccountId, bool toAccountId})
     >;
+typedef $$DailySpendingPlansTableTableCreateCompanionBuilder =
+    DailySpendingPlansTableCompanion Function({
+      Value<int> id,
+      required DateTime date,
+      Value<int> targetAmountSen,
+      Value<String?> whatToSpendOn,
+      Value<String?> reason,
+      Value<bool> isWorkday,
+      Value<DateTime> updatedAt,
+    });
+typedef $$DailySpendingPlansTableTableUpdateCompanionBuilder =
+    DailySpendingPlansTableCompanion Function({
+      Value<int> id,
+      Value<DateTime> date,
+      Value<int> targetAmountSen,
+      Value<String?> whatToSpendOn,
+      Value<String?> reason,
+      Value<bool> isWorkday,
+      Value<DateTime> updatedAt,
+    });
+
+class $$DailySpendingPlansTableTableFilterComposer
+    extends Composer<_$AppDatabase, $DailySpendingPlansTableTable> {
+  $$DailySpendingPlansTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get targetAmountSen => $composableBuilder(
+    column: $table.targetAmountSen,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get whatToSpendOn => $composableBuilder(
+    column: $table.whatToSpendOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isWorkday => $composableBuilder(
+    column: $table.isWorkday,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DailySpendingPlansTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $DailySpendingPlansTableTable> {
+  $$DailySpendingPlansTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get targetAmountSen => $composableBuilder(
+    column: $table.targetAmountSen,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get whatToSpendOn => $composableBuilder(
+    column: $table.whatToSpendOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isWorkday => $composableBuilder(
+    column: $table.isWorkday,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DailySpendingPlansTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DailySpendingPlansTableTable> {
+  $$DailySpendingPlansTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<int> get targetAmountSen => $composableBuilder(
+    column: $table.targetAmountSen,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get whatToSpendOn => $composableBuilder(
+    column: $table.whatToSpendOn,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<bool> get isWorkday =>
+      $composableBuilder(column: $table.isWorkday, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$DailySpendingPlansTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DailySpendingPlansTableTable,
+          DailySpendingPlansTableData,
+          $$DailySpendingPlansTableTableFilterComposer,
+          $$DailySpendingPlansTableTableOrderingComposer,
+          $$DailySpendingPlansTableTableAnnotationComposer,
+          $$DailySpendingPlansTableTableCreateCompanionBuilder,
+          $$DailySpendingPlansTableTableUpdateCompanionBuilder,
+          (
+            DailySpendingPlansTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $DailySpendingPlansTableTable,
+              DailySpendingPlansTableData
+            >,
+          ),
+          DailySpendingPlansTableData,
+          PrefetchHooks Function()
+        > {
+  $$DailySpendingPlansTableTableTableManager(
+    _$AppDatabase db,
+    $DailySpendingPlansTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$DailySpendingPlansTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer:
+              () => $$DailySpendingPlansTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer:
+              () => $$DailySpendingPlansTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> date = const Value.absent(),
+                Value<int> targetAmountSen = const Value.absent(),
+                Value<String?> whatToSpendOn = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<bool> isWorkday = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => DailySpendingPlansTableCompanion(
+                id: id,
+                date: date,
+                targetAmountSen: targetAmountSen,
+                whatToSpendOn: whatToSpendOn,
+                reason: reason,
+                isWorkday: isWorkday,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required DateTime date,
+                Value<int> targetAmountSen = const Value.absent(),
+                Value<String?> whatToSpendOn = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<bool> isWorkday = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => DailySpendingPlansTableCompanion.insert(
+                id: id,
+                date: date,
+                targetAmountSen: targetAmountSen,
+                whatToSpendOn: whatToSpendOn,
+                reason: reason,
+                isWorkday: isWorkday,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DailySpendingPlansTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DailySpendingPlansTableTable,
+      DailySpendingPlansTableData,
+      $$DailySpendingPlansTableTableFilterComposer,
+      $$DailySpendingPlansTableTableOrderingComposer,
+      $$DailySpendingPlansTableTableAnnotationComposer,
+      $$DailySpendingPlansTableTableCreateCompanionBuilder,
+      $$DailySpendingPlansTableTableUpdateCompanionBuilder,
+      (
+        DailySpendingPlansTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $DailySpendingPlansTableTable,
+          DailySpendingPlansTableData
+        >,
+      ),
+      DailySpendingPlansTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7754,4 +9029,9 @@ class $AppDatabaseManager {
       $$ChecklistItemsTableTableTableManager(_db, _db.checklistItemsTable);
   $$AccountTransfersTableTableTableManager get accountTransfersTable =>
       $$AccountTransfersTableTableTableManager(_db, _db.accountTransfersTable);
+  $$DailySpendingPlansTableTableTableManager get dailySpendingPlansTable =>
+      $$DailySpendingPlansTableTableTableManager(
+        _db,
+        _db.dailySpendingPlansTable,
+      );
 }

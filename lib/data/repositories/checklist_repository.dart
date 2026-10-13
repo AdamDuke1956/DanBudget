@@ -28,6 +28,7 @@ class ChecklistRepository {
     required String title,
     required String category,
     required String description,
+    DateTime? targetDate,
   }) {
     final id = 'custom_${DateTime.now().millisecondsSinceEpoch}';
     return _db.into(_db.checklistItemsTable).insert(
@@ -37,8 +38,38 @@ class ChecklistRepository {
         category: Value(category),
         description: Value(description),
         isCompleted: const Value(false),
+        targetDate: Value(targetDate),
         sortOrder: const Value(99),
       ),
     );
+  }
+
+  /// Update an existing starter pack goal.
+  Future<bool> updateItem({
+    required String id,
+    required String title,
+    required String category,
+    required String description,
+    DateTime? targetDate,
+    bool? isCompleted,
+  }) async {
+    final rows = await (_db.update(_db.checklistItemsTable)..where((t) => t.id.equals(id))).write(
+      ChecklistItemsTableCompanion(
+        title: Value(title),
+        category: Value(category),
+        description: Value(description),
+        targetDate: Value(targetDate),
+        isCompleted: isCompleted != null ? Value(isCompleted) : const Value.absent(),
+        completedAt: isCompleted != null
+            ? Value(isCompleted ? DateTime.now() : null)
+            : const Value.absent(),
+      ),
+    );
+    return rows > 0;
+  }
+
+  /// Delete a starter pack goal.
+  Future<int> deleteItem(String id) {
+    return (_db.delete(_db.checklistItemsTable)..where((t) => t.id.equals(id))).go();
   }
 }

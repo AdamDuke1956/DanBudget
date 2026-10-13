@@ -22,7 +22,7 @@ class EmploymentStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const OnboardingStepHeader(
-          emoji: '🧭',
+          icon: Icons.explore_rounded,
           title: "What's your current status?",
           subtitle:
               'This decides how DanBudget calculates your take-home pay and splits your budget.',
@@ -50,7 +50,7 @@ class EmploymentStep extends StatelessWidget {
           onTap: () => _select(EmploymentType.fullTime),
         ),
         const SizedBox(height: 16),
-        const Text(
+        Text(
           'You can switch to Full-Time later when you graduate.',
           style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
         ),
@@ -119,7 +119,13 @@ class _EmploymentCard extends StatelessWidget {
                 color: AppColors.surfaceHigh,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Text(type.emoji, style: const TextStyle(fontSize: 24)),
+              child: Icon(
+                type == EmploymentType.intern
+                    ? Icons.school_rounded
+                    : Icons.work_rounded,
+                size: 24,
+                color: selected ? AppColors.primary : AppColors.textSecondary,
+              ),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -128,7 +134,7 @@ class _EmploymentCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
@@ -137,7 +143,7 @@ class _EmploymentCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     description,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12.5,
                       height: 1.4,
                       color: AppColors.textSecondary,

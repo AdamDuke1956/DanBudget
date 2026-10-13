@@ -105,7 +105,7 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
         top: 20,
         bottom: 24 + bottomInset,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -126,7 +126,7 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
             ),
             const SizedBox(height: 16),
 
-            const Text(
+            Text(
               'Profile & Income Setup',
               style: TextStyle(
                 fontSize: 20,
@@ -140,16 +140,15 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
                   ? 'Intern allowances are take-home: no EPF, SOCSO or EIS deductions.'
                   : 'Malaysian EPF, SOCSO, EIS & PCB are calculated automatically.',
               style:
-                  const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 16),
 
-            // Display name
             TextField(
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
               maxLength: 24,
-              style: const TextStyle(
+              style: TextStyle(
                   color: AppColors.textPrimary, fontWeight: FontWeight.bold),
               decoration: _inputDecoration(
                 label: 'Your Name',
@@ -158,8 +157,7 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
             ),
             const SizedBox(height: 4),
 
-            // Employment type
-            const Text(
+            Text(
               'Employment Status',
               style: TextStyle(
                   fontSize: 13,
@@ -182,11 +180,10 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
             ),
             const SizedBox(height: 16),
 
-            // Gross Salary / Monthly Allowance
             TextField(
               controller: _grossSalaryController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(
+              style: TextStyle(
                   color: AppColors.textPrimary, fontWeight: FontWeight.bold),
               decoration: _inputDecoration(
                 label: '${_employmentType.incomeLabel} (RM)',
@@ -196,13 +193,12 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
             ),
             const SizedBox(height: 12),
 
-            // Fixed Allowances (salaried staff only)
             if (!_isIntern) ...[
               TextField(
                 controller: _allowancesController,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
-                style: const TextStyle(color: AppColors.textPrimary),
+                style: TextStyle(color: AppColors.textPrimary),
                 decoration: _inputDecoration(
                   label: 'Fixed Allowances (Transport / Phone)',
                   prefixText: 'RM ',
@@ -212,11 +208,10 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
               const SizedBox(height: 12),
             ],
 
-            // Payday Date
             TextField(
               controller: _paydayController,
               keyboardType: TextInputType.number,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: AppColors.textPrimary),
               decoration: _inputDecoration(
                 label: 'Payday of the Month (e.g. 25th)',
                 icon: Icons.calendar_month_rounded,
@@ -224,9 +219,8 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
             ),
             const SizedBox(height: 16),
 
-            // EPF Contribution Rate Selector (salaried staff only)
             if (!_isIntern) ...[
-              const Text(
+              Text(
                 'EPF (KWSP) Employee Contribution Rate',
                 style: TextStyle(
                     fontSize: 13,
@@ -261,7 +255,7 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
               onPressed: _save,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: const Color(0xFF04291F),
+                foregroundColor: AppColors.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18)),
@@ -304,9 +298,9 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
   }) {
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+      labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
       prefixText: prefixText,
-      prefixStyle: const TextStyle(
+      prefixStyle: TextStyle(
           color: AppColors.textPrimary, fontWeight: FontWeight.bold),
       prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
       counterText: '',
@@ -316,15 +310,15 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
           const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.outline),
+        borderSide: BorderSide(color: AppColors.outline),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.outline),
+        borderSide: BorderSide(color: AppColors.outline),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        borderSide: BorderSide(color: AppColors.primary, width: 2),
       ),
     );
   }

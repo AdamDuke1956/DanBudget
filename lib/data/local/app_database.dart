@@ -8,6 +8,7 @@ import 'tables/commitments_table.dart';
 import 'tables/checklist_items_table.dart';
 import 'tables/accounts_table.dart';
 import 'tables/account_transfers_table.dart';
+import 'tables/daily_spending_plans_table.dart';
 import 'default_seeds.dart';
 
 part 'app_database.g.dart';
@@ -20,12 +21,13 @@ part 'app_database.g.dart';
   ChecklistItemsTable,
   AccountsTable,
   AccountTransfersTable,
+  DailySpendingPlansTable,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 6;
 
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'danbudget_db');
@@ -79,6 +81,36 @@ class AppDatabase extends _$AppDatabase {
             b.insertAll(accountsTable, DefaultSeeds.defaultAccounts);
           });
         }
+        if (from < 5) {
+          // v4 -> v5: Rename giving category to Charity
+          await (update(expenseCategoriesTable)
+                ..where((tbl) => tbl.id.equals('giving')))
+              .write(
+            const ExpenseCategoriesTableCompanion(
+              name: Value('Charity'),
+            ),
+          );
+        }
+        if (from < 6) {
+          // v5 -> v6: Checklist target dates, Daily spending plans, and Workday settings
+          await m.addColumn(checklistItemsTable, checklistItemsTable.targetDate);
+          await m.addColumn(userProfileTable, userProfileTable.workdaysOnlySafeToSpend);
+          await m.addColumn(userProfileTable, userProfileTable.defaultWorkdayTargetSen);
+          await m.addColumn(userProfileTable, userProfileTable.defaultWeekendTargetSen);
+          await m.createTable(dailySpendingPlansTable);
+        }
+      },
+      beforeOpen: (details) async {
+        // Ensure legacy category names are synchronized to Charity
+        await (update(expenseCategoriesTable)
+              ..where((tbl) =>
+                  tbl.id.equals('giving') &
+                  tbl.name.isNotValue('Charity')))
+            .write(
+          const ExpenseCategoriesTableCompanion(
+            name: Value('Charity'),
+          ),
+        );
       },
     );
   }

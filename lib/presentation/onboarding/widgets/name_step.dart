@@ -23,7 +23,7 @@ class NameStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const OnboardingStepHeader(
-          emoji: '👋',
+          icon: Icons.person_rounded,
           title: 'What should we call you?',
           subtitle:
               "Let's personalise your financial companion. Pick any name or nickname you like.",
@@ -38,7 +38,7 @@ class NameStep extends StatelessWidget {
           textInputAction: TextInputAction.next,
           maxLength: 24,
           inputFormatters: [LengthLimitingTextInputFormatter(24)],
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w700,
             fontSize: 18,

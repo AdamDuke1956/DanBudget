@@ -150,7 +150,6 @@ class AccountRepository {
     final transferDate = date ?? DateTime.now();
 
     return _db.transaction(() async {
-      // 1. Deduct from source
       final fromAcc = await (_db.select(_db.accountsTable)..where((t) => t.id.equals(fromAccountId))).getSingle();
       await (_db.update(_db.accountsTable)..where((t) => t.id.equals(fromAccountId))).write(
         AccountsTableCompanion(
@@ -159,7 +158,6 @@ class AccountRepository {
         ),
       );
 
-      // 2. Add to destination
       final toAcc = await (_db.select(_db.accountsTable)..where((t) => t.id.equals(toAccountId))).getSingle();
       await (_db.update(_db.accountsTable)..where((t) => t.id.equals(toAccountId))).write(
         AccountsTableCompanion(
@@ -168,7 +166,6 @@ class AccountRepository {
         ),
       );
 
-      // 3. Record transfer
       return _db.into(_db.accountTransfersTable).insert(
             AccountTransfersTableCompanion.insert(
               fromAccountId: fromAccountId,
@@ -187,7 +184,6 @@ class AccountRepository {
       final transfer = await (_db.select(_db.accountTransfersTable)..where((t) => t.id.equals(transferId))).getSingleOrNull();
       if (transfer == null) return;
 
-      // Reverse balances
       final fromAcc = await getAccount(transfer.fromAccountId);
       if (fromAcc != null) {
         await setAccountBalance(fromAcc.id, fromAcc.balanceSen + transfer.amountSen);

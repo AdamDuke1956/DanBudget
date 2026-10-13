@@ -12,16 +12,20 @@ import 'presentation/commitments/commitments_screen.dart';
 import 'presentation/more/more_screen.dart';
 import 'presentation/more/widgets/biometric_guard.dart';
 
-class DanBudgetApp extends StatelessWidget {
+class DanBudgetApp extends ConsumerWidget {
   const DanBudgetApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    AppColors.current = themeMode.isDark ? AppPalette.dark : AppPalette.light;
+
     return MaterialApp(
       title: 'DanBudget',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark(),
-      themeMode: ThemeMode.dark,
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: themeMode.isDark ? ThemeMode.dark : ThemeMode.light,
       home: const AppRoot(),
     );
   }
@@ -44,7 +48,7 @@ class AppRoot extends ConsumerWidget {
         body: Center(
           child: Text(
             'Error: $err',
-            style: const TextStyle(color: AppColors.danger),
+            style: TextStyle(color: AppColors.danger),
           ),
         ),
       ),
@@ -67,7 +71,7 @@ class _SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: AppColors.background,
       body: Center(
         child: CircularProgressIndicator(color: AppColors.primary),
@@ -77,33 +81,44 @@ class _SplashScreen extends StatelessWidget {
 }
 
 /// Bottom-navigation shell.
-class AppShell extends StatefulWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key});
 
   @override
-  State<AppShell> createState() => _AppShellState();
+  ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends State<AppShell> {
+class _AppShellState extends ConsumerState<AppShell> {
   int _index = 0;
 
-  List<Widget> get _tabs => [
-    HomeScreen(onNavigateToTab: (i) => setState(() => _index = i)),
-    const ExpensesScreen(),
-    const PlanScreen(),
-    const CommitmentsScreen(),
-    const MoreScreen(),
+  List<Widget> _buildTabs(AppThemeMode themeMode) => [
+    HomeScreen(
+      key: ValueKey('home_${themeMode.name}'),
+      onNavigateToTab: (i) => setState(() => _index = i),
+    ),
+    ExpensesScreen(key: ValueKey('expenses_${themeMode.name}')),
+    PlanScreen(key: ValueKey('plan_${themeMode.name}')),
+    CommitmentsScreen(key: ValueKey('commitments_${themeMode.name}')),
+    MoreScreen(key: ValueKey('more_${themeMode.name}')),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = ref.watch(themeModeProvider);
+
     return Scaffold(
-      body: IndexedStack(index: _index, children: _tabs),
+      body: IndexedStack(
+        index: _index,
+        children: _buildTabs(themeMode),
+      ),
       bottomNavigationBar: MediaQuery.withClampedTextScaling(
         maxScaleFactor: 1.0,
         child: NavigationBar(
           selectedIndex: _index,
           onDestinationSelected: (i) => setState(() => _index = i),
+          backgroundColor: AppColors.surface,
+          indicatorColor: AppColors.primary.withValues(alpha: 0.18),
+          elevation: 4,
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.dashboard_outlined),

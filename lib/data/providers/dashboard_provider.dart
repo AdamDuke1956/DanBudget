@@ -51,6 +51,7 @@ final dashboardStateProvider = Provider<AsyncValue<DashboardState>>((ref) {
   final expensesAsync = ref.watch(recentExpensesStreamProvider);
   final accountsAsync = ref.watch(accountsStreamProvider);
   final transfersAsync = ref.watch(recentTransfersStreamProvider);
+  final todayPlanAsync = ref.watch(todayPlanStreamProvider);
 
   if (profileAsync is AsyncLoading ||
       commitmentsAsync is AsyncLoading ||
@@ -83,7 +84,6 @@ final dashboardStateProvider = Provider<AsyncValue<DashboardState>>((ref) {
   final recentTransfers = transfersAsync.value ?? [];
 
 
-  // 1. Calculate Malaysian Net Salary (interns: allowance with no deductions)
   final employmentType = EmploymentType.fromStorage(profile.employmentType);
   final netSalary = NetSalaryCalculator.calculate(
     grossSalary: Money(profile.grossSalarySen),
@@ -95,14 +95,12 @@ final dashboardStateProvider = Provider<AsyncValue<DashboardState>>((ref) {
     isMalaysianCitizen: true,
   );
 
-  // 2. Aggregate active monthly commitments
   final int totalCommitmentSen = commitments.fold<int>(
     0,
     (sum, c) => sum + c.monthlyPaymentSen,
   );
   final totalCommitments = Money(totalCommitmentSen);
 
-  // 3. Budget Allocation (with support for custom presets & sliders)
   final targetPreset = AllocationPreset.getPreset(
     presetKey: profile.budgetPreset,
     type: employmentType,
@@ -119,7 +117,6 @@ final dashboardStateProvider = Provider<AsyncValue<DashboardState>>((ref) {
     targetPreset: targetPreset,
   );
 
-  // 4. Calculate total spent in current salary cycle
   final now = DateTime.now();
   final int payday = profile.paydayDayOfMonth;
   DateTime cycleStart;
@@ -138,7 +135,6 @@ final dashboardStateProvider = Provider<AsyncValue<DashboardState>>((ref) {
   }
   final totalSpent = Money(spentSen);
 
-  // 5. Compute Liquid Money on Hand & Safe to Spend Today
   final int totalLiquidSen = accounts
       .where((a) => a.isLiquidOnHand)
       .fold<int>(0, (sum, a) => sum + a.balanceSen);
@@ -151,15 +147,23 @@ final dashboardStateProvider = Provider<AsyncValue<DashboardState>>((ref) {
       (flexibleCapSen - spentSen).clamp(0, double.infinity).toInt();
   final remainingFlexible = Money(remainingSen);
 
+  final todayPlan = todayPlanAsync.asData?.value;
+
   final safeToSpend = SafeToSpendCalculator.calculate(
     remainingFlexibleBudget: remainingFlexible,
     unpaidCommitmentsBeforePayday: const Money(0),
     currentDate: now,
     paydayDayOfMonth: payday,
     liquidOnHand: totalLiquidOnHand,
+    workdaysOnly: profile.workdaysOnlySafeToSpend,
+    todayCustomTarget: todayPlan != null && todayPlan.targetAmountSen > 0
+        ? Money(todayPlan.targetAmountSen)
+        : null,
+    todayWhatToSpendOn: todayPlan?.whatToSpendOn,
+    todayReason: todayPlan?.reason,
+    todayIsWorkday: todayPlan?.isWorkday,
   );
 
-  // 6. Convert to domain CommitmentItem for Health Score
   final domainCommitments = commitments.map((c) {
     final type = _mapCommitmentType(c.type);
     final monthsPaid = (c.totalTenureMonths - c.remainingTenureMonths).clamp(0, 999);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/app_icons.dart';
 import '../../../core/utils/money.dart';
 import '../../../data/local/app_database.dart';
 import '../../../data/providers/database_providers.dart';
@@ -47,14 +48,14 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
   String _selectedType = 'spaylater';
 
   static const _commitmentTypes = [
-    {'type': 'spaylater', 'label': 'SPayLater', 'icon': '🛍️'},
-    {'type': 'ptptn', 'label': 'PTPTN', 'icon': '🎓'},
-    {'type': 'mara', 'label': 'Pinjaman MARA', 'icon': '📚'},
-    {'type': 'car_loan', 'label': 'Car Loan', 'icon': '🚗'},
-    {'type': 'sloan', 'label': 'Shopee SLoan', 'icon': '💵'},
-    {'type': 'credit_card', 'label': 'Credit Card', 'icon': '💳'},
-    {'type': 'personal_loan', 'label': 'Personal Loan', 'icon': '🏦'},
-    {'type': 'other', 'label': 'Other', 'icon': '📋'},
+    {'type': 'spaylater', 'label': 'SPayLater'},
+    {'type': 'ptptn', 'label': 'PTPTN'},
+    {'type': 'mara', 'label': 'Pinjaman MARA'},
+    {'type': 'car_loan', 'label': 'Car Loan'},
+    {'type': 'sloan', 'label': 'Shopee SLoan'},
+    {'type': 'credit_card', 'label': 'Credit Card'},
+    {'type': 'personal_loan', 'label': 'Personal Loan'},
+    {'type': 'other', 'label': 'Other'},
   ];
 
   @override
@@ -110,7 +111,7 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
     final monthlySen = Money.fromRinggit(monthlyRinggit).sen;
     final tenureMonths = int.tryParse(_tenureMonthsController.text.trim()) ?? 12;
     final remainingTenure = int.tryParse(_remainingTenureMonthsController.text.trim()) ?? tenureMonths;
-    final dueDay = (int.tryParse(_dueDayController.text.trim()) ?? 10).clamp(1, 28);
+    final dueDay = (int.tryParse(_dueDayController.text.trim()) ?? 10).clamp(1, 31);
 
     final remainingRinggit = double.tryParse(_remainingAmountController.text.trim());
     final remainingSen = (remainingRinggit != null && remainingRinggit >= 0)
@@ -154,7 +155,7 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
             widget.isEditing
                 ? 'Updated $title (RM ${monthlyRinggit.toStringAsFixed(2)}/mo)'
                 : 'Added $title (RM ${monthlyRinggit.toStringAsFixed(2)}/mo)',
-            style: const TextStyle(color: AppColors.textPrimary),
+            style: TextStyle(color: AppColors.textPrimary),
           ),
         ),
       );
@@ -172,7 +173,7 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
         top: 20,
         bottom: 24 + bottomInset,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -197,7 +198,7 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
               widget.isEditing
                   ? 'Edit Commitment'
                   : 'Add Commitment / Installment',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
@@ -205,7 +206,6 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
             ),
             const SizedBox(height: 14),
 
-            // Type selector
             SizedBox(
               height: 44,
               child: ListView.separated(
@@ -215,10 +215,16 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
                 itemBuilder: (context, i) {
                   final t = _commitmentTypes[i];
                   final isSelected = t['type'] == _selectedType;
+                  final typeIcon = AppIcons.getCommitmentIcon(t['type']!);
                   return ChoiceChip(
-                    label: Text('${t['icon']} ${t['label']}'),
+                    avatar: Icon(
+                      typeIcon,
+                      size: 15,
+                      color: isSelected ? AppColors.accent : AppColors.textSecondary,
+                    ),
+                    label: Text(t['label']!),
                     selected: isSelected,
-                    selectedColor: AppColors.accent.withValues(alpha: 0.3),
+                    selectedColor: AppColors.accent.withValues(alpha: 0.22),
                     backgroundColor: AppColors.surfaceHigh,
                     labelStyle: TextStyle(
                       color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
@@ -241,7 +247,6 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
             ),
             const SizedBox(height: 14),
 
-            // SPayLater itemized prompt
             if (_selectedType == 'spaylater')
               Container(
                 margin: const EdgeInsets.only(bottom: 14),
@@ -255,9 +260,9 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
                 ),
                 child: Row(
                   children: [
-                    const Text('💡', style: TextStyle(fontSize: 20)),
+                    const Icon(Icons.tips_and_updates_outlined, size: 20, color: Color(0xFFEE4D2D)),
                     const SizedBox(width: 10),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -293,7 +298,7 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Open',
                         style: TextStyle(
                           fontSize: 12,
@@ -306,10 +311,9 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
                 ),
               ),
 
-            // Commitment Title
             TextField(
               controller: _titleController,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: AppColors.textPrimary),
               decoration: _inputDecoration(
                 hint: 'e.g. iPhone 15 SPayLater, Myvi Hire Purchase',
                 label: 'Commitment Name',
@@ -318,11 +322,10 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
             ),
             const SizedBox(height: 12),
 
-            // Monthly Installment
             TextField(
               controller: _monthlyPaymentController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: AppColors.textPrimary),
               decoration: _inputDecoration(
                 hint: 'e.g. 250.00',
                 label: 'Monthly Installment (RM)',
@@ -332,11 +335,10 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
             ),
             const SizedBox(height: 12),
 
-            // Total / Original Loan Amount
             TextField(
               controller: _totalAmountController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: AppColors.textPrimary),
               decoration: _inputDecoration(
                 hint: 'e.g. 3000.00',
                 label: 'Total Loan / Original Principal (RM)',
@@ -346,12 +348,11 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
             ),
             const SizedBox(height: 12),
 
-            // If editing, expose remaining balance
             if (widget.isEditing) ...[
               TextField(
                 controller: _remainingAmountController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                style: const TextStyle(color: AppColors.textPrimary),
+                style: TextStyle(color: AppColors.textPrimary),
                 decoration: _inputDecoration(
                   hint: 'e.g. 1500.00',
                   label: 'Current Remaining Balance (RM)',
@@ -364,12 +365,11 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
 
             Row(
               children: [
-                // Total tenure months
                 Expanded(
                   child: TextField(
                     controller: _tenureMonthsController,
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(color: AppColors.textPrimary),
+                    style: TextStyle(color: AppColors.textPrimary),
                     decoration: _inputDecoration(
                       hint: '12',
                       label: 'Total Tenure (Mo)',
@@ -378,13 +378,12 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                // If editing, allow remaining tenure months, otherwise due day
                 if (widget.isEditing)
                   Expanded(
                     child: TextField(
                       controller: _remainingTenureMonthsController,
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       decoration: _inputDecoration(
                         hint: '6',
                         label: 'Months Left',
@@ -397,7 +396,7 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
                     child: TextField(
                       controller: _dueDayController,
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       decoration: _inputDecoration(
                         hint: '10',
                         label: 'Due Day (1-28)',
@@ -412,12 +411,43 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
               TextField(
                 controller: _dueDayController,
                 keyboardType: TextInputType.number,
-                style: const TextStyle(color: AppColors.textPrimary),
+                style: TextStyle(color: AppColors.textPrimary),
                 decoration: _inputDecoration(
                   hint: '10',
-                  label: 'Due Day of Month (1-28)',
+                  label: 'Due Day of Month (1-31)',
                   icon: Icons.event_rounded,
                 ),
+              ),
+            ],
+            if (_selectedType == 'spaylater') ...[
+              const SizedBox(height: 10),
+              Text('Shopee Bill Cycles:', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+              const SizedBox(height: 4),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  ActionChip(
+                    label: const Text('Bill: 1st ➜ Due: 10th', style: TextStyle(fontSize: 11)),
+                    backgroundColor: AppColors.surfaceHigh,
+                    onPressed: () => setState(() => _dueDayController.text = '10'),
+                  ),
+                  ActionChip(
+                    label: const Text('Bill: 11th ➜ Due: 20th', style: TextStyle(fontSize: 11)),
+                    backgroundColor: AppColors.surfaceHigh,
+                    onPressed: () => setState(() => _dueDayController.text = '20'),
+                  ),
+                  ActionChip(
+                    label: const Text('Bill: 21st ➜ Due: 1st', style: TextStyle(fontSize: 11)),
+                    backgroundColor: AppColors.surfaceHigh,
+                    onPressed: () => setState(() => _dueDayController.text = '1'),
+                  ),
+                  ActionChip(
+                    label: const Text('Bill: 25th ➜ Due: 5th', style: TextStyle(fontSize: 11)),
+                    backgroundColor: AppColors.surfaceHigh,
+                    onPressed: () => setState(() => _dueDayController.text = '5'),
+                  ),
+                ],
               ),
             ],
             const SizedBox(height: 20),
@@ -450,26 +480,26 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
   }) {
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+      labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
       hintText: hint,
-      hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+      hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
       prefixText: prefixText,
-      prefixStyle: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+      prefixStyle: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
       prefixIcon: Icon(icon, color: AppColors.accent, size: 20),
       filled: true,
       fillColor: AppColors.surfaceHigh,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.outline),
+        borderSide: BorderSide(color: AppColors.outline),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.outline),
+        borderSide: BorderSide(color: AppColors.outline),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.accent, width: 2),
+        borderSide: BorderSide(color: AppColors.accent, width: 2),
       ),
     );
   }

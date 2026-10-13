@@ -8,6 +8,8 @@ import '../repositories/checklist_repository.dart';
 import '../repositories/account_repository.dart';
 import '../models/transfer_with_accounts.dart';
 
+import '../repositories/daily_plan_repository.dart';
+
 /// Singleton instance of AppDatabase.
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
@@ -15,7 +17,6 @@ final databaseProvider = Provider<AppDatabase>((ref) {
   return db;
 });
 
-// Repositories
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
   return ProfileRepository(ref.watch(databaseProvider));
 });
@@ -36,7 +37,10 @@ final accountRepositoryProvider = Provider<AccountRepository>((ref) {
   return AccountRepository(ref.watch(databaseProvider));
 });
 
-// Reactive Streams
+final dailyPlanRepositoryProvider = Provider<DailyPlanRepository>((ref) {
+  return DailyPlanRepository(ref.watch(databaseProvider));
+});
+
 final userProfileStreamProvider = StreamProvider<UserProfileTableData>((ref) {
   return ref.watch(profileRepositoryProvider).watchProfile();
 });
@@ -72,4 +76,10 @@ final totalMoneyOnHandStreamProvider = StreamProvider<int>((ref) {
 final recentTransfersStreamProvider = StreamProvider<List<TransferWithAccounts>>((ref) {
   return ref.watch(accountRepositoryProvider).watchRecentTransfers();
 });
+
+final todayPlanStreamProvider = StreamProvider<DailySpendingPlansTableData?>((ref) {
+  final now = DateTime.now();
+  return ref.watch(dailyPlanRepositoryProvider).watchPlanForDate(now);
+});
+
 

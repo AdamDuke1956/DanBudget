@@ -13,7 +13,8 @@ import 'onboarding_widgets.dart';
 class StarterOption {
   const StarterOption({
     required this.id,
-    required this.emoji,
+    this.emoji = '',
+    required this.icon,
     required this.title,
     required this.subtitle,
     required this.monthlySen,
@@ -22,6 +23,7 @@ class StarterOption {
 
   final String id;
   final String emoji;
+  final IconData icon;
   final String title;
   final String subtitle;
   final int monthlySen;
@@ -38,7 +40,7 @@ class StarterOption {
 const List<StarterOption> kStarterOptions = [
   StarterOption(
     id: 'my50',
-    emoji: '🚆',
+    icon: Icons.directions_subway_rounded,
     title: 'My50 Transit Pass',
     subtitle: 'Unlimited RapidKL travel',
     monthlySen: 5000,
@@ -46,7 +48,7 @@ const List<StarterOption> kStarterOptions = [
   ),
   StarterOption(
     id: 'telco',
-    emoji: '📱',
+    icon: Icons.phone_android_rounded,
     title: 'Mobile Plan',
     subtitle: 'Prepaid / postpaid data',
     monthlySen: 3500,
@@ -86,7 +88,7 @@ class PaydayStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const OnboardingStepHeader(
-          emoji: '📅',
+          icon: Icons.calendar_month_rounded,
           title: 'Payday & starter costs',
           subtitle:
               'Tell us when money lands so we can pace your daily budget. Starter costs are optional.',
@@ -95,7 +97,7 @@ class PaydayStep extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Payday of the month',
               style: TextStyle(
                 fontSize: 13,
@@ -106,7 +108,7 @@ class PaydayStep extends StatelessWidget {
             Text(
               _ordinal(payday),
               key: const Key('onboarding_payday_label'),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
                 color: AppColors.primary,
@@ -146,7 +148,7 @@ class PaydayStep extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 26),
-        const Text(
+        Text(
           'Starter commitments (optional)',
           style: TextStyle(
             fontSize: 13,
@@ -222,7 +224,22 @@ class _StarterTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Text(option.emoji, style: const TextStyle(fontSize: 24)),
+            Container(
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: selected
+                    ? AppColors.primary.withValues(alpha: 0.18)
+                    : AppColors.surfaceHigh,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                option.icon,
+                size: 20,
+                color: selected ? AppColors.primary : AppColors.textSecondary,
+              ),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -230,7 +247,7 @@ class _StarterTile extends StatelessWidget {
                 children: [
                   Text(
                     option.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
@@ -238,7 +255,7 @@ class _StarterTile extends StatelessWidget {
                   ),
                   Text(
                     '${option.subtitle} • ${Money(option.monthlySen).formatted}/mo',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
                     ),
@@ -288,7 +305,7 @@ class _PlanPreview extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Your monthly plan',
                 style: TextStyle(
                   fontSize: 14,
@@ -298,7 +315,7 @@ class _PlanPreview extends StatelessWidget {
               ),
               Text(
                 preset.label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textSecondary,
@@ -309,7 +326,7 @@ class _PlanPreview extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Take-home ${netIncome.formatted}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
               color: AppColors.textPrimary,
@@ -319,7 +336,7 @@ class _PlanPreview extends StatelessWidget {
           _row('Needs', alloc.needs.targetAmount, AppColors.needs),
           _row('Wants', alloc.wants.targetAmount, AppColors.wants),
           _row('Savings', alloc.savings.targetAmount, AppColors.savings),
-          _row('Family & Giving', alloc.giving.targetAmount, AppColors.giving),
+          _row('Charity', alloc.giving.targetAmount, AppColors.giving),
         ],
       ),
     );
@@ -339,7 +356,7 @@ class _PlanPreview extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 color: AppColors.textSecondary,
               ),
@@ -347,7 +364,7 @@ class _PlanPreview extends StatelessWidget {
           ),
           Text(
             amount.formatted,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,

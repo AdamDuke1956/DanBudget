@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/animated_counter.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../domain/engine/financial_health_score.dart';
 
@@ -33,10 +34,10 @@ class HealthScoreCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
+              Row(
                 children: [
                   Icon(Icons.shield_rounded, color: AppColors.primary, size: 24),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
                     'Financial Health Score',
                     style: TextStyle(
@@ -67,22 +68,28 @@ class HealthScoreCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
 
-          // Big Score Display
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(
-                '${health.totalScore}',
-                style: TextStyle(
-                  fontSize: 42,
-                  fontWeight: FontWeight.w900,
-                  color: gradeColor,
-                  letterSpacing: -1,
-                ),
+              TweenAnimationBuilder<int>(
+                tween: IntTween(begin: 0, end: health.totalScore),
+                duration: const Duration(milliseconds: 650),
+                curve: Curves.easeOutCubic,
+                builder: (context, val, child) {
+                  return Text(
+                    '$val',
+                    style: TextStyle(
+                      fontSize: 42,
+                      fontWeight: FontWeight.w900,
+                      color: gradeColor,
+                      letterSpacing: -1,
+                    ),
+                  );
+                },
               ),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 '/ 100',
                 style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
               ),
@@ -91,11 +98,10 @@ class HealthScoreCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             health.summary,
-            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 16),
 
-          // 4 Sub-score bars
           _buildScoreBar('Debt Service Ratio (DSR)', health.dsrScore, 35, AppColors.needs),
           const SizedBox(height: 8),
           _buildScoreBar('Savings Rate (20% Target)', health.savingsScore, 25, AppColors.savings),
@@ -105,10 +111,9 @@ class HealthScoreCard extends StatelessWidget {
           _buildScoreBar('BNPL & Loan Safety', health.bnplSafetyScore, 15, AppColors.giving),
           const SizedBox(height: 14),
 
-          // Recommendations
           if (health.recommendations.isNotEmpty) ...[
-            const Divider(color: AppColors.outline, height: 20),
-            const Text(
+            Divider(color: AppColors.outline, height: 20),
+            Text(
               'Actionable Tips for Your Score:',
               style: TextStyle(
                 fontSize: 13,
@@ -123,11 +128,18 @@ class HealthScoreCard extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('👉 ', style: TextStyle(fontSize: 12)),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2, right: 6),
+                      child: Icon(
+                        Icons.lightbulb_outline_rounded,
+                        size: 14,
+                        color: AppColors.primary,
+                      ),
+                    ),
                     Expanded(
                       child: Text(
                         rec,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textPrimary,
                           height: 1.35,
@@ -152,20 +164,18 @@ class HealthScoreCard extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+            Text(label, style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
             Text('$current / $max',
                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
           ],
         ),
         const SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: ratio,
-            backgroundColor: AppColors.surfaceHigh,
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-            minHeight: 6,
-          ),
+        AnimatedProgressBar(
+          value: ratio,
+          color: color,
+          backgroundColor: AppColors.surfaceHigh,
+          height: 6,
+          borderRadius: 4,
         ),
       ],
     );

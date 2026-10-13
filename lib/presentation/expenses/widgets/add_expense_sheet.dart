@@ -115,13 +115,13 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
           backgroundColor: AppColors.surfaceHigh,
           content: Row(
             children: [
-              const Icon(Icons.check_circle_rounded, color: AppColors.primary),
+              Icon(Icons.check_circle_rounded, color: AppColors.primary),
               const SizedBox(width: 12),
               Text(
                 widget.isEditing
                     ? 'Updated RM ${ringgit.toStringAsFixed(2)}'
                     : 'Logged RM ${ringgit.toStringAsFixed(2)}',
-                style: const TextStyle(color: AppColors.textPrimary),
+                style: TextStyle(color: AppColors.textPrimary),
               ),
             ],
           ),
@@ -149,7 +149,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
         top: 20,
         bottom: 24 + bottomInset,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -158,7 +158,6 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Handle bar
             Center(
               child: Container(
                 width: 44,
@@ -176,7 +175,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
               children: [
                 Text(
                   widget.isEditing ? 'Edit Expense' : 'Quick Log Expense',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -194,17 +193,16 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                       setState(() => _selectedDate = picked);
                     }
                   },
-                  icon: const Icon(Icons.calendar_today_rounded, size: 16, color: AppColors.accent),
+                  icon: Icon(Icons.calendar_today_rounded, size: 16, color: AppColors.accent),
                   label: Text(
                     DateFormat('dd MMM').format(_selectedDate),
-                    style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 14),
 
-            // Amount input hero
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
@@ -214,7 +212,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
               ),
               child: Row(
                 children: [
-                  const Text(
+                  Text(
                     'RM ',
                     style: TextStyle(
                       fontSize: 32,
@@ -227,12 +225,12 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                       controller: _amountController,
                       autofocus: true,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: '0.00',
                         hintStyle: TextStyle(color: AppColors.textSecondary),
                         border: InputBorder.none,
@@ -244,19 +242,18 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
             ),
             const SizedBox(height: 12),
 
-            // Quick increment chips
             Wrap(
               spacing: 8,
               children: _quickAmounts.map((amt) {
                 return ActionChip(
                   label: Text('+$amt'),
-                  labelStyle: const TextStyle(
+                  labelStyle: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                     color: AppColors.textPrimary,
                   ),
                   backgroundColor: AppColors.surfaceHigh,
-                  side: const BorderSide(color: AppColors.outline),
+                  side: BorderSide(color: AppColors.outline),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   onPressed: () => _onQuickAmountTap(amt),
                 );
@@ -264,8 +261,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
             ),
             const SizedBox(height: 16),
 
-            // Categories horizontal/grid selector
-            const Text(
+            Text(
               'Category',
               style: TextStyle(
                 fontSize: 14,
@@ -333,7 +329,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
             ),
             if (accounts.isNotEmpty) ...[
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Paid From Pocket',
                 style: TextStyle(
                   fontSize: 14,
@@ -391,35 +387,33 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
             ],
             const SizedBox(height: 16),
 
-            // Note input
             TextField(
               controller: _noteController,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
                 hintText: 'Note (e.g. Mixed rice, Touch n Go reload)',
-                hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                prefixIcon: const Icon(Icons.edit_note_rounded, color: AppColors.textSecondary),
+                hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                prefixIcon: Icon(Icons.edit_note_rounded, color: AppColors.textSecondary),
                 filled: true,
                 fillColor: AppColors.surfaceHigh,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: AppColors.outline),
+                  borderSide: BorderSide(color: AppColors.outline),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: AppColors.outline),
+                  borderSide: BorderSide(color: AppColors.outline),
                 ),
               ),
             ),
             const SizedBox(height: 20),
 
-            // Save button
             ElevatedButton(
               onPressed: _saveExpense,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: const Color(0xFF04291F),
+                foregroundColor: AppColors.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                 elevation: 0,

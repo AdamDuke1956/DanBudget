@@ -54,8 +54,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     super.dispose();
   }
 
-  // ---- Derived state -------------------------------------------------------
-
   double get _incomeRinggit =>
       IncomeStep.parseRinggit(_incomeController.text) ?? 0;
 
@@ -81,8 +79,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       epfRate: _epfRate,
     ).netSalary;
   }
-
-  // ---- Actions -------------------------------------------------------------
 
   void _onEmploymentSelected(EmploymentType type) {
     setState(() {
@@ -168,8 +164,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 
-  // ---- UI ------------------------------------------------------------------
-
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -247,7 +241,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               child: IconButton(
                 key: const Key('onboarding_back_button'),
                 onPressed: _step == 0 ? null : _back,
-                icon: const Icon(
+                icon: Icon(
                   Icons.arrow_back_rounded,
                   color: AppColors.textPrimary,
                 ),
@@ -263,7 +257,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(width: 12),
           Text(
             '${_step + 1}/$_totalSteps',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: AppColors.textSecondary,
@@ -288,7 +282,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           onPressed: enabled ? _next : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
-            foregroundColor: const Color(0xFF04291F),
+            foregroundColor: AppColors.onPrimary,
             disabledBackgroundColor: AppColors.surfaceHigh,
             disabledForegroundColor: AppColors.textSecondary,
             elevation: 0,
@@ -297,12 +291,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
           ),
           child: _saving
-              ? const SizedBox(
+              ? SizedBox(
                   width: 22,
                   height: 22,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
-                    color: Color(0xFF04291F),
+                    color: AppColors.onPrimary,
                   ),
                 )
               : Row(

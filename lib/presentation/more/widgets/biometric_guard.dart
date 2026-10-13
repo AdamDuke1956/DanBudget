@@ -105,7 +105,7 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
     if (mounted) {
       setState(() => _isUnlocked = true);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           backgroundColor: AppColors.surfaceHigh,
           content: Text('Biometric lock disabled.',
               style: TextStyle(color: AppColors.textPrimary)),
@@ -136,7 +136,6 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                 children: [
                   const Spacer(),
 
-                  // Shield / Fingerprint Icon
                   Container(
                     width: 100,
                     height: 100,
@@ -148,7 +147,7 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                         width: 2,
                       ),
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Icon(
                         Icons.fingerprint_rounded,
                         size: 54,
@@ -158,7 +157,7 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                   ),
                   const SizedBox(height: 28),
 
-                  const Text(
+                  Text(
                     'DanBudget Locked',
                     style: TextStyle(
                       fontSize: 24,
@@ -167,7 +166,7 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
+                  Text(
                     'Biometric security is active to protect your payslip and financial data.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -177,7 +176,6 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                     ),
                   ),
 
-                  // Error / Status Message
                   if (_errorMessage != null) ...[
                     const SizedBox(height: 18),
                     Container(
@@ -191,13 +189,13 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.info_outline_rounded,
+                          Icon(Icons.info_outline_rounded,
                               color: AppColors.warning, size: 20),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               _errorMessage!,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textPrimary,
                                 height: 1.3,
@@ -211,19 +209,18 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
 
                   const Spacer(),
 
-                  // Primary Unlock Button
                   SizedBox(
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton.icon(
                       onPressed: _isAuthenticating ? null : _authenticate,
                       icon: _isAuthenticating
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Color(0xFF04291F),
+                                color: AppColors.onPrimary,
                               ),
                             )
                           : const Icon(Icons.fingerprint_rounded, size: 22),
@@ -233,7 +230,7 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        foregroundColor: const Color(0xFF04291F),
+                        foregroundColor: AppColors.onPrimary,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -243,7 +240,6 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                   ),
                   const SizedBox(height: 12),
 
-                  // High-Contrast Clear Bypass Button
                   SizedBox(
                     width: double.infinity,
                     height: 48,
@@ -271,11 +267,10 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                   ),
                   const SizedBox(height: 8),
 
-                  // Quick Disable Option
                   TextButton.icon(
                     onPressed: _disableBiometricLock,
                     icon: const Icon(Icons.lock_reset_rounded, size: 16),
-                    label: const Text(
+                    label: Text(
                       'Disable Biometric Lock',
                       style: TextStyle(
                         color: AppColors.textSecondary,

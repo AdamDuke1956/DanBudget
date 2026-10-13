@@ -37,16 +37,18 @@ class OnboardingProgressBar extends StatelessWidget {
   }
 }
 
-/// Emoji badge + title + subtitle shown at the top of every step.
+/// Icon badge + title + subtitle shown at the top of every step.
 class OnboardingStepHeader extends StatelessWidget {
   const OnboardingStepHeader({
     super.key,
-    required this.emoji,
+    this.icon,
+    this.emoji,
     required this.title,
     required this.subtitle,
   });
 
-  final String emoji;
+  final IconData? icon;
+  final String? emoji;
   final String title;
   final String subtitle;
 
@@ -64,12 +66,14 @@ class OnboardingStepHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
             border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
           ),
-          child: Text(emoji, style: const TextStyle(fontSize: 28)),
+          child: icon != null
+              ? Icon(icon, size: 28, color: AppColors.primary)
+              : Text(emoji ?? '', style: const TextStyle(fontSize: 28)),
         ),
         const SizedBox(height: 20),
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 26,
             height: 1.2,
             fontWeight: FontWeight.w800,
@@ -79,7 +83,7 @@ class OnboardingStepHeader extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           subtitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             height: 1.45,
             color: AppColors.textSecondary,
@@ -96,21 +100,22 @@ class OnboardingInfoPill extends StatelessWidget {
     super.key,
     required this.icon,
     required this.text,
-    this.color = AppColors.primary,
+    this.color,
   });
 
   final IconData icon;
   final String text;
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = color ?? AppColors.primary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: effectiveColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.28)),
+        border: Border.all(color: effectiveColor.withValues(alpha: 0.28)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,7 +125,7 @@ class OnboardingInfoPill extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12.5,
                 height: 1.4,
                 color: AppColors.textPrimary,
@@ -192,12 +197,12 @@ InputDecoration onboardingInputDecoration({
   return InputDecoration(
     labelText: label,
     hintText: hint,
-    labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+    labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
     hintStyle: TextStyle(
       color: AppColors.textSecondary.withValues(alpha: 0.6),
     ),
     prefixText: prefixText,
-    prefixStyle: const TextStyle(
+    prefixStyle: TextStyle(
       color: AppColors.textPrimary,
       fontWeight: FontWeight.bold,
       fontSize: 18,

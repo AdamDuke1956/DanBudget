@@ -11,6 +11,7 @@ class ChecklistItemsTable extends Table {
   TextColumn get category => text()();
   BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
   DateTimeColumn get completedAt => dateTime().nullable()();
+  DateTimeColumn get targetDate => dateTime().nullable()();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
 
   @override

@@ -45,7 +45,7 @@ class IncomeStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         OnboardingStepHeader(
-          emoji: isIntern ? '🎓' : '💼',
+          icon: isIntern ? Icons.school_rounded : Icons.work_rounded,
           title: isIntern
               ? "What's your monthly allowance?"
               : "What's your monthly salary?",
@@ -63,7 +63,7 @@ class IncomeStep extends StatelessWidget {
             FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
             LengthLimitingTextInputFormatter(9),
           ],
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w800,
             fontSize: 22,
@@ -98,7 +98,7 @@ class IncomeStep extends StatelessWidget {
                 : 'No statutory deductions. You take home your full allowance.',
           )
         else ...[
-          const Text(
+          Text(
             'EPF (KWSP) employee contribution',
             style: TextStyle(
               fontSize: 13,
