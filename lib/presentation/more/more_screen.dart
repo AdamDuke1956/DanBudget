@@ -397,7 +397,7 @@ class MoreScreen extends ConsumerWidget {
                         child: Column(
                           children: [
                             Text(
-                              'DanBudget v1.5.0 • Malaysian Fresh Grad Edition',
+                              'DanBudget v1.5.5 • Malaysian Fresh Grad Edition',
                               style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary.withValues(alpha: 0.7)),
                             ),
                             const SizedBox(height: 2),
@@ -487,7 +487,7 @@ class MoreScreen extends ConsumerWidget {
 
     final data = {
       'exportedAt': DateTime.now().toIso8601String(),
-      'version': '1.5.0',
+      'version': '1.5.5',
       'appName': 'DanBudget',
       'profile': {
         'name': state.profile.name,
