@@ -1,4 +1,4 @@
-package com.danbudget.danbudget
+package com.danialduke.danbudget
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

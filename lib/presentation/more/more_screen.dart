@@ -348,6 +348,38 @@ class MoreScreen extends ConsumerWidget {
                                     'All transactions, payslips, and commitments are stored encrypted in on-device SQLite. Zero cloud tracking, zero telemetry, 100% private.',
                                     style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.4),
                                   ),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: OutlinedButton.icon(
+                                          onPressed: () => _exportDataAsJson(context, ref, state),
+                                          icon: const Icon(Icons.file_download_outlined, size: 16),
+                                          label: const Text('Export JSON', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: AppColors.primary,
+                                            side: BorderSide(color: AppColors.primary.withValues(alpha: 0.5)),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                            padding: const EdgeInsets.symmetric(vertical: 8),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: OutlinedButton.icon(
+                                          onPressed: () => _showRestoreDialog(context, ref),
+                                          icon: const Icon(Icons.restore_page_outlined, size: 16),
+                                          label: const Text('Restore JSON', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: AppColors.textPrimary,
+                                            side: BorderSide(color: AppColors.cardBorder),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                            padding: const EdgeInsets.symmetric(vertical: 8),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),
@@ -565,6 +597,198 @@ class MoreScreen extends ConsumerWidget {
           ],
         ),
       );
+    }
+  }
+
+  void _showRestoreDialog(BuildContext context, WidgetRef ref) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.restore_page_outlined, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Text(
+              'Restore Backup',
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Paste your exported JSON backup text below to restore your profile, expenses, commitments, and checklist.',
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: controller,
+                maxLines: 6,
+                style: TextStyle(fontFamily: 'monospace', fontSize: 11, color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  hintText: 'Paste JSON backup here...',
+                  hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.5)),
+                  filled: true,
+                  fillColor: AppColors.surfaceHigh,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: () async {
+                  final clip = await Clipboard.getData('text/plain');
+                  if (clip?.text != null) {
+                    controller.text = clip!.text!;
+                  }
+                },
+                icon: const Icon(Icons.paste_rounded, size: 16),
+                label: const Text('Paste from Clipboard', style: TextStyle(fontSize: 12)),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final text = controller.text.trim();
+              if (text.isEmpty) return;
+              Navigator.of(ctx).pop();
+              await _restoreDataFromJson(context, ref, text);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.onPrimary,
+            ),
+            child: const Text('Restore Now'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _restoreDataFromJson(BuildContext context, WidgetRef ref, String jsonText) async {
+    try {
+      final dynamic decoded = jsonDecode(jsonText);
+      if (decoded is! Map<String, dynamic>) {
+        throw const FormatException('Invalid backup format: root must be a JSON object.');
+      }
+      final db = ref.read(databaseProvider);
+
+      await db.transaction(() async {
+        // 1. Profile
+        if (decoded['profile'] is Map<String, dynamic>) {
+          final p = decoded['profile'] as Map<String, dynamic>;
+          await (db.update(db.userProfileTable)..where((t) => t.id.equals(1))).write(
+            UserProfileTableCompanion(
+              name: drift.Value((p['name'] as String?) ?? ''),
+              grossSalarySen: drift.Value((p['grossSalarySen'] as num?)?.toInt() ?? 300000),
+              fixedAllowanceSen: drift.Value((p['fixedAllowanceSen'] as num?)?.toInt() ?? 0),
+              currentSavingsSen: drift.Value((p['currentSavingsSen'] as num?)?.toInt() ?? 0),
+              paydayDayOfMonth: drift.Value((p['paydayDayOfMonth'] as num?)?.toInt() ?? 25),
+              epfRate: drift.Value((p['epfRate'] as num?)?.toDouble() ?? 0.11),
+              isOnboarded: const drift.Value(true),
+              updatedAt: drift.Value(DateTime.now()),
+            ),
+          );
+        }
+
+        // 2. Commitments
+        if (decoded['commitments'] is List) {
+          await db.delete(db.commitmentsTable).go();
+          for (final item in decoded['commitments'] as List) {
+            if (item is Map<String, dynamic>) {
+              final remaining = (item['remainingAmountSen'] as num?)?.toInt() ?? 0;
+              await db.into(db.commitmentsTable).insert(
+                CommitmentsTableCompanion.insert(
+                  title: item['title'] ?? 'Commitment',
+                  type: item['type'] ?? 'other',
+                  totalAmountSen: (item['totalAmountSen'] as num?)?.toInt() ?? remaining,
+                  monthlyPaymentSen: (item['monthlyPaymentSen'] as num?)?.toInt() ?? 0,
+                  remainingAmountSen: remaining,
+                  remainingTenureMonths: drift.Value((item['remainingTenureMonths'] as num?)?.toInt() ?? 1),
+                  dueDayOfMonth: drift.Value((item['dueDayOfMonth'] as num?)?.toInt() ?? 1),
+                ),
+              );
+            }
+          }
+        }
+
+        // 3. Expenses
+        if (decoded['expenses'] is List) {
+          await db.delete(db.expensesTable).go();
+          final categories = await db.select(db.expenseCategoriesTable).get();
+          final catMap = {for (var c in categories) c.name.toLowerCase(): c.id};
+          final defaultCatId = categories.isNotEmpty ? categories.first.id : 'food';
+
+          for (final item in decoded['expenses'] as List) {
+            if (item is Map<String, dynamic>) {
+              final catName = (item['category'] as String?)?.toLowerCase() ?? '';
+              final categoryId = catMap[catName] ?? defaultCatId;
+              final date = item['date'] != null
+                  ? DateTime.tryParse(item['date']) ?? DateTime.now()
+                  : DateTime.now();
+
+              await db.into(db.expensesTable).insert(
+                ExpensesTableCompanion.insert(
+                  amountSen: (item['amountSen'] as num?)?.toInt() ?? 0,
+                  categoryId: categoryId,
+                  date: date,
+                  note: drift.Value(item['note'] as String?),
+                  isCommitmentPayment: drift.Value((item['isCommitment'] as bool?) ?? false),
+                ),
+              );
+            }
+          }
+        }
+
+        // 4. Checklist
+        if (decoded['checklist'] is List) {
+          for (final item in decoded['checklist'] as List) {
+            if (item is Map<String, dynamic> && item['id'] != null) {
+              final id = item['id'].toString();
+              final isCompleted = (item['isCompleted'] as bool?) ?? false;
+              await (db.update(db.checklistItemsTable)..where((t) => t.id.equals(id))).write(
+                ChecklistItemsTableCompanion(
+                  isCompleted: drift.Value(isCompleted),
+                  completedAt: drift.Value(isCompleted ? DateTime.now() : null),
+                ),
+              );
+            }
+          }
+        }
+      });
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Color(0xFF10B981),
+            content: Text('Backup restored successfully! All data has been loaded.'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFFEF4444),
+            content: Text('Failed to restore backup: $e'),
+          ),
+        );
+      }
     }
   }
 }
