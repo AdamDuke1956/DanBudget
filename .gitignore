@@ -88,3 +88,6 @@ RunnerTests/
 **/*credentials*.json
 **/*google-services*.json
 **/*GoogleService-Info*.plist
+
+# Screenshots & media output
+output_screenshots/
