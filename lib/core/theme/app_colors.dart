@@ -39,6 +39,17 @@ class AppPalette {
 
   bool get isDark => mode.isDark;
 
+  // Semantic aliases used by v1.6.0 Tax Optimizer widgets
+  Color get bgPrimary => background;
+  Color get bgSecondary => surface;
+  Color get bgElevated => surfaceHigh;
+  Color get borderSubtle => outline;
+  Color get accentPrimary => primary;
+  Color get accentSecondary => success;
+  Color get accentWarning => warning;
+  Color get accentDanger => danger;
+  Color get textMuted => textSecondary;
+
   const AppPalette({
     required this.mode,
     required this.background,

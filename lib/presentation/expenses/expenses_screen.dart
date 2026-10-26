@@ -9,6 +9,7 @@ import '../../core/widgets/animated_counter.dart';
 import '../../data/models/expense_with_category.dart';
 import '../../data/providers/database_providers.dart';
 import '../../data/providers/dashboard_provider.dart';
+import '../tax/tax_optimizer_screen.dart';
 import 'widgets/add_expense_sheet.dart';
 
 class ExpensesScreen extends ConsumerStatefulWidget {
@@ -61,6 +62,16 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         actions: [
+          if (!(dashboardAsync.value?.employmentType.isIntern ?? false))
+            IconButton(
+              icon: Icon(Icons.account_balance_rounded, color: AppColors.accent, size: 22),
+              tooltip: 'LHDN Tax Relief Classifier',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const TaxOptimizerScreen()),
+                );
+              },
+            ),
           IconButton(
             icon: Icon(Icons.add_circle_outline_rounded, color: AppColors.primary, size: 24),
             tooltip: 'Add Expense',

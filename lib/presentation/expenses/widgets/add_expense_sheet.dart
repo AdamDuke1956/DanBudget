@@ -5,6 +5,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/money.dart';
 import '../../../data/models/expense_with_category.dart';
 import '../../../data/providers/database_providers.dart';
+import '../../../data/providers/tax_provider.dart';
+import '../../../domain/engine/lhdn_tax_engine.dart';
 
 class AddExpenseSheet extends ConsumerStatefulWidget {
   final ExpenseWithCategory? existingExpense;
@@ -41,6 +43,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
   String _selectedCategoryId = 'food';
   int? _selectedAccountId;
   DateTime _selectedDate = DateTime.now();
+  bool _autoClaimTaxRelief = true;
 
   static const _quickAmounts = [5, 10, 15, 25, 50, 100];
 
@@ -69,9 +72,11 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
       double.tryParse(_amountController.text.trim()) ?? 0,
     ).sen;
     final newRinggit = (currentSen / 100) + ringgit;
-    _amountController.text = newRinggit.toStringAsFixed(
-      newRinggit.truncateToDouble() == newRinggit ? 0 : 2,
-    );
+    setState(() {
+      _amountController.text = newRinggit.toStringAsFixed(
+        newRinggit.truncateToDouble() == newRinggit ? 0 : 2,
+      );
+    });
   }
 
   Future<void> _saveExpense() async {
@@ -88,6 +93,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
 
     final amountSen = Money.fromRinggit(ringgit).sen;
     final repo = ref.read(expenseRepositoryProvider);
+    final noteTrimmed = _noteController.text.trim();
 
     if (widget.isEditing) {
       await repo.updateExpense(
@@ -95,17 +101,33 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
         amountSen: amountSen,
         categoryId: _selectedCategoryId,
         date: _selectedDate,
-        note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+        note: noteTrimmed.isEmpty ? null : noteTrimmed,
         accountId: _selectedAccountId,
       );
     } else {
-      await repo.addExpense(
+      final newExpenseId = await repo.addExpense(
         amountSen: amountSen,
         categoryId: _selectedCategoryId,
         date: _selectedDate,
-        note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+        note: noteTrimmed.isEmpty ? null : noteTrimmed,
         accountId: _selectedAccountId,
       );
+
+      if (_autoClaimTaxRelief && noteTrimmed.isNotEmpty) {
+        final cls = LhdnTaxEngine.classifyTransaction(description: noteTrimmed);
+        if (cls.bucket != null && !cls.isExcludedWarn) {
+          await ref.read(taxRepositoryProvider).addReceiptClaim(
+                assessmentYear: _selectedDate.year,
+                expenseId: newExpenseId,
+                title: noteTrimmed,
+                amountSen: amountSen,
+                bucket: cls.bucket!,
+                subBucketId: cls.subBucketId,
+                claimedDate: _selectedDate,
+                isAutoClassified: true,
+              );
+        }
+      }
     }
 
     if (mounted) {
@@ -223,6 +245,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                   Expanded(
                     child: TextField(
                       controller: _amountController,
+                      onChanged: (_) => setState(() {}),
                       autofocus: true,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       style: TextStyle(
@@ -389,6 +412,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
 
             TextField(
               controller: _noteController,
+              onChanged: (_) => setState(() {}),
               style: TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
                 hintText: 'Note (e.g. Mixed rice, Touch n Go reload)',
@@ -407,6 +431,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                 ),
               ),
             ),
+            _buildLhdnTaxPreviewBanner(),
             const SizedBox(height: 20),
 
             ElevatedButton(
@@ -425,6 +450,114 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildLhdnTaxPreviewBanner() {
+    final taxDashAsync = ref.watch(taxDashboardProvider);
+    final profileEmpType = taxDashAsync.value?.userProfile.employmentType;
+    if (profileEmpType == 'intern') {
+      return const SizedBox.shrink();
+    }
+
+    final note = _noteController.text.trim();
+    if (note.isEmpty) return const SizedBox.shrink();
+
+    final cls = LhdnTaxEngine.classifyTransaction(description: note);
+    if (cls.bucket == null && !cls.isZakatRebate && !cls.isExcludedWarn) {
+      return const SizedBox.shrink();
+    }
+
+    final amount =
+        Money.tryParse(_amountController.text) ?? Money.fromRinggit(100);
+    final currentInput = taxDashAsync.value?.taxInput ??
+        const LhdnTaxInput(assessmentYear: 2026);
+
+    final impact = LhdnTaxEngine.simulateExpenseImpact(
+      currentInput: currentInput,
+      description: note,
+      amount: amount.sen > 0 ? amount : Money.fromRinggit(100),
+    );
+
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: cls.isExcludedWarn
+            ? AppColors.danger.withValues(alpha: 0.12)
+            : AppColors.primary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: cls.isExcludedWarn
+              ? AppColors.danger.withValues(alpha: 0.45)
+              : AppColors.primary.withValues(alpha: 0.45),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                cls.isExcludedWarn
+                    ? Icons.warning_amber_rounded
+                    : Icons.account_balance_rounded,
+                size: 16,
+                color: cls.isExcludedWarn ? AppColors.danger : AppColors.primary,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  cls.isExcludedWarn
+                      ? 'LHDN Tax Alert: Excluded Item'
+                      : 'LHDN Tax Relief Match: ${cls.subBucketTitle ?? cls.bucket?.shortTitle ?? "Zakat Rebate"}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            impact.capStatusSummary,
+            style: TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w600,
+              color: AppColors.success,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            impact.marginalImpactStatement,
+            style: TextStyle(
+              fontSize: 11.5,
+              color: AppColors.textSecondary,
+              height: 1.35,
+            ),
+          ),
+          if (!widget.isEditing && cls.bucket != null && !cls.isExcludedWarn)
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              controlAffinity: ListTileControlAffinity.leading,
+              activeColor: AppColors.primary,
+              value: _autoClaimTaxRelief,
+              onChanged: (v) =>
+                  setState(() => _autoClaimTaxRelief = v ?? true),
+              title: Text(
+                'Auto-claim in LHDN 7-Year Tax Relief Vault',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

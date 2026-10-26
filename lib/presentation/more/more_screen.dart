@@ -9,7 +9,9 @@ import '../../core/theme/app_theme.dart';
 import '../../data/local/app_database.dart';
 import '../../data/providers/dashboard_provider.dart';
 import '../../data/providers/database_providers.dart';
+import '../../data/repositories/tax_repository.dart';
 import '../plan/widgets/salary_edit_sheet.dart';
+import '../tax/tax_optimizer_screen.dart';
 import 'widgets/checklist_section.dart';
 import 'widgets/health_score_card.dart';
 
@@ -290,6 +292,35 @@ class MoreScreen extends ConsumerWidget {
                                     );
                               },
                             ),
+                            if (!state.employmentType.isIntern) ...[
+                              Divider(color: AppColors.outline.withValues(alpha: 0.5), height: 16),
+
+                              ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(Icons.account_balance_rounded, color: AppColors.primary, size: 20),
+                                ),
+                                title: Text(
+                                  'Malaysian Income Tax & e-Filing (Form BE)',
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                                ),
+                                subtitle: Text(
+                                  'LHDN relief caps, receipt auto-classifier & refund simulator',
+                                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                ),
+                                trailing: Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (_) => const TaxOptimizerScreen()),
+                                  );
+                                },
+                              ),
+                            ],
                             Divider(color: AppColors.outline.withValues(alpha: 0.5), height: 16),
 
                             ListTile(
@@ -397,7 +428,7 @@ class MoreScreen extends ConsumerWidget {
                         child: Column(
                           children: [
                             Text(
-                              'DanBudget v1.5.5 • Malaysian Fresh Grad Edition',
+                              'DanBudget v1.6.0 • Malaysian Fresh Grad Edition',
                               style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary.withValues(alpha: 0.7)),
                             ),
                             const SizedBox(height: 2),
@@ -484,10 +515,13 @@ class MoreScreen extends ConsumerWidget {
     final expenses = await ref.read(expenseRepositoryProvider).getAllExpenses();
     final commitments = state.activeCommitments;
     final checklist = await ref.read(checklistRepositoryProvider).watchChecklistItems().first;
+    final taxRepo = ref.read(taxRepositoryProvider);
+    final taxProfiles = await taxRepo.getAllProfiles();
+    final taxClaims = await taxRepo.getAllReceiptClaims();
 
     final data = {
       'exportedAt': DateTime.now().toIso8601String(),
-      'version': '1.5.5',
+      'version': '1.6.0',
       'appName': 'DanBudget',
       'profile': {
         'name': state.profile.name,
@@ -526,6 +560,8 @@ class MoreScreen extends ConsumerWidget {
                 'isCompleted': i.isCompleted,
               })
           .toList(),
+      'taxProfiles': taxProfiles.map((p) => p.toJson()).toList(),
+      'taxReceiptClaims': taxClaims.map((c) => c.toJson()).toList(),
     };
 
     final jsonStr = const JsonEncoder.withIndent('  ').convert(data);
@@ -794,6 +830,37 @@ class MoreScreen extends ConsumerWidget {
           }
         }
       });
+
+      // 5. Tax Profiles & Receipt Claims (v1.6.0+)
+      final taxRepo = ref.read(taxRepositoryProvider);
+      if (decoded['taxProfiles'] is List || decoded['taxReceiptClaims'] is List) {
+        await taxRepo.clearAllTaxData();
+        if (decoded['taxProfiles'] is List) {
+          for (final item in decoded['taxProfiles'] as List) {
+            if (item is Map<String, dynamic>) {
+              await taxRepo.saveTaxYearProfile(TaxYearProfileData.fromJson(item));
+            }
+          }
+        }
+        if (decoded['taxReceiptClaims'] is List) {
+          for (final item in decoded['taxReceiptClaims'] as List) {
+            if (item is Map<String, dynamic>) {
+              final claim = TaxReceiptClaimData.fromJson(item);
+              await taxRepo.addReceiptClaim(
+                assessmentYear: claim.assessmentYear,
+                expenseId: claim.expenseId,
+                title: claim.title,
+                amountSen: claim.amountSen,
+                bucket: claim.bucket,
+                subBucketId: claim.subBucketId,
+                receiptRef: claim.receiptRef,
+                claimedDate: claim.claimedDate,
+                isAutoClassified: claim.isAutoClassified,
+              );
+            }
+          }
+        }
+      }
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

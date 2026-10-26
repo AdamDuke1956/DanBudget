@@ -27,10 +27,60 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'danbudget_db');
+  }
+
+  /// Ensures LHDN Form BE tax optimization tables exist for v1.6.0+.
+  Future<void> ensureTaxTables() async {
+    await customStatement('''
+      CREATE TABLE IF NOT EXISTS tax_year_profiles (
+        assessment_year INTEGER PRIMARY KEY NOT NULL,
+        annual_bonus_sen INTEGER NOT NULL DEFAULT 0,
+        annual_other_income_sen INTEGER NOT NULL DEFAULT 0,
+        annual_pcb_override_sen INTEGER,
+        zakat_fitrah_sen INTEGER NOT NULL DEFAULT 0,
+        voluntary_epf_sen INTEGER NOT NULL DEFAULT 0,
+        life_insurance_sen INTEGER NOT NULL DEFAULT 0,
+        medical_insurance_sen INTEGER NOT NULL DEFAULT 0,
+        prs_annuity_sen INTEGER NOT NULL DEFAULT 0,
+        sspn_net_savings_sen INTEGER NOT NULL DEFAULT 0,
+        higher_education_sen INTEGER NOT NULL DEFAULT 0,
+        upskilling_sen INTEGER NOT NULL DEFAULT 0,
+        housing_loan_tier TEXT NOT NULL DEFAULT 'none',
+        housing_loan_interest_sen INTEGER NOT NULL DEFAULT 0,
+        lifestyle_ai_sen INTEGER NOT NULL DEFAULT 0,
+        lifestyle_internet_sen INTEGER NOT NULL DEFAULT 0,
+        lifestyle_books_sen INTEGER NOT NULL DEFAULT 0,
+        lifestyle_devices_sen INTEGER NOT NULL DEFAULT 0,
+        lifestyle_courses_sen INTEGER NOT NULL DEFAULT 0,
+        sports_equipment_sen INTEGER NOT NULL DEFAULT 0,
+        sports_gym_facility_sen INTEGER NOT NULL DEFAULT 0,
+        sports_competition_sen INTEGER NOT NULL DEFAULT 0,
+        medical_serious_fertility_sen INTEGER NOT NULL DEFAULT 0,
+        medical_checkup_mental_sen INTEGER NOT NULL DEFAULT 0,
+        medical_dental_sen INTEGER NOT NULL DEFAULT 0,
+        medical_vaccination_sen INTEGER NOT NULL DEFAULT 0,
+        updated_at INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+
+    await customStatement('''
+      CREATE TABLE IF NOT EXISTS tax_receipt_claims (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        assessment_year INTEGER NOT NULL,
+        expense_id INTEGER,
+        title TEXT NOT NULL,
+        amount_sen INTEGER NOT NULL,
+        bucket_id TEXT NOT NULL,
+        sub_bucket_id TEXT,
+        receipt_ref TEXT NOT NULL DEFAULT '',
+        claimed_date INTEGER NOT NULL,
+        is_auto_classified INTEGER NOT NULL DEFAULT 1
+      )
+    ''');
   }
 
   @override
@@ -38,6 +88,7 @@ class AppDatabase extends _$AppDatabase {
     return MigrationStrategy(
       onCreate: (Migrator m) async {
         await m.createAll();
+        await ensureTaxTables();
         // Seed default categories, checklist and initial profile
         await batch((b) {
           b.insertAll(expenseCategoriesTable, DefaultSeeds.defaultCategories);
@@ -99,8 +150,13 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(userProfileTable, userProfileTable.defaultWeekendTargetSen);
           await m.createTable(dailySpendingPlansTable);
         }
+        if (from < 7) {
+          // v6 -> v7: LHDN Form BE Personal Income Tax Optimization Engine tables
+          await ensureTaxTables();
+        }
       },
       beforeOpen: (details) async {
+        await ensureTaxTables();
         // Ensure legacy category names are synchronized to Charity
         await (update(expenseCategoriesTable)
               ..where((tbl) =>

@@ -9,6 +9,7 @@ import '../repositories/account_repository.dart';
 import '../models/transfer_with_accounts.dart';
 
 import '../repositories/daily_plan_repository.dart';
+import '../repositories/tax_repository.dart';
 
 /// Singleton instance of AppDatabase.
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -39,6 +40,32 @@ final accountRepositoryProvider = Provider<AccountRepository>((ref) {
 
 final dailyPlanRepositoryProvider = Provider<DailyPlanRepository>((ref) {
   return DailyPlanRepository(ref.watch(databaseProvider));
+});
+
+final taxRepositoryProvider = Provider<TaxRepository>((ref) {
+  return TaxRepository(ref.watch(databaseProvider));
+});
+
+/// Selected Year of Assessment (Tahun Taksiran) for LHDN Form BE.
+class SelectedTaxYearNotifier extends Notifier<int> {
+  @override
+  int build() => DateTime.now().year;
+
+  void setYear(int year) => state = year;
+}
+
+final selectedTaxYearProvider =
+    NotifierProvider<SelectedTaxYearNotifier, int>(SelectedTaxYearNotifier.new);
+
+final taxYearProfileStreamProvider = StreamProvider<TaxYearProfileData>((ref) {
+  final year = ref.watch(selectedTaxYearProvider);
+  return ref.watch(taxRepositoryProvider).watchTaxYearProfile(year);
+});
+
+final taxReceiptClaimsStreamProvider =
+    StreamProvider<List<TaxReceiptClaimData>>((ref) {
+  final year = ref.watch(selectedTaxYearProvider);
+  return ref.watch(taxRepositoryProvider).watchReceiptClaims(year);
 });
 
 final userProfileStreamProvider = StreamProvider<UserProfileTableData>((ref) {

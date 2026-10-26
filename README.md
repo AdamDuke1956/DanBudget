@@ -10,6 +10,10 @@
 - **Commitments & Debt Tracking**: Track credit cards, personal loans, and buy-now-pay-later (e.g., SPayLater) installments with repayment simulations.
 - **Financial Health Score**: Real-time health score assessment to keep your debt-to-income ratio and savings in check.
 - **Account & Cash Management**: Monitor "Money on Hand" across accounts and cash wallets with quick balance adjustments and transfers.
+- **Malaysian Personal Income Tax Optimization Engine (LHDN Form BE — v1.6.0)**:
+  - **6-Step Statutory Calculation**: Automatically computes Total Annual Gross Income, Statutory Reliefs (`Pelepasan Cukai`), Chargeable Income (`Pendapatan Bercukai`), Resident Progressive Tax Brackets (0% – 30%), Tax Rebates (RM400 Individual Rebate if Chargeable Income `<= RM35,000` + 1:1 Zakat/Fitrah Rebate), and Final Tax Payable / Refund (`PCB Paid - Final Calculated Tax`).
+  - **11 Strict LHDN Relief Buckets & Sub-Caps**: Tracks Individual (RM9,000), Lifestyle / Gaya Hidup shared RM2,500 pot (including AI subscriptions like ChatGPT Plus, Claude Pro, GitHub Copilot), Sports & Fitness RM1,000 pot (excluding sports shoes/apparel), Medical & Healthcare RM10,000 pot (with RM1,000 sub-caps for Checkup/Mental Health, Dental, and Vaccinations), Medical/Education Insurance (RM4,000), Life Insurance & EPF (RM7,000 total / RM4,000 EPF sub-cap), PRS (RM3,000), Self Education (RM7,000 total / RM2,000 Upskilling sub-cap), SOCSO & EIS (RM350), SSPN Net Savings (RM8,000), and First-Time Homebuyer Loan Interest (up to RM7,000 / RM5,000).
+  - **Receipt Auto-Classifier & Marginal Tax Impact Simulator**: Maps transactions to legal LHDN buckets, reports remaining cap headroom, calculates exact cash saved based on your marginal tax bracket, warns on saturated caps, and enforces the 7-year LHDN receipt retention alert.
 - **Privacy & Security**: Built-in biometric lock and local-first data storage (Drift / SQLite) — your financial data stays securely on your device.
 - **Sleek Dark Theme**: Designed with an emerald and navy dark theme for a pleasant, modern experience.
 
@@ -20,7 +24,7 @@
 ### Option 1: Install the Android APK (Quickest)
 You can directly download and install the pre-built APK without installing Flutter or Android Studio:
 1. Go to the [Releases](https://github.com/AdamDuke1956/DanBudget/releases) section.
-2. Download `DanBudget-v1.5.5.apk`.
+2. Download `DanBudget-v1.6.0.apk`.
 3. Open the downloaded `.apk` file on your Android device to install.
 
 ### Option 2: Run from Source
