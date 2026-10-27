@@ -489,11 +489,11 @@ class ChecklistSection extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: item.isCompleted
               ? AppColors.primary.withValues(alpha: 0.3)
-              : AppColors.outline.withValues(alpha: 0.5),
+              : AppColors.cardBorder,
         ),
       ),
       child: Theme(

@@ -107,7 +107,7 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
       ),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SingleChildScrollView(
         child: Column(

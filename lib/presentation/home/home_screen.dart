@@ -108,7 +108,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Welcome, ${profile.name.isNotEmpty ? profile.name : 'Friend'}',
+                                          'Hi, ${profile.name.isNotEmpty ? profile.name : 'there'}',
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
@@ -120,7 +120,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
-                                          'Net Salary: ${state.netSalary.netSalary.formatted}',
+                                          'Take-home ${state.netSalary.netSalary.formatted}',
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
@@ -176,16 +176,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
                         child: Container(
                           decoration: BoxDecoration(
-                            gradient: AppColors.heroGradient,
-                            borderRadius: BorderRadius.circular(24),
+                            color: AppColors.surfaceHigh,
+                            borderRadius: BorderRadius.circular(14),
                             border: Border.all(color: AppColors.cardBorder),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: AppColors.isDark ? 0.3 : 0.05),
-                                blurRadius: 16,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
                           ),
                           padding: const EdgeInsets.all(20),
                           child: Column(
@@ -197,15 +190,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   Expanded(
                                     child: Row(
                                       children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(6),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primary.withValues(alpha: 0.15),
-                                            borderRadius: BorderRadius.circular(10),
-                                          ),
-                                          child: Icon(Icons.bolt_rounded, size: 16, color: AppColors.primary),
-                                        ),
-                                        const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
                                             'Safe-to-Spend Today',
@@ -278,7 +262,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               if (safe.todayCustomTarget != null) ...[
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Standard safe base: ${safe.safeDailyAmount.formatted}/day',
+                                  'Usual pace: ${safe.safeDailyAmount.formatted}/day',
                                   style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                                 ),
                               ],
@@ -301,7 +285,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       const SizedBox(width: 8),
                                       Flexible(
                                         child: Text(
-                                          'Buffer Left: ${state.remainingFlexibleBudget.formatted}',
+                                          'Left: ${state.remainingFlexibleBudget.formatted}',
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           textAlign: TextAlign.end,
@@ -327,44 +311,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         : AppColors.outline.withValues(alpha: 0.6),
                                     height: 7,
                                     borderRadius: 6,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: ElevatedButton.icon(
-                                      onPressed: () => AddExpenseSheet.show(context),
-                                      icon: const Icon(Icons.add_rounded, size: 18),
-                                      label: const FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text('Log Spend', style: TextStyle(fontWeight: FontWeight.bold)),
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.primary,
-                                        foregroundColor: AppColors.onPrimary,
-                                        minimumSize: const Size(0, 44),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: OutlinedButton.icon(
-                                      onPressed: () => DailySpendingCalendarSheet.show(context),
-                                      icon: const Icon(Icons.calendar_month_rounded, size: 16),
-                                      label: const FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text('Calendar', style: TextStyle(fontWeight: FontWeight.bold)),
-                                      ),
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: AppColors.textPrimary,
-                                        side: BorderSide(color: AppColors.cardBorder),
-                                        minimumSize: const Size(0, 44),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                      ),
-                                    ),
                                   ),
                                 ],
                               ),
@@ -394,7 +340,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           padding: const EdgeInsets.all(18),
                           decoration: BoxDecoration(
                             color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(22),
+                            borderRadius: BorderRadius.circular(14),
                             border: Border.all(color: AppColors.outline.withValues(alpha: 0.6)),
                           ),
                           child: Column(
@@ -419,20 +365,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   const SizedBox(width: 8),
                                   GestureDetector(
                                     onTap: () => widget.onNavigateToTab?.call(2), // Plan tab
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          'View Plan',
-                                          style: TextStyle(
-                                            color: AppColors.accent,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Icon(Icons.arrow_forward_rounded, size: 13, color: AppColors.accent),
-                                      ],
+                                    child: Text(
+                                      'View plan',
+                                      style: TextStyle(
+                                        color: AppColors.accent,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -531,7 +470,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(14),
                               border: Border.all(color: AppColors.outline.withValues(alpha: 0.6)),
                             ),
                             child: Row(
@@ -555,7 +494,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        '${state.activeCommitments.length} Active Commitments',
+                                        '${state.activeCommitments.length} commitments',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14,
@@ -564,7 +503,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        'Total: ${state.allocation.totalCommitments.formatted}/mo (DSR: ${(state.allocation.dsrRatio * 100).toStringAsFixed(1)}%)',
+                                        '${state.allocation.totalCommitments.formatted}/mo, DSR ${(state.allocation.dsrRatio * 100).toStringAsFixed(1)}%',
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: AppColors.textSecondary,
@@ -575,20 +514,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                                 TextButton(
                                   onPressed: () => widget.onNavigateToTab?.call(3), // Commitments tab
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Manage',
-                                        style: TextStyle(
-                                          color: AppColors.accent,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 2),
-                                      Icon(Icons.arrow_forward_rounded, size: 12, color: AppColors.accent),
-                                    ],
+                                  child: Text(
+                                    'Manage',
+                                    style: TextStyle(
+                                      color: AppColors.accent,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -658,15 +590,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
                                 decoration: BoxDecoration(
                                   color: AppColors.surface,
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(14),
                                   border: Border.all(color: AppColors.outline.withValues(alpha: 0.6)),
                                 ),
                                 child: Column(
                                   children: [
-                                    Icon(Icons.receipt_long_rounded, size: 36, color: AppColors.primary),
+                                    Icon(Icons.receipt_long_rounded, size: 28, color: AppColors.textSecondary),
                                     const SizedBox(height: 10),
                                     Text(
-                                      'No transactions found',
+                                      'No activity yet',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 15,
@@ -675,7 +607,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      'Log your first expense or perform a transfer!',
+                                      'Log a spend to get started.',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                                     ),
@@ -701,7 +633,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
                                       color: AppColors.surface,
-                                      borderRadius: BorderRadius.circular(16),
+                                      borderRadius: BorderRadius.circular(12),
                                       border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
                                     ),
                                     child: Row(
@@ -761,7 +693,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
                                       color: AppColors.surface,
-                                      borderRadius: BorderRadius.circular(16),
+                                      borderRadius: BorderRadius.circular(12),
                                       border: Border.all(color: AppColors.accent.withValues(alpha: 0.25)),
                                     ),
                                     child: Row(
@@ -846,7 +778,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: AppColors.surface.withValues(alpha: 0.95),
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: AppColors.outline.withValues(alpha: 0.8)),
                       boxShadow: [
                         BoxShadow(

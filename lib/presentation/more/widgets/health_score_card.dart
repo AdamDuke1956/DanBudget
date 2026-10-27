@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/animated_counter.dart';
-import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/surface_card.dart';
 import '../../../domain/engine/financial_health_score.dart';
 
 class HealthScoreCard extends StatelessWidget {
@@ -26,8 +26,8 @@ class HealthScoreCard extends StatelessWidget {
         gradeColor = AppColors.danger;
     }
 
-    return GlassCard(
-      padding: const EdgeInsets.all(20),
+    return SurfaceCard(
+      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -39,7 +39,7 @@ class HealthScoreCard extends StatelessWidget {
                   Icon(Icons.shield_rounded, color: AppColors.primary, size: 24),
                   const SizedBox(width: 8),
                   Text(
-                    'Financial Health Score',
+                    'Health Score',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -49,11 +49,10 @@ class HealthScoreCard extends StatelessWidget {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: gradeColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: gradeColor.withValues(alpha: 0.4)),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   'Grade ${health.grade}',
@@ -104,17 +103,17 @@ class HealthScoreCard extends StatelessWidget {
 
           _buildScoreBar('Debt Service Ratio (DSR)', health.dsrScore, 35, AppColors.needs),
           const SizedBox(height: 8),
-          _buildScoreBar('Savings Rate (20% Target)', health.savingsScore, 25, AppColors.savings),
+          _buildScoreBar('Savings rate', health.savingsScore, 25, AppColors.savings),
           const SizedBox(height: 8),
-          _buildScoreBar('Emergency Fund Buffer', health.emergencyFundScore, 25, AppColors.accent),
+          _buildScoreBar('Emergency fund', health.emergencyFundScore, 25, AppColors.accent),
           const SizedBox(height: 8),
-          _buildScoreBar('BNPL & Loan Safety', health.bnplSafetyScore, 15, AppColors.giving),
+          _buildScoreBar('Loan & BNPL safety', health.bnplSafetyScore, 15, AppColors.giving),
           const SizedBox(height: 14),
 
           if (health.recommendations.isNotEmpty) ...[
             Divider(color: AppColors.outline, height: 20),
             Text(
-              'Actionable Tips for Your Score:',
+              'Tips',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
@@ -122,7 +121,7 @@ class HealthScoreCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            ...health.recommendations.map(
+            ...health.recommendations.take(3).map(
               (rec) => Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Row(
@@ -131,7 +130,7 @@ class HealthScoreCard extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 2, right: 6),
                       child: Icon(
-                        Icons.lightbulb_outline_rounded,
+                        Icons.check_circle_outline_rounded,
                         size: 14,
                         color: AppColors.primary,
                       ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/money.dart';
-import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/surface_card.dart';
 import '../../../data/local/app_database.dart';
 import '../../../domain/engine/debt_planner.dart';
 
@@ -45,7 +45,7 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
       ),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -174,8 +174,8 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
             ),
             child: Text(
               _useSnowball
-                  ? 'Snowball Method: Pay off smallest balances first (e.g. SPayLater) for quick psychological momentum and to eliminate monthly commitments fast.'
-                  : 'Avalanche Method: Attacks highest interest/fee rate first (e.g. SLoan / Credit Card) to minimize total money paid in fees over time.',
+                  ? 'Snowball: Pay smallest balances first for quick wins and fewer monthly bills.'
+                  : 'Avalanche: Pay highest interest/fee balances first to save the most money.',
               style: TextStyle(
                 fontSize: 12,
                 color: AppColors.textPrimary,
@@ -188,7 +188,7 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
           Row(
             children: [
               Expanded(
-                child: GlassCard(
+                child: SurfaceCard(
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,7 +212,7 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: GlassCard(
+                child: SurfaceCard(
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,7 +263,7 @@ class _DebtPayoffSheetState extends State<DebtPayoffSheet> {
                     color: isTopPriority
                         ? AppColors.primary.withValues(alpha: 0.12)
                         : AppColors.surfaceHigh,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isTopPriority
                           ? AppColors.primary.withValues(alpha: 0.5)

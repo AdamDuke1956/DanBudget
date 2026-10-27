@@ -536,7 +536,7 @@ class LhdnTaxResult {
 abstract final class LhdnTaxEngine {
   /// LHDN 7-Year Receipt Retention Mandate (Sections 82 & 82A Income Tax Act 1967).
   static const String complianceMandate =
-      'Compliance Alert: Keep all digital receipts, invoices, and e-Invoices registered under your own legal name for 7 years as mandated by LHDN (Sections 82 & 82A Income Tax Act 1967).';
+      'Keep receipts and invoices under your own name for 7 years (Income Tax Act 1967, s.82 & 82A).';
 
   /// Chargeable income ceiling for the RM 400 individual tax rebate (RM 35,000.00).
   static const int individualRebateIncomeCeilingSen = 3500000;
@@ -1797,10 +1797,9 @@ abstract final class LhdnTaxEngine {
       if (util.excessUnclaimable.sen > 0) {
         advisories.add(
           TaxOptimizationAdvisory(
-            title:
-                '${util.bucket.shortTitle} Cap Saturated (${util.excessUnclaimable.formattedCompact} Excess)',
+            title: '${util.bucket.shortTitle} cap reached',
             message:
-                '${util.formatCapStatus(short: true)}. Your total spend (${util.rawSpent.formattedCompact}) exceeds the strict LHDN cap by ${util.excessUnclaimable.formattedCompact}, which yields RM0 additional relief. Channel further tax-saving contributions before Dec 31 into PRS (up to RM3,000) or Simpan SSPN (up to RM8,000).',
+                '${util.formatCapStatus(short: true)}. ${util.excessUnclaimable.formattedCompact} over the cap earns no extra relief. Try PRS or SSPN before Dec 31.',
             isWarning: true,
             targetBucket: util.bucket,
           ),
@@ -1817,10 +1816,9 @@ abstract final class LhdnTaxEngine {
       final totalUnlock = marginalSave + const Money(individualRebateAmountSen);
       advisories.add(
         TaxOptimizationAdvisory(
-          title:
-              'RM 35,000 Rebate Cliff: Just ${gap.formattedCompact} Away from RM 400 Rebate!',
+          title: '${gap.formattedCompact} from the RM400 rebate',
           message:
-              'Your Chargeable Income is ${chargeableIncome.formattedCompact}. Claiming ${gap.formattedCompact} more in reliefs (e.g., voluntary PRS, SSPN net deposit, or unclaimed Lifestyle/Sports receipts) before Dec 31 drops your Chargeable Income <= RM35,000 and unlocks the RM400 Individual Tax Rebate!',
+              'Claim ${gap.formattedCompact} more in reliefs before Dec 31 to bring chargeable income down to RM35,000 and unlock it.',
           isWarning: false,
           estimatedMaxTaxSaved: totalUnlock,
         ),
@@ -1833,9 +1831,9 @@ abstract final class LhdnTaxEngine {
     if (lifestyle.remainingHeadroom.sen > 0) {
       advisories.add(
         TaxOptimizationAdvisory(
-          title: 'Lifestyle (Gaya Hidup) Headroom Available',
+          title: 'Lifestyle relief room left',
           message:
-              '${lifestyle.formatCapStatus(short: true)}. Remember that AI software subscriptions (ChatGPT Plus, Claude Pro, GitHub Copilot for personal/study use) share this RM2,500 pot with broadband bills, books, and smartphones/laptops.',
+              '${lifestyle.formatCapStatus(short: true)}. AI tools, broadband, books and devices share this pot.',
           isWarning: false,
           targetBucket: LhdnReliefBucket.lifestyle,
           estimatedMaxTaxSaved: lifestyle.remainingHeadroom.scale(marginalRate),
@@ -1848,9 +1846,9 @@ abstract final class LhdnTaxEngine {
     if (prs.remainingHeadroom.sen > 0 && marginalRate > 0) {
       advisories.add(
         TaxOptimizationAdvisory(
-          title: 'Voluntary PRS Top-Up before Dec 31 ($marginalPct% Bracket)',
+          title: 'Top up PRS before Dec 31',
           message:
-              '${prs.formatCapStatus(short: true)}. Contributing to an approved Private Retirement Scheme (PRS) before Dec 31 can save up to ${prs.remainingHeadroom.scale(marginalRate).formatted} in cash tax refund.',
+              '${prs.formatCapStatus(short: true)}. Could save up to ${prs.remainingHeadroom.scale(marginalRate).formatted} in tax.',
           isWarning: false,
           targetBucket: LhdnReliefBucket.prsAndAnnuity,
           estimatedMaxTaxSaved: prs.remainingHeadroom.scale(marginalRate),
@@ -1862,9 +1860,9 @@ abstract final class LhdnTaxEngine {
     if (sspn.remainingHeadroom.sen > 0 && marginalRate > 0) {
       advisories.add(
         TaxOptimizationAdvisory(
-          title: 'Simpan SSPN Net Savings Relief (Up to RM 8,000)',
+          title: 'Simpan SSPN net savings',
           message:
-              '${sspn.formatCapStatus(short: true)}. Net deposits (deposit minus withdrawal) in Simpan SSPN before Dec 31 save up to ${sspn.remainingHeadroom.scale(marginalRate).formatted} at your $marginalPct% marginal rate.',
+              '${sspn.formatCapStatus(short: true)}. Could save up to ${sspn.remainingHeadroom.scale(marginalRate).formatted} at your $marginalPct% rate.',
           isWarning: false,
           targetBucket: LhdnReliefBucket.sspn,
           estimatedMaxTaxSaved: sspn.remainingHeadroom.scale(marginalRate),
@@ -1875,9 +1873,9 @@ abstract final class LhdnTaxEngine {
     if (finalCalculatedTax.sen > 0) {
       advisories.add(
         TaxOptimizationAdvisory(
-          title: 'Zakat / Fitrah 1:1 Direct Tax Rebate',
+          title: 'Zakat and fitrah rebate',
           message:
-              'Unlike tax reliefs which save at your $marginalPct% marginal rate, Zakat/Fitrah paid within the assessment year is a 1:1 direct rebate against your RM ${finalCalculatedTax.ringgit.toStringAsFixed(2)} calculated tax.',
+              'Zakat paid this year offsets your RM ${finalCalculatedTax.ringgit.toStringAsFixed(2)} tax 1:1, not at your $marginalPct% rate.',
           isWarning: false,
           estimatedMaxTaxSaved: finalCalculatedTax,
         ),

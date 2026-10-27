@@ -269,7 +269,7 @@ class _LogTaxReceiptSheetState extends ConsumerState<LogTaxReceiptSheet> {
                         Icon(
                           impact.classification.isExcludedWarn
                               ? Icons.warning_amber_rounded
-                              : Icons.auto_awesome,
+                              : Icons.calculate_outlined,
                           size: 16,
                           color: impact.classification.isExcludedWarn
                               ? colors.accentDanger

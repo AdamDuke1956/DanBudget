@@ -52,7 +52,7 @@ class _AffordabilitySimulatorSheetState
       ),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: stateAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -102,21 +102,21 @@ class _AffordabilitySimulatorSheetState
           if (simulatedDsr <= 35) {
             verdictColor = AppColors.success;
             verdictIcon = Icons.check_circle_rounded;
-            verdictTitle = 'Affordable & Healthy';
+            verdictTitle = 'Affordable';
             verdictDesc =
-                'Your debt-service ratio stays at ${simulatedDsr.toStringAsFixed(1)}% (under the 35% safe ceiling). Your savings buffer is secure.';
+                'DSR stays at ${simulatedDsr.toStringAsFixed(1)}% (under the 35% safe limit).';
           } else if (simulatedDsr <= 50) {
             verdictColor = AppColors.warning;
             verdictIcon = Icons.warning_rounded;
-            verdictTitle = 'Moderate Stretch (Caution)';
+            verdictTitle = 'Moderate Stretch';
             verdictDesc =
-                'Your DSR climbs to ${simulatedDsr.toStringAsFixed(1)}%. Your Wants budget will be compressed to prevent dipping into savings.';
+                'DSR rises to ${simulatedDsr.toStringAsFixed(1)}% and trims your Wants budget.';
           } else {
             verdictColor = AppColors.danger;
             verdictIcon = Icons.error_rounded;
-            verdictTitle = 'High Risk / Debt Stress';
+            verdictTitle = 'High Debt Load';
             verdictDesc =
-                'Critical DSR: ${simulatedDsr.toStringAsFixed(1)}%! More than half your take-home pay is locked in fixed debts. We advise postponing this purchase.';
+                'DSR reaches ${simulatedDsr.toStringAsFixed(1)}%. Over half of take-home pay goes to fixed debt.';
           }
 
           return SingleChildScrollView(
@@ -138,14 +138,14 @@ class _AffordabilitySimulatorSheetState
 
                 Row(
                   children: [
-                    Icon(Icons.psychology_alt_rounded,
-                        color: AppColors.accent, size: 26),
+                    Icon(Icons.calculate_outlined,
+                        color: AppColors.accent, size: 22),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        '"Can I Afford It?" Simulator',
+                        'Affordability Check',
                         style: TextStyle(
-                          fontSize: 19,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
                         ),
@@ -153,9 +153,9 @@ class _AffordabilitySimulatorSheetState
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
-                  'Test a new SPayLater or loan before committing to protect your fresh grad cashflow.',
+                  'Check how a new instalment affects your DSR and daily budget.',
                   style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 16),
@@ -174,7 +174,7 @@ class _AffordabilitySimulatorSheetState
                           filled: true,
                           fillColor: AppColors.surfaceHigh,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: AppColors.outline),
                           ),
                         ),
@@ -200,7 +200,7 @@ class _AffordabilitySimulatorSheetState
                           filled: true,
                           fillColor: AppColors.surfaceHigh,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: AppColors.outline),
                           ),
                         ),
@@ -211,10 +211,10 @@ class _AffordabilitySimulatorSheetState
                 const SizedBox(height: 16),
 
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: verdictColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: verdictColor.withValues(alpha: 0.4)),
                   ),
                   child: Column(
@@ -222,25 +222,25 @@ class _AffordabilitySimulatorSheetState
                     children: [
                       Row(
                         children: [
-                          Icon(verdictIcon, color: verdictColor, size: 24),
+                          Icon(verdictIcon, color: verdictColor, size: 20),
                           const SizedBox(width: 8),
                           Text(
                             verdictTitle,
                             style: TextStyle(
                               color: verdictColor,
-                              fontSize: 16,
+                              fontSize: 15,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Text(
                         verdictDesc,
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textPrimary,
-                          height: 1.4,
+                          height: 1.35,
                         ),
                       ),
                     ],
@@ -281,9 +281,9 @@ class _AffordabilitySimulatorSheetState
                         onPressed: () => Navigator.of(context).pop(),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: BorderSide(color: AppColors.outline),
+                          side: BorderSide(color: AppColors.cardBorder),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                         child: Text('Cancel',
                             style: TextStyle(color: AppColors.textSecondary)),
@@ -324,7 +324,7 @@ class _AffordabilitySimulatorSheetState
                           foregroundColor: AppColors.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                         child: const Text('Add to Commitments',
                             style: TextStyle(fontWeight: FontWeight.bold)),
@@ -351,8 +351,8 @@ class _AffordabilitySimulatorSheetState
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.surfaceHigh,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.outline),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.cardBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

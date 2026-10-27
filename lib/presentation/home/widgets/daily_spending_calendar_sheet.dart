@@ -89,7 +89,7 @@ class _DailySpendingCalendarSheetState
               ),
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -425,7 +425,7 @@ class _DailySpendingCalendarSheetState
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -443,7 +443,7 @@ class _DailySpendingCalendarSheetState
             ),
             const SizedBox(height: 16),
             Text(
-              'What do the days consist of?',
+              'Cycle Breakdown',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -452,9 +452,9 @@ class _DailySpendingCalendarSheetState
             ),
             const SizedBox(height: 12),
             Text(
-              '• The $totalDays days are the calendar days remaining until your next payday (${paydayDayOfMonth}th of the month).\n\n'
-              '• Out of these $totalDays days, you have $workdays working days (Monday to Friday) and $weekends weekend days.\n\n'
-              '• If you work 5 days a week and targeted RM 10.00 for lunch, you can tap "Set Mon–Fri Lunch" to automatically plan your workdays!',
+              '• $totalDays days until your next payday (${paydayDayOfMonth}th).\n'
+              '• $workdays workdays (Mon–Fri) and $weekends weekend days.\n'
+              '• Tap "Set Mon–Fri Lunch" to batch-fill your workday meal targets.',
               style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.45),
             ),
             const SizedBox(height: 20),

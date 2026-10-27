@@ -130,13 +130,13 @@ abstract final class AppTheme {
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: palette.primary,
         foregroundColor: palette.onPrimary,
-        shape: const StadiumBorder(),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
       cardTheme: CardTheme(
         color: palette.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(14),
           side: BorderSide(
             color: isDark
                 ? palette.outline.withValues(alpha: 0.6)
@@ -148,20 +148,20 @@ abstract final class AppTheme {
         backgroundColor: palette.surface,
         modalBackgroundColor: palette.surface,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
       ),
       dialogTheme: DialogTheme(
         backgroundColor: palette.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: palette.surfaceHigh,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(
             color: isDark
                 ? palette.outline.withValues(alpha: 0.6)
@@ -169,7 +169,7 @@ abstract final class AppTheme {
           ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(
             color: isDark
                 ? palette.outline.withValues(alpha: 0.6)
@@ -177,7 +177,7 @@ abstract final class AppTheme {
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(
             color: palette.primary,
             width: 1.5,

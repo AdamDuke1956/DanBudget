@@ -79,7 +79,7 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
     final r = data.taxResult;
     final buffer = StringBuffer()
       ..writeln(
-        '=== LHDN FORM BE SUMMARY (YA ${data.assessmentYear}) — DANBUDGET v1.6.0 ===',
+        '=== LHDN FORM BE SUMMARY (YA ${data.assessmentYear}) — DANBUDGET v1.6.5 ===',
       )
       ..writeln('1. Total Annual Gross Income: ${r.totalGrossIncome.formatted}')
       ..writeln(
@@ -222,18 +222,9 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
         Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                colors.accentPrimary.withValues(alpha: 0.18),
-                colors.accentSecondary.withValues(alpha: 0.10),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: colors.accentPrimary.withValues(alpha: 0.35),
-            ),
+            color: colors.bgElevated,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: colors.borderSubtle),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,16 +245,15 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
                               ? colors.accentSecondary
                               : colors.accentWarning)
                           .withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       r.isRefund
-                          ? 'ESTIMATED e-FILING REFUND'
-                          : 'ESTIMATED ADDITIONAL TAX OWED',
+                          ? 'Estimated refund'
+                          : 'Estimated tax owed',
                       style: TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.6,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
                         color: r.isRefund
                             ? colors.accentSecondary
                             : colors.accentWarning,
@@ -281,7 +271,7 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
                       border: Border.all(color: colors.borderSubtle),
                     ),
                     child: Text(
-                      'Marginal Bracket: ${r.marginalRatePercentLabel}',
+                      'Bracket ${r.marginalRatePercentLabel}',
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -307,8 +297,8 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
               const SizedBox(height: 4),
               Text(
                 r.isRefund
-                    ? 'Expected LHDN refund around March/April (PCB Paid ${r.annualPcbPaid.formatted} vs Final Tax ${r.finalCalculatedTax.formatted}).'
-                    : 'Shortfall between PCB Paid (${r.annualPcbPaid.formatted}) and Final Calculated Tax (${r.finalCalculatedTax.formatted}). Claim more reliefs to reduce!',
+                    ? 'Refund expected around March or April.'
+                    : 'PCB paid is short of final tax. Claim more reliefs to reduce it.',
                 style: TextStyle(
                   fontSize: 12,
                   color: colors.textSecondary,
@@ -574,14 +564,14 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
               Row(
                 children: [
                   Icon(
-                    Icons.auto_awesome_rounded,
+                    Icons.calculate_outlined,
                     size: 18,
                     color: colors.accentPrimary,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Receipt Auto-Classifier & Marginal Tax Simulator',
+                      'Receipt Tax Simulator',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -593,7 +583,7 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
               ),
               const SizedBox(height: 4),
               Text(
-                'Type any expense or tap a preset below to see its legal LHDN bucket, cap headroom, and exact marginal tax refund impact.',
+                'Type an expense or tap a preset to see its relief bucket and tax saved.',
                 style: TextStyle(fontSize: 12, color: colors.textMuted),
               ),
               const SizedBox(height: 12),
@@ -712,7 +702,7 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _ProtocolItem(
-                      badge: '1. AUTO-CATEGORIZE',
+                      badge: '1. CATEGORY',
                       content: impact.classification.isExcludedWarn
                           ? 'NOT ELIGIBLE — Excluded under LHDN Sports & Fitness rules (sports shoes/apparel).'
                           : impact.classification.isZakatRebate
@@ -727,14 +717,14 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
                     ),
                     const SizedBox(height: 8),
                     _ProtocolItem(
-                      badge: '2. CAP TRACKING',
+                      badge: '2. CAP',
                       content: impact.capStatusSummary,
                       color: colors.accentSecondary,
                       colors: colors,
                     ),
                     const SizedBox(height: 8),
                     _ProtocolItem(
-                      badge: '3. MARGINAL TAX IMPACT',
+                      badge: '3. TAX SAVED',
                       content: impact.marginalImpactStatement,
                       color: colors.textPrimary,
                       colors: colors,
@@ -742,7 +732,7 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
                     if (impact.actionableSuggestion != null) ...[
                       const SizedBox(height: 8),
                       _ProtocolItem(
-                        badge: '4. ACTIONABLE SUGGESTION',
+                        badge: '4. TIP',
                         content: impact.actionableSuggestion!,
                         color: colors.accentWarning,
                         colors: colors,
@@ -913,7 +903,7 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'No itemized tax receipts logged for YA ${data.assessmentYear} yet.',
+                  'No receipts logged for YA ${data.assessmentYear} yet.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13,
@@ -923,7 +913,7 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Use the Simulator above or tap "Add Receipt" to record AI subscriptions, broadband bills, medical checkups, or sports equipment.',
+                  'Tap "Add Receipt" or use the simulator to log one.',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 12, color: colors.textMuted),
                 ),
@@ -1032,7 +1022,7 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'LHDN 7-Year Statutory Compliance Alert (Sections 82 & 82A ITA 1967)',
+                      '7-year receipt rule',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -1058,7 +1048,7 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
 
         // Actionable Suggestions
         Text(
-          'Actionable Tax Refund Advisories',
+          'Tax Advisories',
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
@@ -1142,7 +1132,7 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
 
         // Progressive Tax Brackets Table (0% to 30%)
         Text(
-          'Malaysian Resident Progressive Tax Brackets (0% – 30%)',
+          'Resident Tax Brackets (0% – 30%)',
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
@@ -1151,7 +1141,7 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
         ),
         const SizedBox(height: 4),
         Text(
-          'Your Chargeable Income (${r.chargeableIncome.formatted}) is taxed progressively across each band:',
+          'Your chargeable income (${r.chargeableIncome.formatted}) is taxed in bands:',
           style: TextStyle(fontSize: 12, color: colors.textMuted),
         ),
         const SizedBox(height: 10),
@@ -1444,7 +1434,7 @@ class _ReliefBucketCard extends StatelessWidget {
           if (u.excessUnclaimable.sen > 0) ...[
             const SizedBox(height: 6),
             Text(
-              'Cap Saturated: ${u.excessUnclaimable.formatted} excess above ${u.annualCap.formattedCompact} yields RM0 additional tax relief.',
+              'Cap reached: ${u.excessUnclaimable.formatted} over ${u.annualCap.formattedCompact} earns no extra relief.',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,

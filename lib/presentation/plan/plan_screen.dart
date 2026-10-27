@@ -6,7 +6,7 @@ import '../../data/providers/tax_provider.dart';
 import '../../domain/engine/allocation_engine.dart';
 import '../tax/tax_optimizer_screen.dart';
 import 'widgets/adjust_plan_sheet.dart';
-import 'widgets/ai_coach_card.dart';
+import 'widgets/cashflow_advisor_card.dart';
 import 'widgets/salary_edit_sheet.dart';
 
 class PlanScreen extends ConsumerWidget {
@@ -91,7 +91,7 @@ class PlanScreen extends ConsumerWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: AppColors.cardBorder),
                           boxShadow: [
                             BoxShadow(
@@ -218,8 +218,8 @@ class PlanScreen extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          gradient: AppColors.heroGradient,
-                          borderRadius: BorderRadius.circular(24),
+                          color: AppColors.surfaceHigh,
+                          borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: AppColors.cardBorder),
                         ),
                         child: Column(
@@ -358,7 +358,7 @@ class PlanScreen extends ConsumerWidget {
                             padding: const EdgeInsets.all(18),
                             decoration: BoxDecoration(
                               color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(14),
                               border: Border.all(color: AppColors.needs.withValues(alpha: 0.4)),
                             ),
                             child: Column(
@@ -407,7 +407,7 @@ class PlanScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
-                                  'Essential living expenses: groceries, utility bills, rent, fuel, and loan installments.',
+                                  'Groceries, bills, rent, fuel, loans.',
                                   style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4),
                                 ),
                                 const SizedBox(height: 12),
@@ -484,7 +484,7 @@ class PlanScreen extends ConsumerWidget {
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
                                     color: AppColors.surface,
-                                    borderRadius: BorderRadius.circular(18),
+                                    borderRadius: BorderRadius.circular(12),
                                     border: Border.all(color: AppColors.wants.withValues(alpha: 0.35)),
                                   ),
                                   child: Column(
@@ -527,7 +527,7 @@ class PlanScreen extends ConsumerWidget {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        'Dining out, hobbies, movies, coffee runs.',
+                                        'Dining, hobbies, coffee.',
                                         style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.3),
                                       ),
                                     ],
@@ -540,7 +540,7 @@ class PlanScreen extends ConsumerWidget {
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
                                     color: AppColors.surface,
-                                    borderRadius: BorderRadius.circular(18),
+                                    borderRadius: BorderRadius.circular(12),
                                     border: Border.all(color: AppColors.savings.withValues(alpha: 0.35)),
                                   ),
                                   child: Column(
@@ -583,7 +583,7 @@ class PlanScreen extends ConsumerWidget {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        'Emergency runway, ASB, Versa & deposits.',
+                                        'Emergency fund, ASB, deposits.',
                                         style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.3),
                                       ),
                                     ],
@@ -628,7 +628,7 @@ class PlanScreen extends ConsumerWidget {
                                         ),
                                       ),
                                       Text(
-                                        'Sedekah jumaat, zakat pendapatan, and contributions.',
+                                        'Sedekah, zakat, donations.',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
@@ -653,13 +653,14 @@ class PlanScreen extends ConsumerWidget {
                     ),
                   ),
 
-                  // 4. AI Coach Insights Card
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      child: AiCoachCard(state: state),
+                  // 4. Cashflow advisor
+                  if (state.profile.aiAdviceEnabled)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        child: CashflowAdvisorCard(state: state),
+                      ),
                     ),
-                  ),
 
                   // 5. Malaysian Personal Income Tax Optimization Engine (LHDN Form BE)
                   // Intern allowances are exempt from EPF, SOCSO, EIS & PCB tax.
@@ -683,7 +684,7 @@ class PlanScreen extends ConsumerWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppColors.surface.withValues(alpha: 0.95),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: AppColors.outline.withValues(alpha: 0.8)),
                     boxShadow: [
                       BoxShadow(
@@ -815,7 +816,7 @@ class _LhdnTaxSummaryCard extends ConsumerWidget {
         return Container(
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: AppColors.primary.withValues(alpha: 0.35),
             ),
@@ -844,7 +845,7 @@ class _LhdnTaxSummaryCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'LHDN Tax & e-Filing Engine (Form BE)',
+                          'Income Tax (Form BE)',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -946,12 +947,12 @@ class _LhdnTaxSummaryCard extends ConsumerWidget {
                     );
                   },
                   icon: Icon(
-                    Icons.auto_awesome_rounded,
+                    Icons.receipt_long_rounded,
                     size: 16,
                     color: AppColors.primary,
                   ),
                   label: Text(
-                    'Open LHDN Tax Optimizer & Receipt Classifier',
+                    'Open Tax Optimizer',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

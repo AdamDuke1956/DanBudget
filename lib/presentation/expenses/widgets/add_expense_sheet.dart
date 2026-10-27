@@ -173,7 +173,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
       ),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -229,7 +229,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: AppColors.background,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: AppColors.outline),
               ),
               child: Row(
@@ -549,7 +549,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
               onChanged: (v) =>
                   setState(() => _autoClaimTaxRelief = v ?? true),
               title: Text(
-                'Auto-claim in LHDN 7-Year Tax Relief Vault',
+                'Save to Tax Relief Vault',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,

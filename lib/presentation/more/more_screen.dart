@@ -52,27 +52,21 @@ class MoreScreen extends ConsumerWidget {
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
                       child: Container(
-                        padding: const EdgeInsets.all(18),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: AppColors.cardBorder),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: AppColors.isDark ? 0.2 : 0.04),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
+                          boxShadow: AppColors.cardShadow != null ? [AppColors.cardShadow!] : null,
                         ),
                         child: Row(
                           children: [
                             CircleAvatar(
-                              radius: 26,
-                              backgroundColor: AppColors.primary.withValues(alpha: 0.18),
+                              radius: 24,
+                              backgroundColor: AppColors.primary.withValues(alpha: 0.15),
                               child: Text(
                                 state.employmentType.emoji.isNotEmpty ? state.employmentType.emoji : '👤',
-                                style: const TextStyle(fontSize: 24),
+                                style: const TextStyle(fontSize: 22),
                               ),
                             ),
                             const SizedBox(width: 14),
@@ -88,14 +82,15 @@ class MoreScreen extends ConsumerWidget {
                                       color: AppColors.textPrimary,
                                     ),
                                   ),
-                                  const SizedBox(height: 3),
-                                  Text(
-                                    '${state.employmentType.label} • Gross: ${state.netSalary.grossSalary.formatted} • Payday: ${profile.paydayDayOfMonth}th',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                  const SizedBox(height: 6),
+                                  Wrap(
+                                    spacing: 6,
+                                    runSpacing: 4,
+                                    children: [
+                                      _ProfilePill(label: state.employmentType.label),
+                                      _ProfilePill(label: 'Gross ${state.netSalary.grossSalary.formatted}'),
+                                      _ProfilePill(label: 'Payday ${profile.paydayDayOfMonth}th'),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -132,11 +127,11 @@ class MoreScreen extends ConsumerWidget {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                       child: Container(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(22),
-                          border: Border.all(color: AppColors.outline.withValues(alpha: 0.6)),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: AppColors.cardBorder),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,7 +147,7 @@ class MoreScreen extends ConsumerWidget {
                             const SizedBox(height: 14),
 
                             Text(
-                              'App Color Palette & Theme',
+                              'Theme',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -199,7 +194,7 @@ class MoreScreen extends ConsumerWidget {
                                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                               ),
                               subtitle: Text(
-                                'Require fingerprint / Face ID on app launch',
+                                'Require fingerprint or Face ID on launch',
                                 style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                               ),
                               activeColor: AppColors.primary,
@@ -275,11 +270,11 @@ class MoreScreen extends ConsumerWidget {
                             SwitchListTile(
                               contentPadding: EdgeInsets.zero,
                               title: Text(
-                                'AI Financial Coaching',
+                                'Cashflow Advisor',
                                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                               ),
                               subtitle: Text(
-                                'Display contextual cashflow and budget advice',
+                                'Show budget advice on the Plan tab',
                                 style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                               ),
                               activeColor: AppColors.primary,
@@ -306,11 +301,11 @@ class MoreScreen extends ConsumerWidget {
                                   child: Icon(Icons.account_balance_rounded, color: AppColors.primary, size: 20),
                                 ),
                                 title: Text(
-                                  'Malaysian Income Tax & e-Filing (Form BE)',
+                                  'Income Tax (Form BE)',
                                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                                 ),
                                 subtitle: Text(
-                                  'LHDN relief caps, receipt auto-classifier & refund simulator',
+                                  'Reliefs, receipts & refund estimate',
                                   style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                                 ),
                                 trailing: Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
@@ -321,29 +316,6 @@ class MoreScreen extends ConsumerWidget {
                                 },
                               ),
                             ],
-                            Divider(color: AppColors.outline.withValues(alpha: 0.5), height: 16),
-
-                            ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              leading: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Icon(Icons.file_download_outlined, color: AppColors.primary, size: 20),
-                              ),
-                              title: Text(
-                                'Export Financial Backup',
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-                              ),
-                              subtitle: Text(
-                                'Generate complete JSON backup of records',
-                                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                              ),
-                              trailing: Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
-                              onTap: () => _exportDataAsJson(context, ref, state),
-                            ),
                           ],
                         ),
                       ),
@@ -358,26 +330,26 @@ class MoreScreen extends ConsumerWidget {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: AppColors.outline.withValues(alpha: 0.6)),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: AppColors.cardBorder),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.shield_rounded, size: 22, color: AppColors.primary),
+                            Icon(Icons.shield_rounded, size: 20, color: AppColors.primary),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '100% Local-First Privacy',
+                                    'Local Data & Backup',
                                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'All transactions, payslips, and commitments are stored encrypted in on-device SQLite. Zero cloud tracking, zero telemetry, 100% private.',
-                                    style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.4),
+                                    'Stored locally on your device. No cloud sync or tracking.',
+                                    style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.35),
                                   ),
                                   const SizedBox(height: 12),
                                   Row(
@@ -390,7 +362,7 @@ class MoreScreen extends ConsumerWidget {
                                           style: OutlinedButton.styleFrom(
                                             foregroundColor: AppColors.primary,
                                             side: BorderSide(color: AppColors.primary.withValues(alpha: 0.5)),
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                             padding: const EdgeInsets.symmetric(vertical: 8),
                                           ),
                                         ),
@@ -404,7 +376,7 @@ class MoreScreen extends ConsumerWidget {
                                           style: OutlinedButton.styleFrom(
                                             foregroundColor: AppColors.textPrimary,
                                             side: BorderSide(color: AppColors.cardBorder),
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                             padding: const EdgeInsets.symmetric(vertical: 8),
                                           ),
                                         ),
@@ -423,20 +395,11 @@ class MoreScreen extends ConsumerWidget {
                   // 6. Versioning footer
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
                       child: Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              'DanBudget v1.6.0 • Malaysian Fresh Grad Edition',
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary.withValues(alpha: 0.7)),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Built with Flutter & Drift SQLite • 100% Offline & Private',
-                              style: TextStyle(fontSize: 10, color: AppColors.textSecondary.withValues(alpha: 0.5)),
-                            ),
-                          ],
+                        child: Text(
+                          'DanBudget v1.6.5 • 100% Offline',
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.textSecondary.withValues(alpha: 0.6)),
                         ),
                       ),
                     ),
@@ -453,13 +416,13 @@ class MoreScreen extends ConsumerWidget {
                 bottom: 16,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: AppColors.surface.withValues(alpha: 0.95),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.outline.withValues(alpha: 0.8)),
+                    color: AppColors.surface.withValues(alpha: 0.96),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.cardBorder),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: AppColors.isDark ? 0.35 : 0.08),
-                        blurRadius: 18,
+                        blurRadius: 16,
                         offset: const Offset(0, 6),
                       ),
                     ],
@@ -480,7 +443,7 @@ class MoreScreen extends ConsumerWidget {
                             foregroundColor: AppColors.onPrimary,
                             elevation: 0,
                             minimumSize: const Size(0, 48),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
                       ),
@@ -496,7 +459,7 @@ class MoreScreen extends ConsumerWidget {
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(color: AppColors.cardBorder),
                             minimumSize: const Size(0, 48),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
                       ),
@@ -521,7 +484,7 @@ class MoreScreen extends ConsumerWidget {
 
     final data = {
       'exportedAt': DateTime.now().toIso8601String(),
-      'version': '1.6.0',
+      'version': '1.6.5',
       'appName': 'DanBudget',
       'profile': {
         'name': state.profile.name,
@@ -883,6 +846,32 @@ class MoreScreen extends ConsumerWidget {
   }
 }
 
+class _ProfilePill extends StatelessWidget {
+  final String label;
+
+  const _ProfilePill({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceHigh,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textSecondary,
+        ),
+      ),
+    );
+  }
+}
+
 class _ThemeModeTile extends StatelessWidget {
   final AppThemeMode mode;
   final String title;
@@ -908,16 +897,16 @@ class _ThemeModeTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutCubic,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           decoration: BoxDecoration(
             color: isSelected ? activeColor.withValues(alpha: 0.12) : AppColors.surfaceHigh,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected ? activeColor : AppColors.outline.withValues(alpha: 0.7),
+              color: isSelected ? activeColor : AppColors.cardBorder,
               width: isSelected ? 1.8 : 1.0,
             ),
           ),

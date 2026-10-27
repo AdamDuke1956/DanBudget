@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
-import 'glass_card.dart';
+import 'surface_card.dart';
 
 /// Temporary screen body for tabs that are built in later phases.
 class PlaceholderScreen extends StatelessWidget {
@@ -26,7 +26,7 @@ class PlaceholderScreen extends StatelessWidget {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: GlassCard(
+          child: SurfaceCard(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

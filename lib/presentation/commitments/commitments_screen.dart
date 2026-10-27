@@ -32,7 +32,7 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           border: Border.all(color: AppColors.outline),
         ),
         child: Column(
@@ -58,23 +58,18 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
                 color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 6),
-            Text(
-              'Choose what type of commitment to record:',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 16),
             InkWell(
               onTap: () {
                 Navigator.of(ctx).pop();
                 AddSpayLaterSheet.show(context);
               },
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(12),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: const Color(0xFFEE4D2D).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: const Color(0xFFEE4D2D).withValues(alpha: 0.35),
                   ),
@@ -104,7 +99,7 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Track individual items, months left & monthly payments',
+                            'Items bought on installment',
                             style: TextStyle(
                               fontSize: 11,
                               color: AppColors.textSecondary,
@@ -124,12 +119,12 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
                 Navigator.of(ctx).pop();
                 AddCommitmentSheet.show(context);
               },
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(12),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppColors.surfaceHigh,
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.outline),
                 ),
                 child: Row(
@@ -157,7 +152,7 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'PTPTN, MARA, Car Loan, SLoan, Personal Loan, etc.',
+                            'PTPTN, car, personal loans',
                             style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                           ),
                         ],
@@ -219,13 +214,13 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
           String dsrLabel;
           if (dsr <= 35) {
             dsrColor = AppColors.success;
-            dsrLabel = 'Healthy (<35%)';
+            dsrLabel = 'Healthy';
           } else if (dsr <= 50) {
             dsrColor = AppColors.warning;
-            dsrLabel = 'Moderate (35-50%)';
+            dsrLabel = 'Moderate';
           } else {
             dsrColor = AppColors.danger;
-            dsrLabel = 'Critical (>50%)';
+            dsrLabel = 'Critical';
           }
 
           return Stack(
@@ -241,7 +236,7 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: AppColors.cardBorder),
                           boxShadow: [
                             BoxShadow(
@@ -327,15 +322,6 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
                                           style: AppTypography.moneyAmount(fontSize: 22),
                                         ),
                                       ),
-                                      const SizedBox(height: 10),
-                                      Text(
-                                        'Healthy under 35%  •  Critical over 50%',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: AppColors.textSecondary,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
                                     ],
                                   ),
                                 ),
@@ -379,14 +365,14 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
                       child: Row(
                         children: [
                           _buildQuickAction(
-                            icon: Icons.psychology_alt_rounded,
+                            icon: Icons.calculate_outlined,
                             label: 'Simulator',
                             color: AppColors.accent,
                             onTap: () => AffordabilitySimulatorSheet.show(context),
                           ),
                           const SizedBox(width: 10),
                           _buildQuickAction(
-                            icon: Icons.auto_graph_rounded,
+                            icon: Icons.trending_down_rounded,
                             label: 'Strategy',
                             color: AppColors.primary,
                             onTap: () => DebtPayoffSheet.show(context, commitments),
@@ -570,7 +556,7 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: Text(
-                                      'Other Commitments & Fixed Loans (${otherCommitments.length})',
+                                      'Fixed Loans (${otherCommitments.length})',
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
@@ -627,7 +613,7 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
                           padding: const EdgeInsets.all(28),
                           decoration: BoxDecoration(
                             color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(22),
+                            borderRadius: BorderRadius.circular(14),
                             border: Border.all(color: AppColors.outline.withValues(alpha: 0.6)),
                           ),
                           child: Column(
@@ -639,22 +625,16 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
                                   color: AppColors.primary.withValues(alpha: 0.15),
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(Icons.celebration_rounded, size: 32, color: AppColors.primary),
+                                child: Icon(Icons.check_circle_outline_rounded, size: 32, color: AppColors.primary),
                               ),
                               const SizedBox(height: 14),
                               Text(
-                                'Zero Commitments!',
+                                'No commitments yet',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.textPrimary,
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Your take-home pay has zero loan deductions. Full cash flexibility!',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                               ),
                               const SizedBox(height: 16),
                               ElevatedButton.icon(
@@ -684,7 +664,7 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppColors.surface.withValues(alpha: 0.95),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: AppColors.outline.withValues(alpha: 0.8)),
                     boxShadow: [
                       BoxShadow(
@@ -802,30 +782,22 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
 
     Color impactColor;
     String impactBadge;
-    String adviceText;
     if (ratio <= 10) {
       impactColor = AppColors.success;
-      impactBadge = 'Manageable (<10%)';
-      adviceText = 'Your SPayLater installments are well-controlled.';
+      impactBadge = 'Manageable';
     } else if (ratio <= 20) {
       impactColor = AppColors.warning;
-      impactBadge = 'Moderate (10-20%)';
-      adviceText = isIntern
-          ? 'SPayLater takes a noticeable bite out of your RM 900 allowance.'
-          : 'Hold off on new BNPL installments until existing ones clear.';
+      impactBadge = 'Moderate';
     } else {
       impactColor = AppColors.danger;
-      impactBadge = 'High Burden (>20%)';
-      adviceText = isIntern
-          ? 'Critical: over 20% of your allowance is pre-committed to SPayLater!'
-          : 'High BNPL load. Settle items early to free up cash flow.';
+      impactBadge = 'High burden';
     }
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: impactColor.withValues(alpha: 0.4)),
       ),
       child: Column(
@@ -916,11 +888,6 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
               minHeight: 6,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            adviceText,
-            style: TextStyle(fontSize: 11, color: impactColor.withValues(alpha: 0.9), fontStyle: FontStyle.italic),
-          ),
         ],
       ),
     );
@@ -947,7 +914,7 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: AppColors.danger.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Icon(Icons.delete_outline_rounded, color: AppColors.danger),
       ),
@@ -962,7 +929,7 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSpay ? const Color(0xFFEE4D2D).withValues(alpha: 0.25) : AppColors.outline.withValues(alpha: 0.6),
           ),
@@ -1228,7 +1195,7 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: Text('Record Payment for ${c.title}?', style: TextStyle(color: AppColors.textPrimary, fontSize: 18)),
         content: Text(
           'This will record 1 installment of ${Money(c.monthlyPaymentSen).formatted} and log it as an expense.',
@@ -1266,7 +1233,7 @@ class _CommitmentsScreenState extends ConsumerState<CommitmentsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: Text('Settle ${c.title} Early?', style: TextStyle(color: AppColors.textPrimary, fontSize: 18)),
         content: Text(
           'This will settle the entire remaining balance of ${Money(c.remainingAmountSen).formatted} in full and mark this commitment as completed.',

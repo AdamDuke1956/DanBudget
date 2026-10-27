@@ -137,18 +137,12 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
                       child: Container(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: AppColors.cardBorder),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: AppColors.isDark ? 0.25 : 0.04),
-                              blurRadius: 14,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
+                          boxShadow: AppColors.cardShadow != null ? [AppColors.cardShadow!] : null,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,8 +152,8 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                               children: [
                                 Text(
                                   _selectedCategoryFilter == 'all'
-                                      ? 'Total Recorded Spending'
-                                      : 'Filtered Category Spending',
+                                      ? 'Total Spend'
+                                      : 'Filtered Spend',
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
@@ -170,7 +164,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                   decoration: BoxDecoration(
                                     color: AppColors.primary.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
                                     '${filtered.length} entries',
@@ -201,30 +195,24 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                     : 0.0;
                                 final isOnTrack = velocityPercent <= 0.8;
                                 final paceColor = isOnTrack ? AppColors.success : AppColors.warning;
-                                final paceLabel = isOnTrack ? 'Pace: On Track' : 'Pace: High Velocity';
+                                final paceLabel = isOnTrack ? 'On Track' : 'High Pace';
 
                                 return Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Row(
-                                      children: [
-                                        Icon(Icons.bolt_rounded, size: 14, color: AppColors.accent),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          'Daily safe pace: ${dash.safeToSpend.safeDailyAmount.formatted}/day',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: AppColors.textSecondary,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
+                                    Text(
+                                      'Safe pace: ${dash.safeToSpend.safeDailyAmount.formatted}/day',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                       decoration: BoxDecoration(
                                         color: paceColor.withValues(alpha: 0.15),
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius: BorderRadius.circular(6),
                                         border: Border.all(color: paceColor.withValues(alpha: 0.35)),
                                       ),
                                       child: Text(
@@ -255,8 +243,8 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.cardBorder),
                         ),
                         child: Row(
                           children: [
@@ -268,7 +256,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                   padding: const EdgeInsets.symmetric(vertical: 8),
                                   decoration: BoxDecoration(
                                     color: _viewMode == 0 ? AppColors.primary : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(9),
                                   ),
                                   alignment: Alignment.center,
                                   child: Row(
@@ -301,7 +289,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                   padding: const EdgeInsets.symmetric(vertical: 8),
                                   decoration: BoxDecoration(
                                     color: _viewMode == 1 ? AppColors.primary : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(9),
                                   ),
                                   alignment: Alignment.center,
                                   child: Row(
@@ -314,7 +302,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                       ),
                                       const SizedBox(width: 6),
                                       Text(
-                                        'Category Breakdown',
+                                        'By Category',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
@@ -339,8 +327,8 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                       child: Container(
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.outline.withValues(alpha: 0.6)),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.cardBorder),
                         ),
                         child: TextField(
                           controller: _searchController,
@@ -504,13 +492,13 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                   Container(
                                     decoration: BoxDecoration(
                                       color: AppColors.surface,
-                                      borderRadius: BorderRadius.circular(18),
+                                      borderRadius: BorderRadius.circular(14),
                                       border: Border.all(
-                                        color: AppColors.outline.withValues(alpha: 0.5),
+                                        color: AppColors.cardBorder,
                                       ),
                                     ),
                                     child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(18),
+                                      borderRadius: BorderRadius.circular(14),
                                       child: ListView.separated(
                                         shrinkWrap: true,
                                         physics: const NeverScrollableScrollPhysics(),
@@ -635,8 +623,8 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
                                     color: AppColors.surface,
-                                    borderRadius: BorderRadius.circular(18),
-                                    border: Border.all(color: AppColors.outline.withValues(alpha: 0.5)),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(color: AppColors.cardBorder),
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -727,13 +715,13 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                 bottom: 16,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: AppColors.surface.withValues(alpha: 0.95),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.outline.withValues(alpha: 0.8)),
+                    color: AppColors.surface.withValues(alpha: 0.96),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.cardBorder),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: AppColors.isDark ? 0.35 : 0.08),
-                        blurRadius: 18,
+                        blurRadius: 16,
                         offset: const Offset(0, 6),
                       ),
                     ],
@@ -754,7 +742,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                             foregroundColor: AppColors.onPrimary,
                             elevation: 0,
                             minimumSize: const Size(0, 48),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
                       ),
@@ -780,14 +768,14 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: isSelected ? color.withValues(alpha: 0.18) : AppColors.surface,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isSelected ? color : AppColors.outline.withValues(alpha: 0.6),
+              color: isSelected ? color : AppColors.cardBorder,
             ),
           ),
           child: Row(

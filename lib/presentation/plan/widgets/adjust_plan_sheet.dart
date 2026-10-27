@@ -169,7 +169,7 @@ class _AdjustPlanSheetState extends ConsumerState<AdjustPlanSheet> {
       ),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -312,7 +312,7 @@ class _AdjustPlanSheetState extends ConsumerState<AdjustPlanSheet> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Your fixed loans (${widget.totalCommitments.formatted}) exceed this Needs cap (${needsRinggit.formatted}). Needs will automatically expand to keep you solvent.',
+                        'Fixed loans (${widget.totalCommitments.formatted}) exceed this cap (${needsRinggit.formatted}). Needs will auto-expand.',
                         style: TextStyle(fontSize: 11, color: AppColors.textPrimary, height: 1.3),
                       ),
                     ),

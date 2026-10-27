@@ -231,7 +231,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
       ),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -704,7 +704,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: impactColor.withValues(alpha: 0.09),
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(
                       color: impactColor.withValues(alpha: 0.35),
                     ),
@@ -723,7 +723,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    'Financial Impact Breakdown',
+                                    'Impact Summary',
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
@@ -741,7 +741,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                                 horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
                               color: impactColor.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               impactStatus,
@@ -796,7 +796,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'This item will consume ${itemImpactRatio.toStringAsFixed(1)}% of your ${netIncome.formatted} ${dash.employmentType.isIntern ? 'allowance' : 'salary'}. Total SPayLater will lock up ${totalImpactRatio.toStringAsFixed(1)}% (${Money(newTotalSpayLaterSen).formatted}/mo).',
+                        'Uses ${itemImpactRatio.toStringAsFixed(1)}% of income. Total SPayLater: ${totalImpactRatio.toStringAsFixed(1)}% (${Money(newTotalSpayLaterSen).formatted}/mo).',
                         style: TextStyle(
                           fontSize: 11,
                           height: 1.35,

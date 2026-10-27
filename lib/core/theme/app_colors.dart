@@ -34,7 +34,6 @@ class AppPalette {
   final Color savings;
   final Color giving;
 
-  final LinearGradient heroGradient;
   final BoxShadow? cardShadow;
 
   bool get isDark => mode.isDark;
@@ -69,7 +68,6 @@ class AppPalette {
     required this.wants,
     required this.savings,
     required this.giving,
-    required this.heroGradient,
     this.cardShadow,
   });
 
@@ -93,11 +91,6 @@ class AppPalette {
     wants: Color(0xFFA855F7),
     savings: Color(0xFF10B981),
     giving: Color(0xFFF59E0B),
-    heroGradient: LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [Color(0xFF12302B), Color(0xFF131B2E)],
-    ),
     cardShadow: null,
   );
 
@@ -121,15 +114,10 @@ class AppPalette {
     wants: Color(0xFF9333EA),
     savings: Color(0xFF059669),
     giving: Color(0xFFEA580C),
-    heroGradient: LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [Color(0xFFFFF1F2), Color(0xFFFFE4E6)],
-    ),
     cardShadow: BoxShadow(
-      color: Color(0x0A0F172A),
-      blurRadius: 10,
-      offset: Offset(0, 4),
+      color: Color(0x0F0F172A),
+      blurRadius: 4,
+      offset: Offset(0, 1),
     ),
   );
 }
@@ -180,7 +168,6 @@ abstract final class AppColors {
 
   static Color get surfaceElevated => current.surfaceHigh;
 
-  static LinearGradient get heroGradient => current.heroGradient;
   static BoxShadow? get cardShadow => current.cardShadow;
 
   /// Retrieves the palette attached to [context] or falls back to [current].

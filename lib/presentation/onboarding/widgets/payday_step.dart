@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/money.dart';
-import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/surface_card.dart';
 import '../../../data/repositories/profile_repository.dart';
 import '../../../domain/engine/allocation_engine.dart';
 import '../../../domain/engine/employment_type.dart';
@@ -296,8 +296,8 @@ class _PlanPreview extends StatelessWidget {
     );
     final preset = AllocationPreset.forType(employmentType);
 
-    return GlassCard(
-      gradient: AppColors.heroGradient,
+    return SurfaceCard(
+      raised: true,
       padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/app_icons.dart';
 import '../../../core/utils/money.dart';
-import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/surface_card.dart';
 import '../../../data/local/app_database.dart';
 import 'add_edit_account_sheet.dart';
 import 'account_details_history_sheet.dart';
@@ -69,10 +69,10 @@ class _MoneyOnHandHeroState extends State<MoneyOnHandHero> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Money on Hand is the actual liquid cash you currently hold across all your banking accounts (Maybank, CIMB, BIMB, BSN, etc.), e-wallets (Touch \'n Go, GrabPay), and physical cash.\n\n'
-              '• "Reconcile" lets you match the recorded balance with your real banking app balance.\n'
-              '• "Transfer" lets you move money between accounts (e.g. reload Touch \'n Go via Maybank) without counting it as an expense.\n'
-              '• "History" shows all your transfer notes and money movements.',
+              'Cash you hold right now: bank accounts, e-wallets and physical cash.\n\n'
+              'Reconcile: match a balance to your bank app.\n'
+              'Transfer: move money without logging an expense.\n'
+              'History: every transfer you have made.',
               style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.45),
             ),
             const SizedBox(height: 20),
@@ -82,7 +82,7 @@ class _MoneyOnHandHeroState extends State<MoneyOnHandHero> {
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.onPrimary,
                 minimumSize: const Size.fromHeight(46),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
               child: const Text('Got It', style: TextStyle(fontWeight: FontWeight.bold)),
             ),
@@ -96,8 +96,8 @@ class _MoneyOnHandHeroState extends State<MoneyOnHandHero> {
   Widget build(BuildContext context) {
     final liquidAccounts = widget.accounts.where((a) => a.isLiquidOnHand).toList();
 
-    return GlassCard(
-      padding: const EdgeInsets.all(18),
+    return SurfaceCard(
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -198,7 +198,7 @@ class _MoneyOnHandHeroState extends State<MoneyOnHandHero> {
                   SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'Safe-to-spend is capped by actual cash in your bank & eWallets.',
+                      'Capped by the cash you actually hold.',
                       style: TextStyle(
                         fontSize: 11,
                         color: AppColors.warning,
@@ -223,13 +223,13 @@ class _MoneyOnHandHeroState extends State<MoneyOnHandHero> {
                   return Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                       onTap: () => AddEditAccountSheet.show(context),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
                           color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: AppColors.primary.withValues(alpha: 0.35),
                           ),
@@ -259,13 +259,13 @@ class _MoneyOnHandHeroState extends State<MoneyOnHandHero> {
                 return Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                     onTap: () => AccountDetailsHistorySheet.show(context, account: acc),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
                         color: AppColors.surfaceHigh,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: brandColor.withValues(alpha: 0.35),
                         ),
@@ -332,7 +332,7 @@ class _MoneyOnHandHeroState extends State<MoneyOnHandHero> {
                     side: BorderSide(color: AppColors.cardBorder),
                     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                     minimumSize: const Size(0, 44),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
               ),
@@ -343,11 +343,11 @@ class _MoneyOnHandHeroState extends State<MoneyOnHandHero> {
                   icon: const Icon(Icons.sync_alt_rounded, size: 14),
                   label: const Text('Transfer', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.accent,
-                    side: BorderSide(color: AppColors.accent.withValues(alpha: 0.5)),
+                    foregroundColor: AppColors.textPrimary,
+                    side: BorderSide(color: AppColors.cardBorder),
                     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                     minimumSize: const Size(0, 44),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
               ),
@@ -358,11 +358,11 @@ class _MoneyOnHandHeroState extends State<MoneyOnHandHero> {
                   icon: const Icon(Icons.history_rounded, size: 14),
                   label: const Text('History', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: BorderSide(color: AppColors.primary.withValues(alpha: 0.5)),
+                    foregroundColor: AppColors.textPrimary,
+                    side: BorderSide(color: AppColors.cardBorder),
                     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                     minimumSize: const Size(0, 44),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
               ),

@@ -21,6 +21,10 @@ migrate_working_dir/
 # Visual Studio Code
 .vscode/
 
+# Obsidian & Local Planning Docs
+.obsidian/
+IMPLEMENTATION_PLAN.md
+
 # Flutter / Dart / Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id

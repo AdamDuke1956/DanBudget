@@ -40,7 +40,7 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
       ),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
