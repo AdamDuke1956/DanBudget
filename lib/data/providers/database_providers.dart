@@ -80,6 +80,10 @@ final recentExpensesStreamProvider = StreamProvider<List<ExpenseWithCategory>>((
   return ref.watch(expenseRepositoryProvider).watchRecentExpenses();
 });
 
+final cycleSpentStreamProvider = StreamProvider.family<int, DateTime>((ref, cycleStart) {
+  return ref.watch(expenseRepositoryProvider).watchTotalSpentSince(cycleStart);
+});
+
 final activeCommitmentsStreamProvider = StreamProvider<List<CommitmentsTableData>>((ref) {
   return ref.watch(commitmentRepositoryProvider).watchActiveCommitments();
 });

@@ -350,49 +350,12 @@ class TaxRepository {
     }
   }
 
-  /// Ensures tables exist and fetches the [TaxYearProfileData] for [year].
-  Future<TaxYearProfileData> getTaxYearProfile(int year) async {
-    await _db.ensureTaxTables();
-    final rows = await _db.customSelect(
-      'SELECT * FROM tax_year_profiles WHERE assessment_year = ?',
-      variables: [Variable.withInt(year)],
-    ).get();
+  /// Notifies active tax streams after an external/transactional update.
+  void notifyChanged() => _notifyListeners();
 
-    if (rows.isEmpty) {
-      return TaxYearProfileData.empty(year);
-    }
-    return TaxYearProfileData.fromRow(rows.first);
-  }
-
-  /// Reactive stream of [TaxYearProfileData] for [year].
-  Stream<TaxYearProfileData> watchTaxYearProfile(int year) {
-    return Stream<TaxYearProfileData>.multi((controller) {
-      var active = true;
-      Future<void> emit() async {
-        try {
-          final data = await getTaxYearProfile(year);
-          if (active && !controller.isClosed) {
-            controller.add(data);
-          }
-        } catch (e, st) {
-          if (active && !controller.isClosed) {
-            controller.addError(e, st);
-          }
-        }
-      }
-
-      emit();
-      final sub = _changeController.stream.listen((_) => emit());
-      controller.onCancel = () {
-        active = false;
-        return sub.cancel();
-      };
-    });
-  }
-
-  /// Saves or updates the [TaxYearProfileData].
-  Future<void> saveTaxYearProfile(TaxYearProfileData profile) async {
-    await _db.ensureTaxTables();
+  /// Inserts or updates a [TaxYearProfileData] without calling DDL or notifying listeners.
+  /// Intended for use inside an active database transaction.
+  Future<void> upsertProfileInTransaction(TaxYearProfileData profile) async {
     final nowMs = DateTime.now().millisecondsSinceEpoch;
     await _db.customStatement(
       '''
@@ -483,6 +446,131 @@ class TaxRepository {
         nowMs,
       ],
     );
+  }
+
+  /// Clears tax profiles and claims inside an active transaction without notifying listeners.
+  Future<void> clearAllTaxDataInTransaction() async {
+    await _db.customStatement('DELETE FROM tax_receipt_claims');
+    await _db.customStatement('DELETE FROM tax_year_profiles');
+  }
+
+  /// Inserts a receipt claim inside an active transaction without calling DDL or notifying listeners.
+  Future<int> insertReceiptClaimInTransaction(
+    TaxReceiptClaimData claim, {
+    int? overrideExpenseId,
+  }) async {
+    final dateMs = claim.claimedDate.millisecondsSinceEpoch;
+    final effectiveExpenseId = overrideExpenseId ?? claim.expenseId;
+    if (claim.id > 0) {
+      return _db.customInsert(
+        '''
+        INSERT INTO tax_receipt_claims (
+          id,
+          assessment_year,
+          expense_id,
+          title,
+          amount_sen,
+          bucket_id,
+          sub_bucket_id,
+          receipt_ref,
+          claimed_date,
+          is_auto_classified
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''',
+        variables: [
+          Variable.withInt(claim.id),
+          Variable.withInt(claim.assessmentYear),
+          effectiveExpenseId != null
+              ? Variable.withInt(effectiveExpenseId)
+              : const Variable<int>(null),
+          Variable.withString(claim.title),
+          Variable.withInt(claim.amountSen),
+          Variable.withString(claim.bucket.name),
+          claim.subBucketId != null
+              ? Variable.withString(claim.subBucketId!)
+              : const Variable<String>(null),
+          Variable.withString(claim.receiptRef),
+          Variable.withInt(dateMs),
+          Variable.withInt(claim.isAutoClassified ? 1 : 0),
+        ],
+      );
+    }
+    return _db.customInsert(
+      '''
+      INSERT INTO tax_receipt_claims (
+        assessment_year,
+        expense_id,
+        title,
+        amount_sen,
+        bucket_id,
+        sub_bucket_id,
+        receipt_ref,
+        claimed_date,
+        is_auto_classified
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ''',
+      variables: [
+        Variable.withInt(claim.assessmentYear),
+        effectiveExpenseId != null
+            ? Variable.withInt(effectiveExpenseId)
+            : const Variable<int>(null),
+        Variable.withString(claim.title),
+        Variable.withInt(claim.amountSen),
+        Variable.withString(claim.bucket.name),
+        claim.subBucketId != null
+            ? Variable.withString(claim.subBucketId!)
+            : const Variable<String>(null),
+        Variable.withString(claim.receiptRef),
+        Variable.withInt(dateMs),
+        Variable.withInt(claim.isAutoClassified ? 1 : 0),
+      ],
+    );
+  }
+
+  /// Ensures tables exist and fetches the [TaxYearProfileData] for [year].
+  Future<TaxYearProfileData> getTaxYearProfile(int year) async {
+    await _db.ensureTaxTables();
+    final rows = await _db.customSelect(
+      'SELECT * FROM tax_year_profiles WHERE assessment_year = ?',
+      variables: [Variable.withInt(year)],
+    ).get();
+
+    if (rows.isEmpty) {
+      return TaxYearProfileData.empty(year);
+    }
+    return TaxYearProfileData.fromRow(rows.first);
+  }
+
+  /// Reactive stream of [TaxYearProfileData] for [year].
+  Stream<TaxYearProfileData> watchTaxYearProfile(int year) {
+    return Stream<TaxYearProfileData>.multi((controller) {
+      var active = true;
+      Future<void> emit() async {
+        try {
+          final data = await getTaxYearProfile(year);
+          if (active && !controller.isClosed) {
+            controller.add(data);
+          }
+        } catch (e, st) {
+          if (active && !controller.isClosed) {
+            controller.addError(e, st);
+          }
+        }
+      }
+
+      emit();
+      final sub = _changeController.stream.listen((_) => emit());
+      controller.onCancel = () {
+        active = false;
+        return sub.cancel();
+      };
+    });
+  }
+
+  /// Saves or updates the [TaxYearProfileData].
+  Future<void> saveTaxYearProfile(TaxYearProfileData profile) async {
+    await _db.ensureTaxTables();
+    await upsertProfileInTransaction(profile);
     _notifyListeners();
   }
 

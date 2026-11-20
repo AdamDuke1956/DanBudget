@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +8,8 @@ import '../../core/theme/app_theme.dart';
 import '../../data/local/app_database.dart';
 import '../../data/providers/dashboard_provider.dart';
 import '../../data/providers/database_providers.dart';
-import '../../data/repositories/tax_repository.dart';
+import '../../data/services/backup_file_service.dart';
+import '../../data/services/backup_service.dart';
 import '../plan/widgets/salary_edit_sheet.dart';
 import '../tax/tax_optimizer_screen.dart';
 import 'widgets/checklist_section.dart';
@@ -348,7 +348,7 @@ class MoreScreen extends ConsumerWidget {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Stored locally on your device. No cloud sync or tracking.',
+                                    'Stored locally on your device. Save .json backups to Downloads/DanBudget so they survive app uninstalls.',
                                     style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.35),
                                   ),
                                   const SizedBox(height: 12),
@@ -398,7 +398,7 @@ class MoreScreen extends ConsumerWidget {
                       padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
                       child: Center(
                         child: Text(
-                          'DanBudget v1.6.5 • 100% Offline',
+                          'DanBudget v1.6.6 • 100% Offline',
                           style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.textSecondary.withValues(alpha: 0.6)),
                         ),
                       ),
@@ -474,85 +474,44 @@ class MoreScreen extends ConsumerWidget {
     );
   }
 
-  void _exportDataAsJson(BuildContext context, WidgetRef ref, DashboardState state) async {
-    final expenses = await ref.read(expenseRepositoryProvider).getAllExpenses();
-    final commitments = state.activeCommitments;
-    final checklist = await ref.read(checklistRepositoryProvider).watchChecklistItems().first;
+  Future<void> _exportDataAsJson(BuildContext context, WidgetRef ref, DashboardState state) async {
+    final db = ref.read(databaseProvider);
     final taxRepo = ref.read(taxRepositoryProvider);
-    final taxProfiles = await taxRepo.getAllProfiles();
-    final taxClaims = await taxRepo.getAllReceiptClaims();
+    final payload = await BackupService.exportToBackupPayload(db, taxRepo: taxRepo);
+    final jsonStr = payload.jsonString;
+    final fileName = BackupFileService.buildFileName();
+    final previewStr = jsonStr.length > 3000
+        ? '${jsonStr.substring(0, 3000)}\n...\n[Full ${jsonStr.length} chars will be saved to $fileName]'
+        : jsonStr;
 
-    final data = {
-      'exportedAt': DateTime.now().toIso8601String(),
-      'version': '1.6.5',
-      'appName': 'DanBudget',
-      'profile': {
-        'name': state.profile.name,
-        'grossSalarySen': state.profile.grossSalarySen,
-        'fixedAllowanceSen': state.profile.fixedAllowanceSen,
-        'currentSavingsSen': state.profile.currentSavingsSen,
-        'paydayDayOfMonth': state.profile.paydayDayOfMonth,
-        'epfRate': state.profile.epfRate,
-      },
-      'expenses': expenses
-          .map((e) => {
-                'id': e.expense.id,
-                'amountSen': e.expense.amountSen,
-                'category': e.category.name,
-                'date': e.expense.date.toIso8601String(),
-                'note': e.expense.note,
-                'isCommitment': e.expense.isCommitmentPayment,
-              })
-          .toList(),
-      'commitments': commitments
-          .map((c) => {
-                'id': c.id,
-                'title': c.title,
-                'type': c.type,
-                'monthlyPaymentSen': c.monthlyPaymentSen,
-                'remainingTenureMonths': c.remainingTenureMonths,
-                'remainingAmountSen': c.remainingAmountSen,
-                'dueDayOfMonth': c.dueDayOfMonth,
-              })
-          .toList(),
-      'checklist': checklist
-          .map((i) => {
-                'id': i.id,
-                'title': i.title,
-                'category': i.category,
-                'isCompleted': i.isCompleted,
-              })
-          .toList(),
-      'taxProfiles': taxProfiles.map((p) => p.toJson()).toList(),
-      'taxReceiptClaims': taxClaims.map((c) => c.toJson()).toList(),
-    };
+    if (!context.mounted) return;
 
-    final jsonStr = const JsonEncoder.withIndent('  ').convert(data);
-
-    if (context.mounted) {
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          backgroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Row(
-            children: [
-              Icon(Icons.shield_outlined, color: AppColors.primary),
-              const SizedBox(width: 8),
-              Text(
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.shield_outlined, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
                 '100% Local Backup',
                 style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
               ),
-            ],
-          ),
-          content: SizedBox(
-            width: double.maxFinite,
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Backup ready: ${expenses.length} expenses, ${commitments.length} commitments, and ${checklist.length} checklist items.',
+                  'Backup ready: ${payload.accountCount} accounts, ${payload.expenseCount} expenses, ${payload.commitmentCount} commitments, and ${payload.dailyPlanCount} daily plans.',
                   style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 10),
@@ -565,11 +524,11 @@ class MoreScreen extends ConsumerWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.shield_outlined, size: 16, color: AppColors.warning),
+                      Icon(Icons.folder_outlined, size: 16, color: AppColors.warning),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Keep your exported JSON private. It contains personal income, debt, and expense records.',
+                          'Saved to Downloads/DanBudget/$fileName so it stays safe even if you uninstall the app.',
                           style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                         ),
                       ),
@@ -578,7 +537,7 @@ class MoreScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 10),
                 Container(
-                  height: 160,
+                  height: 120,
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: AppColors.surfaceHigh,
@@ -586,7 +545,7 @@ class MoreScreen extends ConsumerWidget {
                   ),
                   child: SingleChildScrollView(
                     child: Text(
-                      jsonStr,
+                      previewStr,
                       style: TextStyle(fontFamily: 'monospace', fontSize: 10, color: AppColors.textPrimary),
                     ),
                   ),
@@ -594,31 +553,109 @@ class MoreScreen extends ConsumerWidget {
               ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text('Close', style: TextStyle(color: AppColors.textSecondary)),
-            ),
-            ElevatedButton.icon(
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: jsonStr));
-                Navigator.of(ctx).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Copied backup to clipboard. Paste securely and avoid pasting in untrusted apps.'),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.copy_rounded, size: 16),
-              label: const Text('Copy JSON'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
-              ),
-            ),
-          ],
         ),
-      );
+        actions: [
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text('Close', style: TextStyle(color: AppColors.textSecondary)),
+              ),
+              TextButton.icon(
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: jsonStr));
+                  Navigator.of(ctx).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Copied backup to clipboard. For long backups, prefer saving the .json file.'),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.copy_rounded, size: 15),
+                label: const Text('Copy'),
+              ),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  Navigator.of(ctx).pop();
+                  await _saveBackupFile(
+                    context,
+                    jsonStr: jsonStr,
+                    fileName: fileName,
+                    usePicker: true,
+                  );
+                },
+                icon: const Icon(Icons.folder_open_rounded, size: 15),
+                label: const Text('Save As...'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.textPrimary,
+                  side: BorderSide(color: AppColors.cardBorder),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  Navigator.of(ctx).pop();
+                  await _saveBackupFile(
+                    context,
+                    jsonStr: jsonStr,
+                    fileName: fileName,
+                    usePicker: false,
+                  );
+                },
+                icon: const Icon(Icons.save_alt_rounded, size: 16),
+                label: const Text('Save .json File'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.onPrimary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _saveBackupFile(
+    BuildContext context, {
+    required String jsonStr,
+    required String fileName,
+    required bool usePicker,
+  }) async {
+    try {
+      final result = usePicker
+          ? await BackupFileService.saveWithPicker(
+              jsonContent: jsonStr,
+              fileName: fileName,
+            )
+          : await BackupFileService.saveToDownloadsFolder(
+              jsonContent: jsonStr,
+              fileName: fileName,
+            );
+
+      if (!context.mounted || result.cancelled) return;
+
+      if (result.saved) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFF10B981),
+            content: Text('Backup saved to ${result.location ?? fileName}'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFFEF4444),
+            content: Text('Failed to save backup file: $e'),
+          ),
+        );
+      }
     }
   }
 
@@ -628,55 +665,114 @@ class MoreScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
             Icon(Icons.restore_page_outlined, color: AppColors.primary),
             const SizedBox(width: 8),
-            Text(
-              'Restore Backup',
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+            Expanded(
+              child: Text(
+                'Restore Backup',
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
         content: SizedBox(
           width: double.maxFinite,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Paste your exported JSON backup text below to restore your profile, expenses, commitments, and checklist.',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: controller,
-                maxLines: 6,
-                style: TextStyle(fontFamily: 'monospace', fontSize: 11, color: AppColors.textPrimary),
-                decoration: InputDecoration(
-                  hintText: 'Paste JSON backup here...',
-                  hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.5)),
-                  filled: true,
-                  fillColor: AppColors.surfaceHigh,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Choose a saved .json backup file from Downloads/DanBudget (or any folder) to restore your data.',
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    try {
+                      final picked = await BackupFileService.pickJsonFile();
+                      if (picked.cancelled || !picked.picked) return;
+                      final content = picked.content?.trim() ?? '';
+                      if (content.isEmpty) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              backgroundColor: Color(0xFFEF4444),
+                              content: Text('Selected backup file is empty.'),
+                            ),
+                          );
+                        }
+                        return;
+                      }
+                      if (ctx.mounted) Navigator.of(ctx).pop();
+                      if (context.mounted) {
+                        await _restoreDataFromJson(
+                          context,
+                          ref,
+                          content,
+                          sourceLabel: picked.fileName,
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: const Color(0xFFEF4444),
+                            content: Text('Could not open backup file: $e'),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.upload_file_rounded, size: 18),
+                  label: const Text('Choose .json File'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.onPrimary,
+                    minimumSize: const Size(0, 44),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: () async {
-                  final clip = await Clipboard.getData('text/plain');
-                  if (clip?.text != null) {
-                    controller.text = clip!.text!;
-                  }
-                },
-                icon: const Icon(Icons.paste_rounded, size: 16),
-                label: const Text('Paste from Clipboard', style: TextStyle(fontSize: 12)),
-              ),
-            ],
+                const SizedBox(height: 12),
+                Text(
+                  'Or paste JSON text below:',
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: controller,
+                  maxLines: 5,
+                  style: TextStyle(fontFamily: 'monospace', fontSize: 11, color: AppColors.textPrimary),
+                  decoration: InputDecoration(
+                    hintText: 'Paste JSON backup here...',
+                    hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.5)),
+                    filled: true,
+                    fillColor: AppColors.surfaceHigh,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () async {
+                      final clip = await Clipboard.getData('text/plain');
+                      if (clip?.text != null) {
+                        controller.text = clip!.text!;
+                      }
+                    },
+                    icon: const Icon(Icons.paste_rounded, size: 16),
+                    label: const Text('Paste from Clipboard', style: TextStyle(fontSize: 12)),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         actions: [
@@ -684,16 +780,17 @@ class MoreScreen extends ConsumerWidget {
             onPressed: () => Navigator.of(ctx).pop(),
             child: Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
           ),
-          ElevatedButton(
+          OutlinedButton(
             onPressed: () async {
               final text = controller.text.trim();
               if (text.isEmpty) return;
               Navigator.of(ctx).pop();
               await _restoreDataFromJson(context, ref, text);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.onPrimary,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              side: BorderSide(color: AppColors.primary.withValues(alpha: 0.5)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             child: const Text('Restore Now'),
           ),
@@ -702,134 +799,25 @@ class MoreScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _restoreDataFromJson(BuildContext context, WidgetRef ref, String jsonText) async {
+  Future<void> _restoreDataFromJson(
+    BuildContext context,
+    WidgetRef ref,
+    String jsonText, {
+    String? sourceLabel,
+  }) async {
     try {
-      final dynamic decoded = jsonDecode(jsonText);
-      if (decoded is! Map<String, dynamic>) {
-        throw const FormatException('Invalid backup format: root must be a JSON object.');
-      }
       final db = ref.read(databaseProvider);
-
-      await db.transaction(() async {
-        // 1. Profile
-        if (decoded['profile'] is Map<String, dynamic>) {
-          final p = decoded['profile'] as Map<String, dynamic>;
-          await (db.update(db.userProfileTable)..where((t) => t.id.equals(1))).write(
-            UserProfileTableCompanion(
-              name: drift.Value((p['name'] as String?) ?? ''),
-              grossSalarySen: drift.Value((p['grossSalarySen'] as num?)?.toInt() ?? 300000),
-              fixedAllowanceSen: drift.Value((p['fixedAllowanceSen'] as num?)?.toInt() ?? 0),
-              currentSavingsSen: drift.Value((p['currentSavingsSen'] as num?)?.toInt() ?? 0),
-              paydayDayOfMonth: drift.Value((p['paydayDayOfMonth'] as num?)?.toInt() ?? 25),
-              epfRate: drift.Value((p['epfRate'] as num?)?.toDouble() ?? 0.11),
-              isOnboarded: const drift.Value(true),
-              updatedAt: drift.Value(DateTime.now()),
-            ),
-          );
-        }
-
-        // 2. Commitments
-        if (decoded['commitments'] is List) {
-          await db.delete(db.commitmentsTable).go();
-          for (final item in decoded['commitments'] as List) {
-            if (item is Map<String, dynamic>) {
-              final remaining = (item['remainingAmountSen'] as num?)?.toInt() ?? 0;
-              await db.into(db.commitmentsTable).insert(
-                CommitmentsTableCompanion.insert(
-                  title: item['title'] ?? 'Commitment',
-                  type: item['type'] ?? 'other',
-                  totalAmountSen: (item['totalAmountSen'] as num?)?.toInt() ?? remaining,
-                  monthlyPaymentSen: (item['monthlyPaymentSen'] as num?)?.toInt() ?? 0,
-                  remainingAmountSen: remaining,
-                  remainingTenureMonths: drift.Value((item['remainingTenureMonths'] as num?)?.toInt() ?? 1),
-                  dueDayOfMonth: drift.Value((item['dueDayOfMonth'] as num?)?.toInt() ?? 1),
-                ),
-              );
-            }
-          }
-        }
-
-        // 3. Expenses
-        if (decoded['expenses'] is List) {
-          await db.delete(db.expensesTable).go();
-          final categories = await db.select(db.expenseCategoriesTable).get();
-          final catMap = {for (var c in categories) c.name.toLowerCase(): c.id};
-          final defaultCatId = categories.isNotEmpty ? categories.first.id : 'food';
-
-          for (final item in decoded['expenses'] as List) {
-            if (item is Map<String, dynamic>) {
-              final catName = (item['category'] as String?)?.toLowerCase() ?? '';
-              final categoryId = catMap[catName] ?? defaultCatId;
-              final date = item['date'] != null
-                  ? DateTime.tryParse(item['date']) ?? DateTime.now()
-                  : DateTime.now();
-
-              await db.into(db.expensesTable).insert(
-                ExpensesTableCompanion.insert(
-                  amountSen: (item['amountSen'] as num?)?.toInt() ?? 0,
-                  categoryId: categoryId,
-                  date: date,
-                  note: drift.Value(item['note'] as String?),
-                  isCommitmentPayment: drift.Value((item['isCommitment'] as bool?) ?? false),
-                ),
-              );
-            }
-          }
-        }
-
-        // 4. Checklist
-        if (decoded['checklist'] is List) {
-          for (final item in decoded['checklist'] as List) {
-            if (item is Map<String, dynamic> && item['id'] != null) {
-              final id = item['id'].toString();
-              final isCompleted = (item['isCompleted'] as bool?) ?? false;
-              await (db.update(db.checklistItemsTable)..where((t) => t.id.equals(id))).write(
-                ChecklistItemsTableCompanion(
-                  isCompleted: drift.Value(isCompleted),
-                  completedAt: drift.Value(isCompleted ? DateTime.now() : null),
-                ),
-              );
-            }
-          }
-        }
-      });
-
-      // 5. Tax Profiles & Receipt Claims (v1.6.0+)
       final taxRepo = ref.read(taxRepositoryProvider);
-      if (decoded['taxProfiles'] is List || decoded['taxReceiptClaims'] is List) {
-        await taxRepo.clearAllTaxData();
-        if (decoded['taxProfiles'] is List) {
-          for (final item in decoded['taxProfiles'] as List) {
-            if (item is Map<String, dynamic>) {
-              await taxRepo.saveTaxYearProfile(TaxYearProfileData.fromJson(item));
-            }
-          }
-        }
-        if (decoded['taxReceiptClaims'] is List) {
-          for (final item in decoded['taxReceiptClaims'] as List) {
-            if (item is Map<String, dynamic>) {
-              final claim = TaxReceiptClaimData.fromJson(item);
-              await taxRepo.addReceiptClaim(
-                assessmentYear: claim.assessmentYear,
-                expenseId: claim.expenseId,
-                title: claim.title,
-                amountSen: claim.amountSen,
-                bucket: claim.bucket,
-                subBucketId: claim.subBucketId,
-                receiptRef: claim.receiptRef,
-                claimedDate: claim.claimedDate,
-                isAutoClassified: claim.isAutoClassified,
-              );
-            }
-          }
-        }
-      }
+      await BackupService.restoreFromJson(db, jsonText, taxRepo: taxRepo);
 
       if (context.mounted) {
+        final msg = sourceLabel != null
+            ? 'Backup restored from $sourceLabel!'
+            : 'Backup restored successfully! All data has been loaded.';
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Color(0xFF10B981),
-            content: Text('Backup restored successfully! All data has been loaded.'),
+          SnackBar(
+            backgroundColor: const Color(0xFF10B981),
+            content: Text(msg),
           ),
         );
       }

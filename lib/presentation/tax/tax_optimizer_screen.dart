@@ -79,7 +79,7 @@ class _TaxOptimizerScreenState extends ConsumerState<TaxOptimizerScreen>
     final r = data.taxResult;
     final buffer = StringBuffer()
       ..writeln(
-        '=== LHDN FORM BE SUMMARY (YA ${data.assessmentYear}) — DANBUDGET v1.6.5 ===',
+        '=== LHDN FORM BE SUMMARY (YA ${data.assessmentYear}) — DANBUDGET v1.6.6 ===',
       )
       ..writeln('1. Total Annual Gross Income: ${r.totalGrossIncome.formatted}')
       ..writeln(

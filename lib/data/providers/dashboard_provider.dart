@@ -53,14 +53,6 @@ final dashboardStateProvider = Provider<AsyncValue<DashboardState>>((ref) {
   final transfersAsync = ref.watch(recentTransfersStreamProvider);
   final todayPlanAsync = ref.watch(todayPlanStreamProvider);
 
-  if (profileAsync is AsyncLoading ||
-      commitmentsAsync is AsyncLoading ||
-      expensesAsync is AsyncLoading ||
-      accountsAsync is AsyncLoading ||
-      transfersAsync is AsyncLoading) {
-    return const AsyncLoading();
-  }
-
   if (profileAsync is AsyncError) {
     return AsyncError(profileAsync.error!, profileAsync.stackTrace!);
   }
@@ -77,7 +69,29 @@ final dashboardStateProvider = Provider<AsyncValue<DashboardState>>((ref) {
     return AsyncError(transfersAsync.error!, transfersAsync.stackTrace!);
   }
 
+  if (profileAsync is AsyncLoading ||
+      commitmentsAsync is AsyncLoading ||
+      expensesAsync is AsyncLoading ||
+      accountsAsync is AsyncLoading ||
+      transfersAsync is AsyncLoading) {
+    return const AsyncLoading();
+  }
+
   final profile = profileAsync.value!;
+  final now = DateTime.now();
+  final int payday = profile.paydayDayOfMonth;
+  final DateTime cycleStart = now.day >= payday
+      ? DateTime(now.year, now.month, payday)
+      : DateTime(now.year, now.month - 1, payday);
+
+  final cycleSpentAsync = ref.watch(cycleSpentStreamProvider(cycleStart));
+  if (cycleSpentAsync is AsyncError) {
+    return AsyncError(cycleSpentAsync.error!, cycleSpentAsync.stackTrace!);
+  }
+  if (cycleSpentAsync is AsyncLoading) {
+    return const AsyncLoading();
+  }
+
   final commitments = commitmentsAsync.value ?? [];
   final recentExpenses = expensesAsync.value ?? [];
   final accounts = accountsAsync.value ?? [];
@@ -117,22 +131,7 @@ final dashboardStateProvider = Provider<AsyncValue<DashboardState>>((ref) {
     targetPreset: targetPreset,
   );
 
-  final now = DateTime.now();
-  final int payday = profile.paydayDayOfMonth;
-  DateTime cycleStart;
-  if (now.day >= payday) {
-    cycleStart = DateTime(now.year, now.month, payday);
-  } else {
-    cycleStart = DateTime(now.year, now.month - 1, payday);
-  }
-
-  int spentSen = 0;
-  for (final item in recentExpenses) {
-    if (item.expense.date.isAfter(cycleStart) ||
-        item.expense.date.isAtSameMomentAs(cycleStart)) {
-      spentSen += item.expense.amountSen;
-    }
-  }
+  final int spentSen = cycleSpentAsync.value ?? 0;
   final totalSpent = Money(spentSen);
 
   final int totalLiquidSen = accounts
