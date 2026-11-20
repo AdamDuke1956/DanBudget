@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/surface_card.dart';
 import '../../data/providers/dashboard_provider.dart';
-import '../../data/providers/tax_provider.dart';
 import '../../domain/engine/allocation_engine.dart';
-import '../tax/tax_optimizer_screen.dart';
 import 'widgets/adjust_plan_sheet.dart';
+import 'widgets/allocation_buckets_section.dart';
+import 'widgets/allocation_overview_card.dart';
 import 'widgets/cashflow_advisor_card.dart';
+import 'widgets/lhdn_tax_summary_card.dart';
+import 'widgets/payslip_breakdown_card.dart';
 import 'widgets/salary_edit_sheet.dart';
 
 class PlanScreen extends ConsumerWidget {
@@ -14,10 +17,11 @@ class PlanScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = AppColors.of(context);
     final stateAsync = ref.watch(dashboardStateProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: Text(
           stateAsync.maybeWhen(
@@ -36,7 +40,7 @@ class PlanScreen extends ConsumerWidget {
           ),
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: -0.3),
         ),
-        backgroundColor: AppColors.background,
+        backgroundColor: colors.background,
         elevation: 0,
         actions: [
           stateAsync.when(
@@ -44,7 +48,7 @@ class PlanScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.tune_rounded, color: AppColors.primary),
+                  icon: Icon(Icons.tune_rounded, color: colors.primary),
                   tooltip: 'Adjust Budget Plan',
                   onPressed: () => AdjustPlanSheet.show(
                     context,
@@ -54,7 +58,7 @@ class PlanScreen extends ConsumerWidget {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.badge_outlined, color: AppColors.accent),
+                  icon: Icon(Icons.badge_outlined, color: colors.accent),
                   tooltip: 'Edit Salary Settings',
                   onPressed: () => SalaryEditSheet.show(context, state.profile),
                 ),
@@ -67,593 +71,37 @@ class PlanScreen extends ConsumerWidget {
       ),
       body: stateAsync.when(
         loading: () => Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
+          child: CircularProgressIndicator(color: colors.primary),
         ),
         error: (err, _) => Center(
-          child: Text('Error: $err', style: TextStyle(color: AppColors.danger)),
+          child: Text('Error: $err', style: TextStyle(color: colors.danger)),
         ),
         data: (state) {
-          final net = state.netSalary;
-          final alloc = state.allocation;
           final isIntern = state.employmentType.isIntern;
-          final epfPercent = (state.profile.epfRate * 100).round();
-          String pct(double v) => (v * 100).toStringAsFixed(0);
 
           return Stack(
             children: [
               CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
                 slivers: [
-                  // 1. Payslip & Statutory Deductions Voucher
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 6, 20, 10),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AppColors.cardBorder),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: AppColors.isDark ? 0.25 : 0.04),
-                              blurRadius: 14,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.primary.withValues(alpha: 0.15),
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: Icon(Icons.receipt_rounded, size: 18, color: AppColors.primary),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          isIntern ? 'Monthly Allowance Voucher' : 'Monthly Payslip Breakdown',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.textPrimary,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                TextButton.icon(
-                                  onPressed: () => SalaryEditSheet.show(context, state.profile),
-                                  icon: Icon(Icons.edit_rounded, size: 14, color: AppColors.primary),
-                                  label: Text(
-                                    'Edit',
-                                    style: TextStyle(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  style: TextButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-
-                            _buildPayslipRow(
-                              isIntern ? 'Monthly Allowance' : 'Gross Basic Salary',
-                              net.grossSalary.formatted,
-                              isBold: true,
-                            ),
-                            if (net.allowances.sen > 0)
-                              _buildPayslipRow(
-                                'Fixed Allowances',
-                                '+${net.allowances.formatted}',
-                                color: AppColors.primary,
-                              ),
-                            Divider(color: AppColors.outline.withValues(alpha: 0.5), height: 18),
-
-                            if (isIntern)
-                              _buildPayslipRow(
-                                'Statutory deductions (EPF / SOCSO / EIS)',
-                                'None (Exempted)',
-                                color: AppColors.primary,
-                              )
-                            else ...[
-                              _buildPayslipRow(
-                                'KWSP Employee ($epfPercent%)',
-                                '-${net.epfEmployee.formatted}',
-                                color: AppColors.textSecondary,
-                              ),
-                              _buildPayslipRow(
-                                'SOCSO / PERKESO',
-                                '-${net.socsoEmployee.formatted}',
-                                color: AppColors.textSecondary,
-                              ),
-                              _buildPayslipRow(
-                                'EIS / SIP',
-                                '-${net.eisEmployee.formatted}',
-                                color: AppColors.textSecondary,
-                              ),
-                              if (net.pcbTax.sen > 0)
-                                _buildPayslipRow(
-                                  'PCB Tax (MTD)',
-                                  '-${net.pcbTax.formatted}',
-                                  color: AppColors.textSecondary,
-                                ),
-                            ],
-
-                            Divider(color: AppColors.outline.withValues(alpha: 0.5), height: 18),
-                            _buildPayslipRow(
-                              'Net Take-home Pay',
-                              net.netSalary.formatted,
-                              isHighlight: true,
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: PayslipBreakdownCard(state: state),
                     ),
                   ),
-
-                  // 2. Budget Allocation Framework Section
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 6, 20, 10),
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceHigh,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AppColors.cardBorder),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Net Monthly Allocation',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.textSecondary,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.surface,
-                                          borderRadius: BorderRadius.circular(8),
-                                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.35)),
-                                        ),
-                                        child: Text(
-                                          '${pct(alloc.needs.percentage)} / ${pct(alloc.wants.percentage)} / ${pct(alloc.savings.percentage)} / ${pct(alloc.giving.percentage)} Split',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.primary,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                TextButton.icon(
-                                  onPressed: () => AdjustPlanSheet.show(
-                                    context,
-                                    profile: state.profile,
-                                    netSalary: state.netSalary.netSalary,
-                                    totalCommitments: state.allocation.totalCommitments,
-                                  ),
-                                  icon: Icon(Icons.tune_rounded, size: 14, color: AppColors.primary),
-                                  label: Text(
-                                    'Adjust Plan',
-                                    style: TextStyle(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  style: TextButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                    backgroundColor: AppColors.primary.withValues(alpha: 0.12),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              net.netSalary.formatted,
-                              style: TextStyle(
-                                fontSize: 34,
-                                fontWeight: FontWeight.w900,
-                                color: AppColors.textPrimary,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-                            // Multi-segment progress bar
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: SizedBox(
-                                height: 10,
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      flex: (alloc.needs.percentage * 100).round().clamp(1, 100),
-                                      child: Container(color: AppColors.needs),
-                                    ),
-                                    const SizedBox(width: 2),
-                                    Expanded(
-                                      flex: (alloc.wants.percentage * 100).round().clamp(1, 100),
-                                      child: Container(color: AppColors.wants),
-                                    ),
-                                    const SizedBox(width: 2),
-                                    Expanded(
-                                      flex: (alloc.savings.percentage * 100).round().clamp(1, 100),
-                                      child: Container(color: AppColors.savings),
-                                    ),
-                                    const SizedBox(width: 2),
-                                    Expanded(
-                                      flex: (alloc.giving.percentage * 100).round().clamp(1, 100),
-                                      child: Container(color: AppColors.giving),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Wrap(
-                              spacing: 12,
-                              runSpacing: 6,
-                              children: [
-                                _buildLegend('${pct(alloc.needs.percentage)}% Needs', AppColors.needs),
-                                _buildLegend('${pct(alloc.wants.percentage)}% Wants', AppColors.wants),
-                                _buildLegend('${pct(alloc.savings.percentage)}% Savings', AppColors.savings),
-                                _buildLegend('${pct(alloc.giving.percentage)}% Giving', AppColors.giving),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: AllocationOverviewCard(state: state),
                     ),
                   ),
-
-                  // 3. Detailed Buckets Breakdown
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-                      child: Column(
-                        children: [
-                          // Needs Card
-                          Container(
-                            padding: const EdgeInsets.all(18),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: AppColors.needs.withValues(alpha: 0.4)),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                              color: AppColors.needs.withValues(alpha: 0.15),
-                                              borderRadius: BorderRadius.circular(10),
-                                            ),
-                                            child: Icon(Icons.home_rounded, color: AppColors.needs, size: 20),
-                                          ),
-                                          const SizedBox(width: 10),
-                                          Expanded(
-                                            child: Text(
-                                              '${pct(alloc.needs.percentage)}% Needs & Fixed Living',
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: AppColors.needs,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      alloc.needs.targetAmount.formatted,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w900,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  'Groceries, bills, rent, fuel, loans.',
-                                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4),
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.surfaceHigh,
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Fixed Loans / SPayLater',
-                                              style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              alloc.needs.fixedCommitmentPortion.formatted,
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.bold,
-                                                color: AppColors.textPrimary,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.surfaceHigh,
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Flexible Needs Buffer',
-                                              style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              alloc.needs.flexibleAmount.formatted,
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.bold,
-                                                color: AppColors.primary,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Wants & Savings Row
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.surface,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: AppColors.wants.withValues(alpha: 0.35)),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(6),
-                                            decoration: BoxDecoration(
-                                              color: AppColors.wants.withValues(alpha: 0.15),
-                                              borderRadius: BorderRadius.circular(8),
-                                            ),
-                                            child: Icon(Icons.coffee_rounded, color: AppColors.wants, size: 16),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Flexible(
-                                            child: Text(
-                                              alloc.wants.targetAmount.formatted,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.bold,
-                                                color: AppColors.textPrimary,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 10),
-                                      Text(
-                                        '${pct(alloc.wants.percentage)}% Wants',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.wants,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Dining, hobbies, coffee.',
-                                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.3),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.surface,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: AppColors.savings.withValues(alpha: 0.35)),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(6),
-                                            decoration: BoxDecoration(
-                                              color: AppColors.savings.withValues(alpha: 0.15),
-                                              borderRadius: BorderRadius.circular(8),
-                                            ),
-                                            child: Icon(Icons.savings_rounded, color: AppColors.savings, size: 16),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Flexible(
-                                            child: Text(
-                                              alloc.savings.targetAmount.formatted,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.bold,
-                                                color: AppColors.textPrimary,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 10),
-                                      Text(
-                                        '${pct(alloc.savings.percentage)}% Savings',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.savings,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Emergency fund, ASB, deposits.',
-                                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.3),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Giving Strip
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppColors.giving.withValues(alpha: 0.35)),
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.giving.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Icon(Icons.volunteer_activism_rounded, color: AppColors.giving, size: 16),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '${pct(alloc.giving.percentage)}% Charity & Giving',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.giving,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Sedekah, zakat, donations.',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  alloc.giving.targetAmount.formatted,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                      child: AllocationBucketsSection(allocation: state.allocation),
                     ),
                   ),
-
-                  // 4. Cashflow advisor
                   if (state.profile.aiAdviceEnabled)
                     SliverToBoxAdapter(
                       child: Padding(
@@ -661,39 +109,21 @@ class PlanScreen extends ConsumerWidget {
                         child: CashflowAdvisorCard(state: state),
                       ),
                     ),
-
-                  // 5. Malaysian Personal Income Tax Optimization Engine (LHDN Form BE)
-                  // Intern allowances are exempt from EPF, SOCSO, EIS & PCB tax.
                   if (!isIntern)
-                    SliverToBoxAdapter(
+                    const SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
-                        child: _LhdnTaxSummaryCard(),
+                        padding: EdgeInsets.fromLTRB(20, 4, 20, 10),
+                        child: LhdnTaxSummaryCard(),
                       ),
                     ),
-
                   const SliverToBoxAdapter(child: SizedBox(height: 100)),
                 ],
               ),
-
-              // Sticky Lower-Zone Strategy Dock (Reachable within bottom 60%)
               Positioned(
                 left: 20,
                 right: 20,
                 bottom: 16,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.surface.withValues(alpha: 0.95),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.outline.withValues(alpha: 0.8)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: AppColors.isDark ? 0.35 : 0.08),
-                        blurRadius: 18,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
+                child: SurfaceCard(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   child: Row(
                     children: [
@@ -708,14 +138,17 @@ class PlanScreen extends ConsumerWidget {
                           icon: const Icon(Icons.tune_rounded, size: 18),
                           label: const Text(
                             'Customize Ratios',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: AppColors.onPrimary,
+                            backgroundColor: colors.primary,
+                            foregroundColor: colors.onPrimary,
                             elevation: 0,
                             minimumSize: const Size(0, 48),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
                         ),
                       ),
@@ -723,15 +156,22 @@ class PlanScreen extends ConsumerWidget {
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () => SalaryEditSheet.show(context, state.profile),
-                          icon: Icon(Icons.badge_outlined, size: 16, color: AppColors.textPrimary),
+                          icon: Icon(Icons.badge_outlined, size: 16, color: colors.textPrimary),
                           label: Text(
                             'Edit Salary',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: colors.textPrimary,
+                            ),
                           ),
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: AppColors.cardBorder),
+                            side: BorderSide(color: colors.cardBorder),
                             minimumSize: const Size(0, 48),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
                         ),
                       ),
@@ -743,243 +183,6 @@ class PlanScreen extends ConsumerWidget {
           );
         },
       ),
-    );
-  }
-
-  Widget _buildPayslipRow(
-    String label,
-    String value, {
-    bool isBold = false,
-    bool isHighlight = false,
-    Color? color,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: isHighlight ? 14 : 13,
-                fontWeight: (isBold || isHighlight) ? FontWeight.bold : FontWeight.normal,
-                color: isHighlight ? AppColors.textPrimary : AppColors.textSecondary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: isHighlight ? 18 : 13,
-              fontWeight: (isBold || isHighlight) ? FontWeight.bold : FontWeight.w600,
-              color: isHighlight ? AppColors.primary : (color ?? AppColors.textPrimary),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLegend(String label, Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: color,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _LhdnTaxSummaryCard extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final taxAsync = ref.watch(taxDashboardProvider);
-
-    return taxAsync.maybeWhen(
-      data: (data) {
-        final r = data.taxResult;
-        return Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.35),
-            ),
-          ),
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      Icons.account_balance_rounded,
-                      size: 18,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Income Tax (Form BE)',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        Text(
-                          'YA ${data.assessmentYear} • Marginal Bracket ${r.marginalRatePercentLabel}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          r.isRefund
-                              ? 'Est. e-Filing Refund'
-                              : 'Est. Tax Payable',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          r.isRefund
-                              ? '+${r.estimatedRefund.formatted}'
-                              : '-${r.additionalTaxPayable.formatted}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w800,
-                            color: r.isRefund
-                                ? AppColors.success
-                                : AppColors.warning,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Statutory Reliefs Claimed',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          r.totalStatutoryReliefs.formatted,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const TaxOptimizerScreen(),
-                      ),
-                    );
-                  },
-                  icon: Icon(
-                    Icons.receipt_long_rounded,
-                    size: 16,
-                    color: AppColors.primary,
-                  ),
-                  label: Text(
-                    'Open Tax Optimizer',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: AppColors.primary.withValues(alpha: 0.45),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-      orElse: () => const SizedBox.shrink(),
     );
   }
 }

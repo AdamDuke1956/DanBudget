@@ -11,20 +11,14 @@ class HealthScoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color gradeColor;
-    switch (health.grade) {
-      case 'A':
-        gradeColor = AppColors.primary;
-        break;
-      case 'B':
-        gradeColor = AppColors.accent;
-        break;
-      case 'C':
-        gradeColor = AppColors.warning;
-        break;
-      default:
-        gradeColor = AppColors.danger;
-    }
+    final colors = AppColors.of(context);
+
+    final Color gradeColor = switch (health.grade) {
+      'A' => colors.primary,
+      'B' => colors.accent,
+      'C' => colors.warning,
+      _ => colors.danger,
+    };
 
     return SurfaceCard(
       padding: const EdgeInsets.all(18),
@@ -34,20 +28,27 @@ class HealthScoreCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Icon(Icons.shield_rounded, color: AppColors.primary, size: 24),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Health Score',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+              Expanded(
+                child: Row(
+                  children: [
+                    Icon(Icons.shield_rounded, color: colors.primary, size: 22),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Health Score',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: colors.textPrimary,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
@@ -66,7 +67,6 @@ class HealthScoreCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
@@ -90,34 +90,32 @@ class HealthScoreCard extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 '/ 100',
-                style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 16, color: colors.textSecondary),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
             health.summary,
-            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 12, color: colors.textSecondary),
           ),
           const SizedBox(height: 16),
-
-          _buildScoreBar('Debt Service Ratio (DSR)', health.dsrScore, 35, AppColors.needs),
+          _buildScoreBar(colors, 'Debt Service Ratio (DSR)', health.dsrScore, 35, colors.needs),
           const SizedBox(height: 8),
-          _buildScoreBar('Savings rate', health.savingsScore, 25, AppColors.savings),
+          _buildScoreBar(colors, 'Savings rate', health.savingsScore, 25, colors.savings),
           const SizedBox(height: 8),
-          _buildScoreBar('Emergency fund', health.emergencyFundScore, 25, AppColors.accent),
+          _buildScoreBar(colors, 'Emergency fund', health.emergencyFundScore, 25, colors.accent),
           const SizedBox(height: 8),
-          _buildScoreBar('Loan & BNPL safety', health.bnplSafetyScore, 15, AppColors.giving),
+          _buildScoreBar(colors, 'Loan & BNPL safety', health.bnplSafetyScore, 15, colors.giving),
           const SizedBox(height: 14),
-
           if (health.recommendations.isNotEmpty) ...[
-            Divider(color: AppColors.outline, height: 20),
+            Divider(color: colors.outline, height: 20),
             Text(
               'Tips',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -132,7 +130,7 @@ class HealthScoreCard extends StatelessWidget {
                       child: Icon(
                         Icons.check_circle_outline_rounded,
                         size: 14,
-                        color: AppColors.primary,
+                        color: colors.primary,
                       ),
                     ),
                     Expanded(
@@ -140,7 +138,7 @@ class HealthScoreCard extends StatelessWidget {
                         rec,
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                           height: 1.35,
                         ),
                       ),
@@ -155,7 +153,13 @@ class HealthScoreCard extends StatelessWidget {
     );
   }
 
-  Widget _buildScoreBar(String label, int current, int max, Color color) {
+  Widget _buildScoreBar(
+    AppPalette colors,
+    String label,
+    int current,
+    int max,
+    Color color,
+  ) {
     final ratio = (current / max).clamp(0.0, 1.0);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,16 +167,26 @@ class HealthScoreCard extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-            Text('$current / $max',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 11, color: colors.textSecondary),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '$current / $max',
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color),
+            ),
           ],
         ),
         const SizedBox(height: 4),
         AnimatedProgressBar(
           value: ratio,
           color: color,
-          backgroundColor: AppColors.surfaceHigh,
+          backgroundColor: colors.surfaceHigh,
           height: 6,
           borderRadius: 4,
         ),

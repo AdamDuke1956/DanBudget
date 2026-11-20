@@ -38,6 +38,19 @@ class AppPalette {
 
   bool get isDark => mode.isDark;
 
+  Color get onAccent => isDark ? background : Colors.white;
+  Color get onDanger => isDark ? background : Colors.white;
+
+  Color get cardBorder => isDark
+      ? outline.withValues(alpha: 0.45)
+      : outline.withValues(alpha: 0.7);
+
+  Color get subtleBorder => isDark
+      ? outline.withValues(alpha: 0.25)
+      : outline.withValues(alpha: 0.4);
+
+  Color get surfaceElevated => surfaceHigh;
+
   // Semantic aliases used by v1.6.0 Tax Optimizer widgets
   Color get bgPrimary => background;
   Color get bgSecondary => surface;
@@ -106,7 +119,7 @@ class AppPalette {
     onPrimary: Colors.white, // crisp white on crimson
     accent: Color(0xFF4F46E5), // deep indigo
     textPrimary: Color(0xFF0F172A), // WCAG AAA slate
-    textSecondary: Color(0xFF64748B), // WCAG AA slate
+    textSecondary: Color(0xFF58677D),
     success: Color(0xFF059669),
     warning: Color(0xFFD97706),
     danger: Color(0xFFE11D48),
@@ -158,15 +171,11 @@ abstract final class AppColors {
   static Color get giving => current.giving;
 
   // Modern border and elevation tokens
-  static Color get cardBorder => isDark
-      ? current.outline.withValues(alpha: 0.45)
-      : current.outline.withValues(alpha: 0.7);
+  static Color get cardBorder => current.cardBorder;
 
-  static Color get subtleBorder => isDark
-      ? current.outline.withValues(alpha: 0.25)
-      : current.outline.withValues(alpha: 0.4);
+  static Color get subtleBorder => current.subtleBorder;
 
-  static Color get surfaceElevated => current.surfaceHigh;
+  static Color get surfaceElevated => current.surfaceElevated;
 
   static BoxShadow? get cardShadow => current.cardShadow;
 

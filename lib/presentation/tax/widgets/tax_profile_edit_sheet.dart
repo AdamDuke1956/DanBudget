@@ -212,7 +212,7 @@ class _TaxProfileEditSheetState extends ConsumerState<TaxProfileEditSheet> {
         return Container(
           decoration: BoxDecoration(
             color: colors.bgSecondary,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
           child: Column(
@@ -501,10 +501,10 @@ class _TaxProfileEditSheetState extends ConsumerState<TaxProfileEditSheet> {
                   label: const Text('Save Tax Configuration'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.accentPrimary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: colors.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),

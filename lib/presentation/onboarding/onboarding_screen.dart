@@ -142,16 +142,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     HapticFeedback.mediumImpact();
 
     try {
-      await ref.read(profileRepositoryProvider).completeOnboarding(
+      await ref
+          .read(profileRepositoryProvider)
+          .completeOnboarding(
             name: _nameController.text,
             employmentType: type,
             incomeSen: Money.fromRinggit(_incomeRinggit).sen,
             paydayDayOfMonth: _payday,
             epfRate: _epfRate,
-            starterCommitments: kStarterOptions
-                .where((o) => _starterIds.contains(o.id))
-                .map((o) => o.toCommitment())
-                .toList(),
+            starterCommitments:
+                kStarterOptions
+                    .where((o) => _starterIds.contains(o.id))
+                    .map((o) => o.toCommitment())
+                    .toList(),
           );
       // Success: the profile stream emits isOnboarded = true and AppRoot
       // swaps this screen out, so there is nothing else to do here.
@@ -159,24 +162,27 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (!mounted) return;
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Couldn't save your setup. Please try again. ($e)")),
+        SnackBar(
+          content: Text("Couldn't save your setup. Please try again. ($e)"),
+        ),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return PopScope(
       canPop: _step == 0,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _back();
       },
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: colors.background,
         body: SafeArea(
           child: Column(
             children: [
-              _buildTopBar(),
+              _buildTopBar(colors),
               Expanded(
                 child: PageView(
                   controller: _pageController,
@@ -220,7 +226,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ],
                 ),
               ),
-              _buildBottomBar(),
+              _buildBottomBar(colors),
             ],
           ),
         ),
@@ -228,7 +234,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar(AppPalette colors) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 24, 0),
       child: Row(
@@ -241,10 +247,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               child: IconButton(
                 key: const Key('onboarding_back_button'),
                 onPressed: _step == 0 ? null : _back,
-                icon: Icon(
-                  Icons.arrow_back_rounded,
-                  color: AppColors.textPrimary,
-                ),
+                icon: Icon(Icons.arrow_back_rounded, color: colors.textPrimary),
               ),
             ),
           ),
@@ -260,7 +263,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
         ],
@@ -268,7 +271,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  Widget _buildBottomBar() {
+  Widget _buildBottomBar(AppPalette colors) {
     final isLast = _step == _lastStep;
     final enabled = _canContinue && !_saving;
 
@@ -281,43 +284,47 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           key: const Key('onboarding_continue_button'),
           onPressed: enabled ? _next : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.onPrimary,
-            disabledBackgroundColor: AppColors.surfaceHigh,
-            disabledForegroundColor: AppColors.textSecondary,
+            backgroundColor: colors.primary,
+            foregroundColor: colors.onPrimary,
+            disabledBackgroundColor: colors.surfaceHigh,
+            disabledForegroundColor: colors.textSecondary,
             elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
-          child: _saving
-              ? SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: AppColors.onPrimary,
-                  ),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      isLast ? 'Start My Budget Journey' : 'Continue',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
+          child:
+              _saving
+                  ? SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: colors.onPrimary,
+                    ),
+                  )
+                  : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          isLast ? 'Start My Budget Journey' : 'Continue',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      isLast
-                          ? Icons.rocket_launch_rounded
-                          : Icons.arrow_forward_rounded,
-                      size: 20,
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        isLast
+                            ? Icons.rocket_launch_rounded
+                            : Icons.arrow_forward_rounded,
+                        size: 20,
+                      ),
+                    ],
+                  ),
         ),
       ),
     );
@@ -336,10 +343,14 @@ class _StepPage extends StatelessWidget {
       tween: Tween(begin: 0, end: 1),
       duration: const Duration(milliseconds: 450),
       curve: Curves.easeOutCubic,
-      builder: (context, t, child) => Opacity(
-        opacity: t,
-        child: Transform.translate(offset: Offset(0, (1 - t) * 18), child: child),
-      ),
+      builder:
+          (context, t, child) => Opacity(
+            opacity: t,
+            child: Transform.translate(
+              offset: Offset(0, (1 - t) * 18),
+              child: child,
+            ),
+          ),
       child: SingleChildScrollView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),

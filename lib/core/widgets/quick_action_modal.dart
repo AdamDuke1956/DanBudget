@@ -19,16 +19,13 @@ class QuickActionModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border.all(
-          color: AppColors.isDark
-              ? AppColors.outline.withValues(alpha: 0.45)
-              : AppColors.outline,
-        ),
+        color: colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        border: Border.all(color: colors.cardBorder),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -39,8 +36,8 @@ class QuickActionModal extends StatelessWidget {
               width: 44,
               height: 5,
               decoration: BoxDecoration(
-                color: AppColors.outline,
-                borderRadius: BorderRadius.circular(10),
+                color: colors.outline,
+                borderRadius: BorderRadius.circular(6),
               ),
             ),
           ),
@@ -50,23 +47,23 @@ class QuickActionModal extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            'Manage transactions and balances instantly',
+            'Record transactions or adjust balances.',
             style: TextStyle(
               fontSize: 12,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
           const SizedBox(height: 20),
           _ActionTile(
             title: 'Log New Expense',
-            subtitle: 'Record dining, groceries, transport, or bills',
+            subtitle: 'Dining, groceries, transport, or bills',
             icon: Icons.receipt_long_rounded,
-            color: AppColors.primary,
+            color: colors.primary,
             onTap: () {
               Navigator.of(context).pop();
               AddExpenseSheet.show(context);
@@ -75,9 +72,9 @@ class QuickActionModal extends StatelessWidget {
           const SizedBox(height: 12),
           _ActionTile(
             title: 'Transfer Between Accounts',
-            subtitle: 'e.g. Reload Touch \'n Go from Maybank / CIMB',
+            subtitle: 'Move funds between banks and e-wallets',
             icon: Icons.swap_horiz_rounded,
-            color: AppColors.accent,
+            color: colors.accent,
             onTap: () {
               Navigator.of(context).pop();
               TransferFundsSheet.show(context);
@@ -86,9 +83,9 @@ class QuickActionModal extends StatelessWidget {
           const SizedBox(height: 12),
           _ActionTile(
             title: 'Reconcile Account Balance',
-            subtitle: 'Sync recorded balance with real online banking balance',
+            subtitle: 'Match recorded balance with your bank app',
             icon: Icons.tune_rounded,
-            color: AppColors.needs,
+            color: colors.needs,
             onTap: () {
               Navigator.of(context).pop();
               QuickAdjustBalanceSheet.show(context);
@@ -117,16 +114,17 @@ class _ActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: color.withValues(alpha: 0.25),
             ),
@@ -137,7 +135,7 @@ class _ActionTile extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: color, size: 22),
               ),
@@ -151,7 +149,7 @@ class _ActionTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -159,7 +157,7 @@ class _ActionTile extends StatelessWidget {
                       subtitle,
                       style: TextStyle(
                         fontSize: 11,
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -168,7 +166,7 @@ class _ActionTile extends StatelessWidget {
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 14,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ],
           ),

@@ -68,26 +68,26 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
           return;
         } else if (mounted) {
           setState(() {
-            _errorMessage = 'Biometric authentication was cancelled or not recognized. You can retry or bypass below.';
+            _errorMessage = 'Biometric check was cancelled or not recognized.';
           });
         }
       } else {
         if (mounted) {
           setState(() {
-            _errorMessage = 'Biometrics not enrolled or supported on this device. Tap Bypass to enter.';
+            _errorMessage = 'Biometrics not available on this device.';
           });
         }
       }
     } on PlatformException catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = e.message ?? 'Authentication error occurred. Tap Bypass to enter.';
+          _errorMessage = e.message ?? 'Authentication error occurred.';
         });
       }
     } catch (_) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Unable to verify biometrics. Tap Bypass to enter.';
+          _errorMessage = 'Unable to verify biometrics.';
         });
       }
     } finally {
@@ -109,9 +109,10 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
       if (!didAuth) return;
     } catch (e) {
       if (mounted) {
+        final colors = AppColors.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: AppColors.danger,
+            backgroundColor: colors.danger,
             content: Text('Authentication required to disable lock: $e'),
           ),
         );
@@ -125,12 +126,15 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
           ),
         );
     if (mounted) {
+      final colors = AppColors.of(context);
       setState(() => _isUnlocked = true);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: AppColors.surfaceHigh,
-          content: Text('Biometric lock disabled.',
-              style: TextStyle(color: AppColors.textPrimary)),
+          backgroundColor: colors.surfaceHigh,
+          content: Text(
+            'Biometric lock disabled.',
+            style: TextStyle(color: colors.textPrimary),
+          ),
         ),
       );
     }
@@ -138,6 +142,7 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final profileAsync = ref.watch(userProfileStreamProvider);
 
     return profileAsync.when(
@@ -149,7 +154,7 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
         }
 
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: colors.background,
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -157,15 +162,14 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Spacer(),
-
                   Container(
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.15),
+                      color: colors.primary.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.4),
+                        color: colors.primary.withValues(alpha: 0.4),
                         width: 2,
                       ),
                     ),
@@ -173,53 +177,51 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                       child: Icon(
                         Icons.fingerprint_rounded,
                         size: 54,
-                        color: AppColors.primary,
+                        color: colors.primary,
                       ),
                     ),
                   ),
                   const SizedBox(height: 28),
-
                   Text(
                     'DanBudget Locked',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Biometric security is active to protect your payslip and financial data.',
+                    'Biometric lock is enabled for your financial data.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                       height: 1.4,
                     ),
                   ),
-
                   if (_errorMessage != null) ...[
                     const SizedBox(height: 18),
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppColors.warning.withValues(alpha: 0.12),
+                        color: colors.warning.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: AppColors.warning.withValues(alpha: 0.35),
+                          color: colors.warning.withValues(alpha: 0.35),
                         ),
                       ),
                       child: Row(
                         children: [
                           Icon(Icons.info_outline_rounded,
-                              color: AppColors.warning, size: 20),
+                              color: colors.warning, size: 20),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               _errorMessage!,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textPrimary,
+                                color: colors.textPrimary,
                                 height: 1.3,
                               ),
                             ),
@@ -228,9 +230,7 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                       ),
                     ),
                   ],
-
                   const Spacer(),
-
                   SizedBox(
                     width: double.infinity,
                     height: 52,
@@ -242,7 +242,7 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: AppColors.onPrimary,
+                                color: colors.onPrimary,
                               ),
                             )
                           : const Icon(Icons.fingerprint_rounded, size: 22),
@@ -251,11 +251,11 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.onPrimary,
+                        backgroundColor: colors.primary,
+                        foregroundColor: colors.onPrimary,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),
@@ -276,27 +276,26 @@ class _BiometricGuardState extends ConsumerState<BiometricGuard> {
                           ),
                         ),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.warning,
-                          backgroundColor: AppColors.surfaceHigh,
+                          foregroundColor: colors.warning,
+                          backgroundColor: colors.surfaceHigh,
                           side: BorderSide(
-                            color: AppColors.warning.withValues(alpha: 0.5),
+                            color: colors.warning.withValues(alpha: 0.5),
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                       ),
                     ),
                   ],
                   const SizedBox(height: 8),
-
                   TextButton.icon(
                     onPressed: _disableBiometricLock,
                     icon: const Icon(Icons.lock_reset_rounded, size: 16),
                     label: Text(
                       'Disable Biometric Lock',
                       style: TextStyle(
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),

@@ -30,10 +30,10 @@ class StarterOption {
   final int dueDay;
 
   StarterCommitment toCommitment() => StarterCommitment(
-        title: title,
-        monthlyPaymentSen: monthlySen,
-        dueDayOfMonth: dueDay,
-      );
+    title: title,
+    monthlyPaymentSen: monthlySen,
+    dueDayOfMonth: dueDay,
+  );
 }
 
 /// Offered starter commitments (My50 is pre-selected for interns).
@@ -79,10 +79,13 @@ class PaydayStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selected =
-        kStarterOptions.where((o) => selectedStarterIds.contains(o.id));
-    final commitments =
-        Money(selected.fold<int>(0, (sum, o) => sum + o.monthlySen));
+    final colors = AppColors.of(context);
+    final selected = kStarterOptions.where(
+      (o) => selectedStarterIds.contains(o.id),
+    );
+    final commitments = Money(
+      selected.fold<int>(0, (sum, o) => sum + o.monthlySen),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,31 +100,34 @@ class PaydayStep extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Payday of the month',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textSecondary,
+            Expanded(
+              child: Text(
+                'Payday of the month',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: colors.textSecondary,
+                ),
               ),
             ),
+            const SizedBox(width: 8),
             Text(
               _ordinal(payday),
               key: const Key('onboarding_payday_label'),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: AppColors.primary,
+                color: colors.primary,
               ),
             ),
           ],
         ),
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
-            activeTrackColor: AppColors.primary,
-            inactiveTrackColor: AppColors.outline,
-            thumbColor: AppColors.primary,
-            overlayColor: AppColors.primary.withValues(alpha: 0.15),
+            activeTrackColor: colors.primary,
+            inactiveTrackColor: colors.outline,
+            thumbColor: colors.primary,
+            overlayColor: colors.primary.withValues(alpha: 0.15),
           ),
           child: Slider(
             key: const Key('onboarding_payday_slider'),
@@ -153,7 +159,7 @@ class PaydayStep extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: AppColors.textSecondary,
+            color: colors.textSecondary,
           ),
         ),
         const SizedBox(height: 10),
@@ -206,22 +212,15 @@ class _StarterTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final colors = AppColors.of(context);
+    return SurfaceCard(
       key: Key('starter_${option.id}'),
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.primary.withValues(alpha: 0.12)
-              : AppColors.surface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: selected ? AppColors.primary : AppColors.outline,
-            width: selected ? 1.5 : 1,
-          ),
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      raised: selected,
+      borderColor: selected ? colors.primary : null,
+      child: Semantics(
+        selected: selected,
         child: Row(
           children: [
             Container(
@@ -229,15 +228,16 @@ class _StarterTile extends StatelessWidget {
               height: 40,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: selected
-                    ? AppColors.primary.withValues(alpha: 0.18)
-                    : AppColors.surfaceHigh,
-                borderRadius: BorderRadius.circular(12),
+                color:
+                    selected
+                        ? colors.primary.withValues(alpha: 0.12)
+                        : colors.surfaceHigh,
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 option.icon,
                 size: 20,
-                color: selected ? AppColors.primary : AppColors.textSecondary,
+                color: selected ? colors.textPrimary : colors.textSecondary,
               ),
             ),
             const SizedBox(width: 12),
@@ -250,15 +250,12 @@ class _StarterTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                   ),
                   Text(
                     '${option.subtitle} • ${Money(option.monthlySen).formatted}/mo',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
+                    style: TextStyle(fontSize: 12, color: colors.textSecondary),
                   ),
                 ],
               ),
@@ -267,7 +264,7 @@ class _StarterTile extends StatelessWidget {
               selected
                   ? Icons.check_circle_rounded
                   : Icons.add_circle_outline_rounded,
-              color: selected ? AppColors.primary : AppColors.textSecondary,
+              color: selected ? colors.primary : colors.textSecondary,
             ),
           ],
         ),
@@ -289,6 +286,7 @@ class _PlanPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final alloc = AllocationEngine.calculate(
       netSalary: netIncome,
       totalCommitments: commitments,
@@ -302,15 +300,17 @@ class _PlanPreview extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            spacing: 12,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
                 'Your monthly plan',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
               Text(
@@ -318,7 +318,7 @@ class _PlanPreview extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textSecondary,
+                  color: colors.textSecondary,
                 ),
               ),
             ],
@@ -329,20 +329,20 @@ class _PlanPreview extends StatelessWidget {
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           const SizedBox(height: 14),
-          _row('Needs', alloc.needs.targetAmount, AppColors.needs),
-          _row('Wants', alloc.wants.targetAmount, AppColors.wants),
-          _row('Savings', alloc.savings.targetAmount, AppColors.savings),
-          _row('Charity', alloc.giving.targetAmount, AppColors.giving),
+          _row(colors, 'Needs', alloc.needs.targetAmount, colors.needs),
+          _row(colors, 'Wants', alloc.wants.targetAmount, colors.wants),
+          _row(colors, 'Savings', alloc.savings.targetAmount, colors.savings),
+          _row(colors, 'Charity', alloc.giving.targetAmount, colors.giving),
         ],
       ),
     );
   }
 
-  Widget _row(String label, Money amount, Color color) {
+  Widget _row(AppPalette colors, String label, Money amount, Color color) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -356,10 +356,7 @@ class _PlanPreview extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 13,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 13, color: colors.textSecondary),
             ),
           ),
           Text(
@@ -367,7 +364,7 @@ class _PlanPreview extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
         ],

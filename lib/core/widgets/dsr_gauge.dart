@@ -24,10 +24,10 @@ class DsrGauge extends StatelessWidget {
   /// Hide when the parent already renders its own status badge.
   final bool showStatusLabel;
 
-  Color get statusColor {
-    if (dsrRatio <= 0.35) return AppColors.success;
-    if (dsrRatio <= 0.50) return AppColors.warning;
-    return AppColors.danger;
+  Color _statusColor(AppPalette colors) {
+    if (dsrRatio <= 0.35) return colors.success;
+    if (dsrRatio <= 0.50) return colors.warning;
+    return colors.danger;
   }
 
   String get statusLabel {
@@ -38,6 +38,8 @@ class DsrGauge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final activeColor = _statusColor(colors);
     final clampedRatio = dsrRatio.clamp(0.0, 1.0);
     final pctText = '${(dsrRatio * 100).toStringAsFixed(1)}%';
 
@@ -56,10 +58,10 @@ class DsrGauge extends StatelessWidget {
             size: Size(size, widgetHeight),
             painter: _DsrArcPainter(
               progress: clampedRatio,
-              activeColor: statusColor,
-              trackColor: AppColors.isDark
-                  ? AppColors.surfaceHigh.withValues(alpha: 0.6)
-                  : AppColors.outline.withValues(alpha: 0.8),
+              activeColor: activeColor,
+              trackColor: colors.isDark
+                  ? colors.surfaceHigh.withValues(alpha: 0.6)
+                  : colors.outline.withValues(alpha: 0.8),
               strokeWidth: strokeWidth,
               centerY: centerY,
               radius: radius,
@@ -78,7 +80,7 @@ class DsrGauge extends StatelessWidget {
                     fontSize: size * 0.17,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 if (showStatusLabel) ...[
@@ -88,7 +90,7 @@ class DsrGauge extends StatelessWidget {
                     style: TextStyle(
                       fontSize: size * 0.08,
                       fontWeight: FontWeight.w700,
-                      color: statusColor,
+                      color: activeColor,
                     ),
                   ),
                 ],

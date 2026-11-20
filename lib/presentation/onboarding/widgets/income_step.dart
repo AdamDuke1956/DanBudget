@@ -37,6 +37,7 @@ class IncomeStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final isIntern = employmentType.isIntern;
     final presets = isIntern ? internPresets : fullTimePresets;
     final amount = parseRinggit(controller.text) ?? 0;
@@ -46,12 +47,14 @@ class IncomeStep extends StatelessWidget {
       children: [
         OnboardingStepHeader(
           icon: isIntern ? Icons.school_rounded : Icons.work_rounded,
-          title: isIntern
-              ? "What's your monthly allowance?"
-              : "What's your monthly salary?",
-          subtitle: isIntern
-              ? 'The amount you receive from your internship each month.'
-              : 'Your gross basic salary before EPF, SOCSO, EIS and tax.',
+          title:
+              isIntern
+                  ? "What's your monthly allowance?"
+                  : "What's your monthly salary?",
+          subtitle:
+              isIntern
+                  ? 'The amount you receive from your internship each month.'
+                  : 'Your gross basic salary before EPF, SOCSO, EIS and tax.',
         ),
         const SizedBox(height: 24),
         TextField(
@@ -64,11 +67,12 @@ class IncomeStep extends StatelessWidget {
             LengthLimitingTextInputFormatter(9),
           ],
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
             fontWeight: FontWeight.w800,
             fontSize: 22,
           ),
           decoration: onboardingInputDecoration(
+            context,
             label: isIntern ? 'Monthly Allowance' : 'Gross Monthly Salary',
             prefixText: 'RM ',
           ),
@@ -93,9 +97,10 @@ class IncomeStep extends StatelessWidget {
         if (isIntern)
           OnboardingInfoPill(
             icon: Icons.verified_rounded,
-            text: amount > 0
-                ? 'No statutory deductions. You take home the full ${Money.fromRinggit(amount).formatted}.'
-                : 'No statutory deductions. You take home your full allowance.',
+            text:
+                amount > 0
+                    ? 'No statutory deductions. You take home the full ${Money.fromRinggit(amount).formatted}.'
+                    : 'No statutory deductions. You take home your full allowance.',
           )
         else ...[
           Text(
@@ -103,18 +108,19 @@ class IncomeStep extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
           const SizedBox(height: 10),
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
               OnboardingChip(
                 label: '11% Standard',
                 selected: epfRate == 0.11,
                 onTap: () => onEpfRateChanged(0.11),
               ),
-              const SizedBox(width: 8),
               OnboardingChip(
                 label: '9% Reduced',
                 selected: epfRate == 0.09,

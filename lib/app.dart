@@ -38,17 +38,18 @@ class AppRoot extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = AppColors.of(context);
     final profileAsync = ref.watch(userProfileStreamProvider);
 
     final Widget screen = profileAsync.when(
       loading: () => const _SplashScreen(key: ValueKey('splash')),
       error: (err, _) => Scaffold(
         key: const ValueKey('error'),
-        backgroundColor: AppColors.background,
+        backgroundColor: colors.background,
         body: Center(
           child: Text(
             'Error: $err',
-            style: TextStyle(color: AppColors.danger),
+            style: TextStyle(color: colors.danger),
           ),
         ),
       ),
@@ -71,10 +72,11 @@ class _SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       body: Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+        child: CircularProgressIndicator(color: colors.primary),
       ),
     );
   }
@@ -90,34 +92,39 @@ class AppShell extends ConsumerStatefulWidget {
 
 class _AppShellState extends ConsumerState<AppShell> {
   int _index = 0;
+  late final List<Widget> _tabs;
 
-  List<Widget> _buildTabs(AppThemeMode themeMode) => [
-    HomeScreen(
-      key: ValueKey('home_${themeMode.name}'),
-      onNavigateToTab: (i) => setState(() => _index = i),
-    ),
-    ExpensesScreen(key: ValueKey('expenses_${themeMode.name}')),
-    PlanScreen(key: ValueKey('plan_${themeMode.name}')),
-    CommitmentsScreen(key: ValueKey('commitments_${themeMode.name}')),
-    MoreScreen(key: ValueKey('more_${themeMode.name}')),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _tabs = [
+      HomeScreen(
+        key: const ValueKey('home'),
+        onNavigateToTab: (i) => setState(() => _index = i),
+      ),
+      const ExpensesScreen(key: ValueKey('expenses')),
+      const PlanScreen(key: ValueKey('plan')),
+      const CommitmentsScreen(key: ValueKey('commitments')),
+      const MoreScreen(key: ValueKey('more')),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = ref.watch(themeModeProvider);
+    final colors = AppColors.of(context);
 
     return Scaffold(
       body: IndexedStack(
         index: _index,
-        children: _buildTabs(themeMode),
+        children: _tabs,
       ),
       bottomNavigationBar: MediaQuery.withClampedTextScaling(
         maxScaleFactor: 1.0,
         child: NavigationBar(
           selectedIndex: _index,
           onDestinationSelected: (i) => setState(() => _index = i),
-          backgroundColor: AppColors.surface,
-          indicatorColor: AppColors.primary.withValues(alpha: 0.18),
+          backgroundColor: colors.surface,
+          indicatorColor: colors.primary.withValues(alpha: 0.18),
           elevation: 4,
           destinations: const [
             NavigationDestination(

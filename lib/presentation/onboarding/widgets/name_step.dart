@@ -19,6 +19,7 @@ class NameStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -26,7 +27,7 @@ class NameStep extends StatelessWidget {
           icon: Icons.person_rounded,
           title: 'What should we call you?',
           subtitle:
-              "Let's personalise your financial companion. Pick any name or nickname you like.",
+              'Enter the name or nickname you want to see on your dashboard.',
         ),
         const SizedBox(height: 28),
         TextField(
@@ -39,11 +40,12 @@ class NameStep extends StatelessWidget {
           maxLength: 24,
           inputFormatters: [LengthLimitingTextInputFormatter(24)],
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
             fontWeight: FontWeight.w700,
             fontSize: 18,
           ),
           decoration: onboardingInputDecoration(
+            context,
             label: 'Your name',
             hint: 'e.g. Adam',
             icon: Icons.person_rounded,
@@ -52,8 +54,7 @@ class NameStep extends StatelessWidget {
         const SizedBox(height: 18),
         const OnboardingInfoPill(
           icon: Icons.lock_rounded,
-          text:
-              '100% offline & private. Your name and finances are stored only on this device.',
+          text: 'DanBudget saves your profile and budget on this device.',
         ),
       ],
     );

@@ -15,12 +15,12 @@ class CashflowAdvisorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final alloc = state.allocation;
     final dsrPercent = alloc.dsrRatio * 100;
     final monthlySavings = alloc.savings.targetAmount;
     final preset = AllocationPreset.forType(state.employmentType);
 
-    // Emergency fund target: 3 months of Needs.
     final threeMonthsNeedsSen = alloc.needs.targetAmount.sen * 3;
     final savingsDeficitSen =
         (threeMonthsNeedsSen - state.profile.currentSavingsSen).clamp(0, 1 << 40);
@@ -33,11 +33,11 @@ class CashflowAdvisorCard extends StatelessWidget {
     final String secondChip;
 
     if (alloc.dsrRatio > preset.needs) {
-      statusColor = AppColors.warning;
+      statusColor = colors.warning;
       advice = 'Wants capped at ${alloc.wants.targetAmount.formatted} to protect savings.';
       secondChip = 'Wants capped';
     } else if (alloc.dsrRatio <= 0.25) {
-      statusColor = AppColors.primary;
+      statusColor = colors.primary;
       advice = 'Save ${monthlySavings.formatted} a month to stay on track.';
       secondChip = savingsDeficitSen == 0
           ? 'Emergency fund ready'
@@ -45,7 +45,7 @@ class CashflowAdvisorCard extends StatelessWidget {
               ? 'Emergency fund in $monthsToEmergencyTarget mo'
               : 'Emergency fund not started');
     } else {
-      statusColor = AppColors.accent;
+      statusColor = colors.accent;
       advice = 'Hold off on new SPayLater tenures for now.';
       secondChip = 'Watch new debt';
     }
@@ -57,7 +57,7 @@ class CashflowAdvisorCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.insights_rounded, color: AppColors.textSecondary, size: 18),
+              Icon(Icons.insights_rounded, color: colors.textSecondary, size: 18),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -67,7 +67,7 @@ class CashflowAdvisorCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
               ),
@@ -85,18 +85,18 @@ class CashflowAdvisorCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             advice,
-            style: TextStyle(fontSize: 13, color: AppColors.textPrimary, height: 1.4),
+            style: TextStyle(fontSize: 13, color: colors.textPrimary, height: 1.4),
           ),
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () => AffordabilitySimulatorSheet.show(context),
-              icon: Icon(Icons.calculate_outlined, size: 18, color: AppColors.textPrimary),
+              icon: Icon(Icons.calculate_outlined, size: 18, color: colors.textPrimary),
               label: const Text('Can I afford a purchase?'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: BorderSide(color: AppColors.outline),
+                foregroundColor: colors.textPrimary,
+                side: BorderSide(color: colors.outline),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),

@@ -48,8 +48,6 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
     _paydayController = TextEditingController(
       text: widget.profile.paydayDayOfMonth.toString(),
     );
-    // Interns are stored with a 0% EPF rate; fall back to the standard 11%
-    // so switching to Full-Time starts from a sensible value.
     _epfRate = widget.profile.epfRate > 0 ? widget.profile.epfRate : 0.11;
   }
 
@@ -76,8 +74,6 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
           name: name.isEmpty ? widget.profile.name : name,
           employmentType: _employmentType,
           grossSalarySen: Money.fromRinggit(grossRinggit).sen,
-          // Allowances only apply to salaried staff; an intern's allowance
-          // IS the income figure.
           fixedAllowanceSen:
               _isIntern ? 0 : Money.fromRinggit(allowanceRinggit).sen,
           epfRate: _isIntern ? 0.0 : _epfRate,
@@ -96,6 +92,7 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
@@ -106,7 +103,7 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
         bottom: 24 + bottomInset,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colors.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SingleChildScrollView(
@@ -119,19 +116,18 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
                 width: 44,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: AppColors.outline,
-                  borderRadius: BorderRadius.circular(10),
+                  color: colors.outline,
+                  borderRadius: BorderRadius.circular(6),
                 ),
               ),
             ),
             const SizedBox(height: 16),
-
             Text(
               'Profile & Income Setup',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
             const SizedBox(height: 4),
@@ -139,67 +135,65 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
               _isIntern
                   ? 'Intern allowances are take-home: no EPF, SOCSO or EIS deductions.'
                   : 'Malaysian EPF, SOCSO, EIS & PCB are calculated automatically.',
-              style:
-                  TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 12, color: colors.textSecondary),
             ),
             const SizedBox(height: 16),
-
             TextField(
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
               maxLength: 24,
-              style: TextStyle(
-                  color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+              style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.bold),
               decoration: _inputDecoration(
+                colors: colors,
                 label: 'Your Name',
                 icon: Icons.person_rounded,
               ),
             ),
             const SizedBox(height: 4),
-
             Text(
               'Employment Status',
               style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: colors.textSecondary,
+              ),
             ),
             const SizedBox(height: 8),
             Row(
               children: [
                 for (final type in EmploymentType.values) ...[
-                  Expanded(child: _buildChoiceChip(
-                    label: '${type.emoji} ${type.label}',
-                    selected: _employmentType == type,
-                    onSelected: () => setState(() => _employmentType = type),
-                  )),
-                  if (type != EmploymentType.values.last)
-                    const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildChoiceChip(
+                      colors: colors,
+                      label: '${type.emoji} ${type.label}',
+                      selected: _employmentType == type,
+                      onSelected: () => setState(() => _employmentType = type),
+                    ),
+                  ),
+                  if (type != EmploymentType.values.last) const SizedBox(width: 8),
                 ],
               ],
             ),
             const SizedBox(height: 16),
-
             TextField(
               controller: _grossSalaryController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: TextStyle(
-                  color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+              style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.bold),
               decoration: _inputDecoration(
+                colors: colors,
                 label: '${_employmentType.incomeLabel} (RM)',
                 prefixText: 'RM ',
                 icon: Icons.attach_money_rounded,
               ),
             ),
             const SizedBox(height: 12),
-
             if (!_isIntern) ...[
               TextField(
                 controller: _allowancesController,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                style: TextStyle(color: AppColors.textPrimary),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                style: TextStyle(color: colors.textPrimary),
                 decoration: _inputDecoration(
+                  colors: colors,
                   label: 'Fixed Allowances (Transport / Phone)',
                   prefixText: 'RM ',
                   icon: Icons.card_giftcard_rounded,
@@ -207,31 +201,32 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
               ),
               const SizedBox(height: 12),
             ],
-
             TextField(
               controller: _paydayController,
               keyboardType: TextInputType.number,
-              style: TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: colors.textPrimary),
               decoration: _inputDecoration(
+                colors: colors,
                 label: 'Payday of the Month (e.g. 25th)',
                 icon: Icons.calendar_month_rounded,
               ),
             ),
             const SizedBox(height: 16),
-
             if (!_isIntern) ...[
               Text(
                 'EPF (KWSP) Employee Contribution Rate',
                 style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: colors.textSecondary,
+                ),
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
                     child: _buildChoiceChip(
+                      colors: colors,
                       label: '11% (Standard)',
                       selected: _epfRate == 0.11,
                       onSelected: () => setState(() => _epfRate = 0.11),
@@ -240,6 +235,7 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: _buildChoiceChip(
+                      colors: colors,
                       label: '9% (Reduced)',
                       selected: _epfRate == 0.09,
                       onSelected: () => setState(() => _epfRate = 0.09),
@@ -250,18 +246,18 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
               const SizedBox(height: 20),
             ] else
               const SizedBox(height: 4),
-
             ElevatedButton(
               onPressed: _save,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
+                backgroundColor: colors.primary,
+                foregroundColor: colors.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
-              child: const Text('Update Settings',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Update Settings',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
@@ -270,6 +266,7 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
   }
 
   Widget _buildChoiceChip({
+    required AppPalette colors,
     required String label,
     required bool selected,
     required VoidCallback onSelected,
@@ -278,47 +275,47 @@ class _SalaryEditSheetState extends ConsumerState<SalaryEditSheet> {
       label: Center(child: Text(label)),
       selected: selected,
       showCheckmark: false,
-      selectedColor: AppColors.primary.withValues(alpha: 0.25),
-      backgroundColor: AppColors.surfaceHigh,
+      selectedColor: colors.primary.withValues(alpha: 0.25),
+      backgroundColor: colors.surfaceHigh,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
       labelStyle: TextStyle(
-        color: selected ? AppColors.primary : AppColors.textSecondary,
+        color: selected ? colors.primary : colors.textSecondary,
         fontWeight: FontWeight.bold,
       ),
       side: BorderSide(
-        color: selected ? AppColors.primary : AppColors.outline,
+        color: selected ? colors.primary : colors.outline,
       ),
       onSelected: (_) => onSelected(),
     );
   }
 
   InputDecoration _inputDecoration({
+    required AppPalette colors,
     required String label,
     required IconData icon,
     String? prefixText,
   }) {
     return InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+      labelStyle: TextStyle(color: colors.textSecondary, fontSize: 13),
       prefixText: prefixText,
-      prefixStyle: TextStyle(
-          color: AppColors.textPrimary, fontWeight: FontWeight.bold),
-      prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
+      prefixStyle: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.bold),
+      prefixIcon: Icon(icon, color: colors.primary, size: 20),
       counterText: '',
       filled: true,
-      fillColor: AppColors.surfaceHigh,
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      fillColor: colors.surfaceHigh,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: AppColors.outline),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: colors.outline),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: AppColors.outline),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: colors.outline),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: AppColors.primary, width: 2),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: colors.primary, width: 2),
       ),
     );
   }

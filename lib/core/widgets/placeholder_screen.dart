@@ -20,6 +20,7 @@ class PlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final text = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(title: Text(title)),
@@ -30,7 +31,7 @@ class PlaceholderScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, size: 48, color: AppColors.primary),
+                Icon(icon, size: 48, color: colors.primary),
                 const SizedBox(height: 16),
                 Text(title, style: text.titleLarge),
                 const SizedBox(height: 8),
@@ -38,7 +39,7 @@ class PlaceholderScreen extends StatelessWidget {
                   description,
                   textAlign: TextAlign.center,
                   style: text.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 16),

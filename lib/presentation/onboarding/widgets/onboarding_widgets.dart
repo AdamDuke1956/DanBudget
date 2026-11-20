@@ -15,6 +15,7 @@ class OnboardingProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Row(
       children: List.generate(totalSteps, (i) {
         final reached = i <= currentStep;
@@ -26,8 +27,8 @@ class OnboardingProgressBar extends StatelessWidget {
               curve: Curves.easeOutCubic,
               height: 5,
               decoration: BoxDecoration(
-                color: reached ? AppColors.primary : AppColors.outline,
-                borderRadius: BorderRadius.circular(10),
+                color: reached ? colors.primary : colors.outline,
+                borderRadius: BorderRadius.circular(6),
               ),
             ),
           ),
@@ -54,6 +55,7 @@ class OnboardingStepHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -62,13 +64,14 @@ class OnboardingStepHeader extends StatelessWidget {
           height: 56,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.14),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+            color: colors.primary.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: colors.primary.withValues(alpha: 0.3)),
           ),
-          child: icon != null
-              ? Icon(icon, size: 28, color: AppColors.primary)
-              : Text(emoji ?? '', style: const TextStyle(fontSize: 28)),
+          child:
+              icon != null
+                  ? Icon(icon, size: 28, color: colors.primary)
+                  : Text(emoji ?? '', style: const TextStyle(fontSize: 28)),
         ),
         const SizedBox(height: 20),
         Text(
@@ -77,7 +80,7 @@ class OnboardingStepHeader extends StatelessWidget {
             fontSize: 26,
             height: 1.2,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -86,7 +89,7 @@ class OnboardingStepHeader extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             height: 1.45,
-            color: AppColors.textSecondary,
+            color: colors.textSecondary,
           ),
         ),
       ],
@@ -109,18 +112,19 @@ class OnboardingInfoPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = color ?? AppColors.primary;
+    final colors = AppColors.of(context);
+    final effectiveColor = color ?? colors.primary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: effectiveColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: effectiveColor.withValues(alpha: 0.28)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: color),
+          Icon(icon, size: 18, color: effectiveColor),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -128,7 +132,7 @@ class OnboardingInfoPill extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12.5,
                 height: 1.4,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
           ),
@@ -153,68 +157,61 @@ class OnboardingChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.primary.withValues(alpha: 0.2)
-              : AppColors.surfaceHigh,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: selected ? AppColors.primary : AppColors.outline,
-            width: selected ? 1.5 : 1,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: selected ? AppColors.primary : AppColors.textSecondary,
-          ),
-        ),
+    final colors = AppColors.of(context);
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onTap(),
+      showCheckmark: false,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      backgroundColor: colors.surfaceHigh,
+      selectedColor: colors.primary,
+      side: BorderSide(color: selected ? colors.primary : colors.outline),
+      labelStyle: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        color: selected ? colors.onPrimary : colors.textPrimary,
       ),
     );
   }
 }
 
 /// Shared input decoration matching the rest of the app's sheets.
-InputDecoration onboardingInputDecoration({
+InputDecoration onboardingInputDecoration(
+  BuildContext context, {
   required String label,
   String? hint,
   String? prefixText,
   IconData? icon,
 }) {
+  final colors = AppColors.of(context);
   OutlineInputBorder border(Color color, [double width = 1]) =>
       OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide(color: color, width: width),
       );
 
   return InputDecoration(
     labelText: label,
     hintText: hint,
-    labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-    hintStyle: TextStyle(
-      color: AppColors.textSecondary.withValues(alpha: 0.6),
-    ),
+    labelStyle: TextStyle(color: colors.textSecondary, fontSize: 13),
+    hintStyle: TextStyle(color: colors.textSecondary),
     prefixText: prefixText,
     prefixStyle: TextStyle(
-      color: AppColors.textPrimary,
+      color: colors.textPrimary,
       fontWeight: FontWeight.bold,
       fontSize: 18,
     ),
     prefixIcon:
-        icon == null ? null : Icon(icon, color: AppColors.primary, size: 22),
+        icon == null ? null : Icon(icon, color: colors.primary, size: 22),
     counterText: '',
     filled: true,
-    fillColor: AppColors.surfaceHigh,
+    fillColor: colors.surfaceHigh,
     contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-    border: border(AppColors.outline),
-    enabledBorder: border(AppColors.outline),
-    focusedBorder: border(AppColors.primary, 2),
+    border: border(colors.outline),
+    enabledBorder: border(colors.outline),
+    focusedBorder: border(colors.primary, 2),
   );
 }

@@ -65,7 +65,7 @@ class _AddEditAccountSheetState extends ConsumerState<AddEditAccountSheet> {
   final _nameController = TextEditingController();
   final _balanceController = TextEditingController();
 
-  String _selectedType = 'bank'; // 'bank', 'ewallet', 'cash', 'savings'
+  String _selectedType = 'bank';
   String _selectedIcon = '🏦';
   int _selectedColorHex = 0xFFFFC107;
   bool _isLiquidOnHand = true;
@@ -116,7 +116,6 @@ class _AddEditAccountSheetState extends ConsumerState<AddEditAccountSheet> {
 
     final ringgit = double.tryParse(_balanceController.text.trim()) ?? 0.0;
     final balanceSen = Money.fromRinggit(ringgit).sen;
-
     final repo = ref.read(accountRepositoryProvider);
 
     if (widget.existingAccount != null) {
@@ -145,6 +144,7 @@ class _AddEditAccountSheetState extends ConsumerState<AddEditAccountSheet> {
     }
 
     if (mounted) {
+      final colors = AppColors.of(context);
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -152,8 +152,9 @@ class _AddEditAccountSheetState extends ConsumerState<AddEditAccountSheet> {
             widget.existingAccount != null
                 ? 'Updated "$name"'
                 : 'Added "$name" to Money on Hand',
+            style: TextStyle(color: colors.textPrimary),
           ),
-          backgroundColor: AppColors.surfaceHigh,
+          backgroundColor: colors.surfaceHigh,
         ),
       );
     }
@@ -162,25 +163,33 @@ class _AddEditAccountSheetState extends ConsumerState<AddEditAccountSheet> {
   Future<void> _deleteAccount() async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text('Delete Account', style: TextStyle(color: AppColors.textPrimary)),
-        content: Text(
-          'Are you sure you want to delete "${widget.existingAccount!.name}"? This will not delete historical expenses associated with it.',
-          style: TextStyle(color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+      builder: (ctx) {
+        final colors = AppColors.of(ctx);
+        return AlertDialog(
+          backgroundColor: colors.surface,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text('Delete Account', style: TextStyle(color: colors.textPrimary)),
+          content: Text(
+            'Delete "${widget.existingAccount!.name}"? Past expenses linked to it will remain.',
+            style: TextStyle(color: colors.textSecondary),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colors.danger,
+                foregroundColor: colors.onDanger,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirm == true && mounted) {
@@ -196,6 +205,7 @@ class _AddEditAccountSheetState extends ConsumerState<AddEditAccountSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
@@ -209,8 +219,8 @@ class _AddEditAccountSheetState extends ConsumerState<AddEditAccountSheet> {
         bottom: 24 + bottomInset,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        color: colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -221,29 +231,26 @@ class _AddEditAccountSheetState extends ConsumerState<AddEditAccountSheet> {
                 width: 44,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: AppColors.outline,
-                  borderRadius: BorderRadius.circular(10),
+                  color: colors.outline,
+                  borderRadius: BorderRadius.circular(6),
                 ),
               ),
             ),
             const SizedBox(height: 16),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  widget.existingAccount != null
-                      ? 'Edit Account'
-                      : 'Add Bank / E-Wallet',
+                  widget.existingAccount != null ? 'Edit Account' : 'Add Bank / E-Wallet',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 if (widget.existingAccount != null)
                   IconButton(
-                    icon: Icon(Icons.delete_outline_rounded, color: AppColors.danger),
+                    icon: Icon(Icons.delete_outline_rounded, color: colors.danger),
                     onPressed: _deleteAccount,
                     tooltip: 'Delete Account',
                   ),
@@ -252,20 +259,18 @@ class _AddEditAccountSheetState extends ConsumerState<AddEditAccountSheet> {
             const SizedBox(height: 4),
             Text(
               'Track cash across Malaysian banks, e-wallets, or physical money.',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 12, color: colors.textSecondary),
             ),
             const SizedBox(height: 16),
-
             Text(
               'Select Bank or E-Wallet Preset',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
-
             SizedBox(
               height: 48,
               child: ListView.separated(
@@ -286,24 +291,24 @@ class _AddEditAccountSheetState extends ConsumerState<AddEditAccountSheet> {
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? AppColors.primary.withValues(alpha: 0.2)
-                              : AppColors.surfaceHigh,
-                          borderRadius: BorderRadius.circular(14),
+                              ? colors.primary.withValues(alpha: 0.2)
+                              : colors.surfaceHigh,
+                          borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                            color: isSelected ? AppColors.primary : AppColors.outline,
+                            color: isSelected ? colors.primary : colors.outline,
                             width: isSelected ? 1.5 : 1.0,
                           ),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.edit_note_rounded, size: 16, color: AppColors.primary),
+                            Icon(Icons.edit_note_rounded, size: 16, color: colors.primary),
                             const SizedBox(width: 6),
                             Text(
                               'Other / Custom',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                                color: isSelected ? colors.primary : colors.textPrimary,
                               ),
                             ),
                           ],
@@ -322,10 +327,10 @@ class _AddEditAccountSheetState extends ConsumerState<AddEditAccountSheet> {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? Color(preset.colorHex).withValues(alpha: 0.2)
-                            : AppColors.surfaceHigh,
-                        borderRadius: BorderRadius.circular(14),
+                            : colors.surfaceHigh,
+                        borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                          color: isSelected ? Color(preset.colorHex) : AppColors.outline,
+                          color: isSelected ? Color(preset.colorHex) : colors.outline,
                           width: isSelected ? 1.5 : 1.0,
                         ),
                       ),
@@ -338,7 +343,7 @@ class _AddEditAccountSheetState extends ConsumerState<AddEditAccountSheet> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                              color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                              color: isSelected ? colors.textPrimary : colors.textSecondary,
                             ),
                           ),
                         ],
@@ -349,23 +354,22 @@ class _AddEditAccountSheetState extends ConsumerState<AddEditAccountSheet> {
               ),
             ),
             const SizedBox(height: 16),
-
             TextField(
               controller: _nameController,
-              style: TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: colors.textPrimary),
               decoration: InputDecoration(
                 labelText: 'Account / Wallet Name',
-                labelStyle: TextStyle(color: AppColors.textSecondary),
+                labelStyle: TextStyle(color: colors.textSecondary),
                 hintText: 'e.g. Maybank M2U, CIMB Clicks, BIMB, TnG',
-                hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.5)),
+                hintStyle: TextStyle(color: colors.textSecondary.withValues(alpha: 0.5)),
                 prefixIcon: Container(
                   width: 40,
                   alignment: Alignment.center,
                   child: Text(_selectedIcon, style: const TextStyle(fontSize: 18)),
                 ),
                 filled: true,
-                fillColor: AppColors.surfaceHigh,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                fillColor: colors.surfaceHigh,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
               onChanged: (_) {
                 if (!_isCustomInput) {
@@ -374,84 +378,79 @@ class _AddEditAccountSheetState extends ConsumerState<AddEditAccountSheet> {
               },
             ),
             const SizedBox(height: 12),
-
             Row(
               children: [
                 Text(
                   'Type: ',
-                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                  style: TextStyle(fontSize: 13, color: colors.textSecondary, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Wrap(
                     spacing: 6,
                     children: [
-                      _buildTypeChip('bank', '🏦 Bank'),
-                      _buildTypeChip('ewallet', '📱 E-Wallet'),
-                      _buildTypeChip('cash', '💵 Cash'),
-                      _buildTypeChip('savings', '💰 Savings'),
+                      _buildTypeChip(colors, 'bank', '🏦 Bank'),
+                      _buildTypeChip(colors, 'ewallet', '📱 E-Wallet'),
+                      _buildTypeChip(colors, 'cash', '💵 Cash'),
+                      _buildTypeChip(colors, 'savings', '💰 Savings'),
                     ],
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-
             TextField(
               controller: _balanceController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(color: colors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
               decoration: InputDecoration(
                 labelText: 'Current Balance',
-                labelStyle: TextStyle(color: AppColors.textSecondary),
+                labelStyle: TextStyle(color: colors.textSecondary),
                 hintText: '0.00',
                 prefixText: 'RM ',
-                prefixStyle: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                prefixStyle: TextStyle(color: colors.primary, fontWeight: FontWeight.bold),
                 filled: true,
-                fillColor: AppColors.surfaceHigh,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                fillColor: colors.surfaceHigh,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
             const SizedBox(height: 16),
-
             SwitchListTile.adaptive(
               contentPadding: EdgeInsets.zero,
               title: Text(
                 'Include in Total Money on Hand',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: colors.textPrimary),
               ),
               subtitle: Text(
-                'Keep turned ON for liquid cash. Turn OFF for locked savings (e.g. ASB/FD).',
-                style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                'Keep ON for liquid cash. Turn OFF for locked savings (ASB/FD).',
+                style: TextStyle(fontSize: 11, color: colors.textSecondary),
               ),
               value: _isLiquidOnHand,
-              activeColor: AppColors.primary,
+              activeColor: colors.primary,
               onChanged: (val) => setState(() => _isLiquidOnHand = val),
             ),
-
             SwitchListTile.adaptive(
               contentPadding: EdgeInsets.zero,
               title: Text(
                 'Set as Default Account',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: colors.textPrimary),
               ),
               subtitle: Text(
                 'Default account selected when logging new expenses.',
-                style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 11, color: colors.textSecondary),
               ),
               value: _isDefault,
-              activeColor: AppColors.primary,
+              activeColor: colors.primary,
               onChanged: (val) => setState(() => _isDefault = val),
             ),
             const SizedBox(height: 20),
-
             ElevatedButton(
               onPressed: _saveAccount,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: const Color(0xFF04291F),
+                backgroundColor: colors.primary,
+                foregroundColor: colors.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
               child: Text(
                 widget.existingAccount != null ? 'Save Changes' : 'Add Account',
@@ -464,19 +463,20 @@ class _AddEditAccountSheetState extends ConsumerState<AddEditAccountSheet> {
     );
   }
 
-  Widget _buildTypeChip(String type, String label) {
+  Widget _buildTypeChip(AppPalette colors, String type, String label) {
     final isSelected = _selectedType == type;
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
-      selectedColor: AppColors.primary.withValues(alpha: 0.2),
-      backgroundColor: AppColors.surfaceHigh,
+      selectedColor: colors.primary.withValues(alpha: 0.2),
+      backgroundColor: colors.surfaceHigh,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
       labelStyle: TextStyle(
         fontSize: 11,
-        color: isSelected ? AppColors.primary : AppColors.textSecondary,
+        color: isSelected ? colors.primary : colors.textSecondary,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
-      side: BorderSide(color: isSelected ? AppColors.primary : AppColors.outline),
+      side: BorderSide(color: isSelected ? colors.primary : colors.outline),
       onSelected: (_) {
         setState(() {
           _selectedType = type;

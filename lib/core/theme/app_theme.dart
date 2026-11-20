@@ -67,18 +67,22 @@ abstract final class AppTheme {
               primary: palette.primary,
               onPrimary: palette.onPrimary,
               secondary: palette.accent,
+              onSecondary: palette.onAccent,
               surface: palette.surface,
               onSurface: palette.textPrimary,
               error: palette.danger,
+              onError: palette.onDanger,
               outline: palette.outline,
             )
           : ColorScheme.light(
               primary: palette.primary,
               onPrimary: palette.onPrimary,
               secondary: palette.accent,
+              onSecondary: palette.onAccent,
               surface: palette.surface,
               onSurface: palette.textPrimary,
               error: palette.danger,
+              onError: palette.onDanger,
               outline: palette.outline,
             ),
       scaffoldBackgroundColor: palette.background,
@@ -184,9 +188,7 @@ abstract final class AppTheme {
           ),
         ),
         labelStyle: TextStyle(color: palette.textSecondary),
-        hintStyle: TextStyle(
-          color: palette.textSecondary.withValues(alpha: 0.7),
-        ),
+        hintStyle: TextStyle(color: palette.textSecondary),
       ),
     );
   }

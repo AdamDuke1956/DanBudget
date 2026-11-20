@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/surface_card.dart';
 import '../../../domain/engine/employment_type.dart';
 import 'onboarding_widgets.dart';
 
@@ -18,6 +19,7 @@ class EmploymentStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -52,7 +54,7 @@ class EmploymentStep extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           'You can switch to Full-Time later when you graduate.',
-          style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 12.5, color: colors.textSecondary),
         ),
       ],
     );
@@ -84,30 +86,14 @@ class _EmploymentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final colors = AppColors.of(context);
+    return SurfaceCard(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOut,
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          gradient: selected
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primary.withValues(alpha: 0.22),
-                    AppColors.primary.withValues(alpha: 0.06),
-                  ],
-                )
-              : null,
-          color: selected ? null : AppColors.surface,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: selected ? AppColors.primary : AppColors.outline,
-            width: selected ? 2 : 1,
-          ),
-        ),
+      padding: const EdgeInsets.all(18),
+      raised: selected,
+      borderColor: selected ? colors.primary : null,
+      child: Semantics(
+        selected: selected,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -116,15 +102,15 @@ class _EmploymentCard extends StatelessWidget {
               height: 48,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: AppColors.surfaceHigh,
-                borderRadius: BorderRadius.circular(16),
+                color: colors.surfaceHigh,
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 type == EmploymentType.intern
                     ? Icons.school_rounded
                     : Icons.work_rounded,
                 size: 24,
-                color: selected ? AppColors.primary : AppColors.textSecondary,
+                color: selected ? colors.primary : colors.textSecondary,
               ),
             ),
             const SizedBox(width: 14),
@@ -137,7 +123,7 @@ class _EmploymentCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -146,25 +132,25 @@ class _EmploymentCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12.5,
                       height: 1.4,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: AppColors.background.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(10),
+                      color: colors.background,
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       badge,
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: selected
-                            ? AppColors.primary
-                            : AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                     ),
                   ),
@@ -179,7 +165,7 @@ class _EmploymentCard extends StatelessWidget {
                     ? Icons.check_circle_rounded
                     : Icons.radio_button_unchecked_rounded,
                 key: ValueKey(selected),
-                color: selected ? AppColors.primary : AppColors.outline,
+                color: selected ? colors.primary : colors.textSecondary,
               ),
             ),
           ],

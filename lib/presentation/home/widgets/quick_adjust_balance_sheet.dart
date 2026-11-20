@@ -44,6 +44,7 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final accountsAsync = ref.watch(accountsStreamProvider);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
@@ -55,8 +56,8 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
           return Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              color: colors.surface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: const Text('No accounts available.'),
           );
@@ -87,8 +88,8 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
             bottom: 24 + bottomInset,
           ),
           decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            color: colors.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -100,29 +101,33 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                     width: 44,
                     height: 5,
                     decoration: BoxDecoration(
-                      color: AppColors.outline,
-                      borderRadius: BorderRadius.circular(10),
+                      color: colors.outline,
+                      borderRadius: BorderRadius.circular(6),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Reconcile Balance',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                    Expanded(
+                      child: Text(
+                        'Reconcile Balance',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: colors.textPrimary,
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         color: Color(selectedAccount.colorHex).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         'Current: ${Money(currentSen).formatted}',
@@ -138,10 +143,9 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                 const SizedBox(height: 6),
                 Text(
                   'Match your account balance with your banking app or physical cash.',
-                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 13, color: colors.textSecondary),
                 ),
                 const SizedBox(height: 16),
-
                 SizedBox(
                   height: 42,
                   child: ListView.separated(
@@ -164,12 +168,12 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? Color(acc.colorHex).withValues(alpha: 0.2)
-                                : AppColors.surfaceHigh,
-                            borderRadius: BorderRadius.circular(20),
+                                : colors.surfaceHigh,
+                            borderRadius: BorderRadius.circular(6),
                             border: Border.all(
                               color: isSelected
                                   ? Color(acc.colorHex)
-                                  : AppColors.outline.withValues(alpha: 0.5),
+                                  : colors.outline.withValues(alpha: 0.5),
                               width: isSelected ? 1.5 : 1.0,
                             ),
                           ),
@@ -183,7 +187,7 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                  color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                                  color: isSelected ? colors.textPrimary : colors.textSecondary,
                                 ),
                               ),
                             ],
@@ -194,13 +198,12 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                   ),
                 ),
                 const SizedBox(height: 16),
-
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.outline),
+                    color: colors.background,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: colors.outline),
                   ),
                   child: Row(
                     children: [
@@ -209,7 +212,7 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: colors.primary,
                         ),
                       ),
                       Expanded(
@@ -219,11 +222,11 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: colors.textPrimary,
                           ),
                           decoration: InputDecoration(
                             hintText: '0.00',
-                            hintStyle: TextStyle(color: AppColors.textSecondary),
+                            hintStyle: TextStyle(color: colors.textSecondary),
                             border: InputBorder.none,
                           ),
                           onChanged: (_) => setState(() {}),
@@ -233,15 +236,14 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                   ),
                 ),
                 const SizedBox(height: 12),
-
                 if (deltaSen != 0)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: deltaSen > 0
-                          ? AppColors.savings.withValues(alpha: 0.12)
-                          : AppColors.danger.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
+                          ? colors.savings.withValues(alpha: 0.12)
+                          : colors.danger.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -249,13 +251,13 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                         Icon(
                           deltaSen > 0 ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
                           size: 16,
-                          color: deltaSen > 0 ? AppColors.savings : AppColors.danger,
+                          color: deltaSen > 0 ? colors.savings : colors.danger,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           '${deltaSen > 0 ? 'Adjustment: +' : 'Adjustment: -'}${Money(deltaSen.abs()).formatted}',
                           style: TextStyle(
-                            color: deltaSen > 0 ? AppColors.savings : AppColors.danger,
+                            color: deltaSen > 0 ? colors.savings : colors.danger,
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
                           ),
@@ -264,7 +266,6 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                     ),
                   ),
                 const SizedBox(height: 20),
-
                 ElevatedButton(
                   onPressed: () async {
                     final text = _amountController.text.trim();
@@ -283,17 +284,20 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                         );
 
                     if (context.mounted) {
+                      final toastColors = AppColors.of(context);
                       Navigator.of(context).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          backgroundColor: AppColors.surfaceHigh,
+                          backgroundColor: toastColors.surfaceHigh,
                           content: Row(
                             children: [
-                              Icon(Icons.check_circle_rounded, color: AppColors.primary),
+                              Icon(Icons.check_circle_rounded, color: toastColors.primary),
                               const SizedBox(width: 12),
-                              Text(
-                                '${selectedAccount.name} updated to ${Money(newSen).formatted}',
-                                style: TextStyle(color: AppColors.textPrimary),
+                              Expanded(
+                                child: Text(
+                                  '${selectedAccount.name} updated to ${Money(newSen).formatted}',
+                                  style: TextStyle(color: toastColors.textPrimary),
+                                ),
                               ),
                             ],
                           ),
@@ -302,10 +306,10 @@ class _QuickAdjustBalanceSheetState extends ConsumerState<QuickAdjustBalanceShee
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.onPrimary,
+                    backgroundColor: colors.primary,
+                    foregroundColor: colors.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     elevation: 0,
                   ),
                   child: const Text(

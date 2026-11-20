@@ -64,6 +64,7 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final accountsAsync = ref.watch(accountsStreamProvider);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
@@ -75,14 +76,13 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
           return Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              color: colors.surface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: const Text('You need at least 2 accounts to make a transfer.'),
           );
         }
 
-        // Initialize defaults if null or equal
         _fromAccountId ??= accounts.first.id;
         _toAccountId ??= accounts.firstWhere((a) => a.id != _fromAccountId).id;
 
@@ -100,8 +100,8 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
             bottom: 24 + bottomInset,
           ),
           decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            color: colors.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -113,13 +113,12 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                     width: 44,
                     height: 5,
                     decoration: BoxDecoration(
-                      color: AppColors.outline,
-                      borderRadius: BorderRadius.circular(10),
+                      color: colors.outline,
+                      borderRadius: BorderRadius.circular(6),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -129,7 +128,7 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ),
                     ),
@@ -141,7 +140,7 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                       icon: const Icon(Icons.history_rounded, size: 16),
                       label: const Text('History'),
                       style: TextButton.styleFrom(
-                        foregroundColor: AppColors.accent,
+                        foregroundColor: colors.accent,
                         visualDensity: VisualDensity.compact,
                       ),
                     ),
@@ -149,17 +148,16 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Move money between bank accounts, e-wallets, or cash without recording an expense.',
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  'Move money between banks, e-wallets, or cash without logging an expense.',
+                  style: TextStyle(fontSize: 12, color: colors.textSecondary),
                 ),
                 const SizedBox(height: 16),
-
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceHigh,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.outline),
+                    color: colors.surfaceHigh,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: colors.outline),
                   ),
                   child: Column(
                     children: [
@@ -169,7 +167,7 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: Color(fromAccount.colorHex).withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(fromAccount.icon, style: const TextStyle(fontSize: 20)),
                           ),
@@ -180,20 +178,22 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                               children: [
                                 Text(
                                   'From Account',
-                                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                  style: TextStyle(fontSize: 11, color: colors.textSecondary),
                                 ),
                                 DropdownButtonHideUnderline(
                                   child: DropdownButton<int>(
                                     value: _fromAccountId,
-                                    dropdownColor: AppColors.surfaceHigh,
+                                    dropdownColor: colors.surfaceHigh,
                                     isDense: true,
+                                    isExpanded: true,
                                     items: accounts.map((a) {
                                       return DropdownMenuItem(
                                         value: a.id,
                                         child: Text(
                                           '${a.name} (${Money(a.balanceSen).formatted})',
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
-                                            color: AppColors.textPrimary,
+                                            color: colors.textPrimary,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 14,
                                           ),
@@ -218,8 +218,8 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                         ],
                       ),
                       Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        child: Divider(color: AppColors.outline, height: 1),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Divider(color: colors.outline, height: 1),
                       ),
                       Row(
                         children: [
@@ -227,7 +227,7 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: Color(toAccount.colorHex).withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(toAccount.icon, style: const TextStyle(fontSize: 20)),
                           ),
@@ -238,20 +238,22 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                               children: [
                                 Text(
                                   'To Account',
-                                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                  style: TextStyle(fontSize: 11, color: colors.textSecondary),
                                 ),
                                 DropdownButtonHideUnderline(
                                   child: DropdownButton<int>(
                                     value: _toAccountId,
-                                    dropdownColor: AppColors.surfaceHigh,
+                                    dropdownColor: colors.surfaceHigh,
                                     isDense: true,
+                                    isExpanded: true,
                                     items: accounts.map((a) {
                                       return DropdownMenuItem(
                                         value: a.id,
                                         child: Text(
                                           '${a.name} (${Money(a.balanceSen).formatted})',
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
-                                            color: AppColors.textPrimary,
+                                            color: colors.textPrimary,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 14,
                                           ),
@@ -282,9 +284,9 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.outline),
+                    color: colors.background,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: colors.outline),
                   ),
                   child: Row(
                     children: [
@@ -293,7 +295,7 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: colors.primary,
                         ),
                       ),
                       Expanded(
@@ -303,11 +305,11 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: colors.textPrimary,
                           ),
                           decoration: InputDecoration(
                             hintText: '0.00',
-                            hintStyle: TextStyle(color: AppColors.textSecondary),
+                            hintStyle: TextStyle(color: colors.textSecondary),
                             border: InputBorder.none,
                           ),
                           onChanged: (_) => setState(() {}),
@@ -325,11 +327,11 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                       labelStyle: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                       ),
-                      backgroundColor: AppColors.surfaceHigh,
-                      side: BorderSide(color: AppColors.outline),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      backgroundColor: colors.surfaceHigh,
+                      side: BorderSide(color: colors.outline),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                       onPressed: () => _onQuickAmountTap(amt),
                     );
                   }).toList(),
@@ -337,21 +339,21 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                 const SizedBox(height: 14),
                 TextField(
                   controller: _noteController,
-                  style: TextStyle(color: AppColors.textPrimary),
+                  style: TextStyle(color: colors.textPrimary),
                   decoration: InputDecoration(
                     hintText: 'Note (e.g. DuitNow QR topup, ATM withdrawal)',
-                    hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                    prefixIcon: Icon(Icons.sync_alt_rounded, color: AppColors.textSecondary),
+                    hintStyle: TextStyle(color: colors.textSecondary, fontSize: 13),
+                    prefixIcon: Icon(Icons.sync_alt_rounded, color: colors.textSecondary),
                     filled: true,
-                    fillColor: AppColors.surfaceHigh,
+                    fillColor: colors.surfaceHigh,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: AppColors.outline),
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: colors.outline),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: AppColors.outline),
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: colors.outline),
                     ),
                   ),
                 ),
@@ -379,26 +381,27 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                         );
 
                     if (context.mounted) {
+                      final toastColors = AppColors.of(context);
                       Navigator.of(context).pop();
                       final noteText = _noteController.text.trim();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          backgroundColor: AppColors.surfaceHigh,
+                          backgroundColor: toastColors.surfaceHigh,
                           content: Row(
                             children: [
-                              Icon(Icons.check_circle_rounded, color: AppColors.primary),
+                              Icon(Icons.check_circle_rounded, color: toastColors.primary),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   'Transferred ${Money(transferSen).formatted} to ${toAccount.name}${noteText.isNotEmpty ? " • \"$noteText\"" : ""}',
-                                  style: TextStyle(color: AppColors.textPrimary),
+                                  style: TextStyle(color: toastColors.textPrimary),
                                 ),
                               ),
                             ],
                           ),
                           action: SnackBarAction(
                             label: 'History',
-                            textColor: AppColors.accent,
+                            textColor: toastColors.accent,
                             onPressed: () => AccountDetailsHistorySheet.show(context),
                           ),
                         ),
@@ -406,10 +409,10 @@ class _TransferFundsSheetState extends ConsumerState<TransferFundsSheet> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    foregroundColor: Colors.white,
+                    backgroundColor: colors.accent,
+                    foregroundColor: colors.onAccent,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     elevation: 0,
                   ),
                   child: Text(

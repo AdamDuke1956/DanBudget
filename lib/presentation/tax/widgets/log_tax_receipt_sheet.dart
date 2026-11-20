@@ -107,7 +107,7 @@ class _LogTaxReceiptSheetState extends ConsumerState<LogTaxReceiptSheet> {
         child: Container(
           decoration: BoxDecoration(
             color: colors.bgSecondary,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
           child: Column(
@@ -335,10 +335,10 @@ class _LogTaxReceiptSheetState extends ConsumerState<LogTaxReceiptSheet> {
                   label: const Text('Save Receipt to 7-Year LHDN Vault'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.accentPrimary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: colors.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),

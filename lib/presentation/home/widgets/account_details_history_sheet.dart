@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/widgets/surface_card.dart';
 import '../../../data/local/app_database.dart';
 import '../../../data/providers/database_providers.dart';
 import 'add_edit_account_sheet.dart';
@@ -10,7 +11,7 @@ import 'quick_adjust_balance_sheet.dart';
 import 'transfer_funds_sheet.dart';
 
 class AccountDetailsHistorySheet extends ConsumerWidget {
-  final AccountsTableData? account; // If null, shows all transfers/accounts
+  final AccountsTableData? account;
 
   const AccountDetailsHistorySheet({super.key, this.account});
 
@@ -25,6 +26,7 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = AppColors.of(context);
     final transfersAsync = ref.watch(recentTransfersStreamProvider);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
@@ -39,7 +41,7 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
         bottom: 24 + bottomInset,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colors.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
@@ -50,13 +52,12 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
               width: 44,
               height: 5,
               decoration: BoxDecoration(
-                color: AppColors.outline,
-                borderRadius: BorderRadius.circular(10),
+                color: colors.outline,
+                borderRadius: BorderRadius.circular(6),
               ),
             ),
           ),
           const SizedBox(height: 16),
-
           if (account != null) ...[
             Row(
               children: [
@@ -64,7 +65,7 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Color(account!.colorHex).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(account!.icon, style: const TextStyle(fontSize: 26)),
                 ),
@@ -75,22 +76,24 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
                     children: [
                       Text(
                         account!.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '${account!.type.toUpperCase()} • ${account!.isLiquidOnHand ? "Liquid Cash" : "Locked Savings"}',
-                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        style: TextStyle(fontSize: 12, color: colors.textSecondary),
                       ),
                     ],
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.edit_rounded, color: AppColors.textSecondary),
+                  icon: Icon(Icons.edit_rounded, color: colors.textSecondary),
                   tooltip: 'Edit Account',
                   onPressed: () {
                     Navigator.of(context).pop();
@@ -100,20 +103,16 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 14),
-
-            Container(
+            SurfaceCard(
+              raised: true,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceHigh,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Color(account!.colorHex).withValues(alpha: 0.3)),
-              ),
+              borderColor: Color(account!.colorHex).withValues(alpha: 0.3),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Current Balance',
-                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    style: TextStyle(fontSize: 13, color: colors.textSecondary),
                   ),
                   Text(
                     Money(account!.balanceSen).formatted,
@@ -127,7 +126,6 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 12),
-
             Row(
               children: [
                 Expanded(
@@ -139,9 +137,9 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
                     icon: const Icon(Icons.tune_rounded, size: 14),
                     label: const Text('Reconcile', style: TextStyle(fontSize: 12)),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.textPrimary,
-                      side: BorderSide(color: AppColors.outline),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      foregroundColor: colors.textPrimary,
+                      side: BorderSide(color: colors.outline),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
                 ),
@@ -155,27 +153,32 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
                     icon: const Icon(Icons.sync_alt_rounded, size: 14),
                     label: const Text('Transfer', style: TextStyle(fontSize: 12)),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.accent,
-                      side: BorderSide(color: AppColors.accent.withValues(alpha: 0.5)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      foregroundColor: colors.accent,
+                      side: BorderSide(color: colors.accent.withValues(alpha: 0.5)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
                 ),
               ],
             ),
-            Divider(height: 24, color: AppColors.outline),
+            Divider(height: 24, color: colors.outline),
           ] else ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Transfers & Movement History',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                Expanded(
+                  child: Text(
+                    'Transfers & Movement History',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: colors.textPrimary,
+                    ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: () {
                     Navigator.of(context).pop();
@@ -183,28 +186,26 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
                   },
                   icon: const Icon(Icons.add_rounded, size: 16),
                   label: const Text('New Transfer'),
-                  style: TextButton.styleFrom(foregroundColor: AppColors.accent),
+                  style: TextButton.styleFrom(foregroundColor: colors.accent),
                 ),
               ],
             ),
             const SizedBox(height: 4),
             Text(
-              'View all movements between your banks, e-wallets, and cash with notes.',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              'All movements between your banks, e-wallets, and cash.',
+              style: TextStyle(fontSize: 12, color: colors.textSecondary),
             ),
             const SizedBox(height: 14),
           ],
-
           Text(
             account != null ? 'Transfer & Movement Notes' : 'All Transfer Notes',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
-
           Expanded(
             child: transfersAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -212,9 +213,11 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
               data: (transfers) {
                 final filtered = account == null
                     ? transfers
-                    : transfers.where((t) =>
-                        t.transfer.fromAccountId == account!.id ||
-                        t.transfer.toAccountId == account!.id).toList();
+                    : transfers
+                        .where((t) =>
+                            t.transfer.fromAccountId == account!.id ||
+                            t.transfer.toAccountId == account!.id)
+                        .toList();
 
                 if (filtered.isEmpty) {
                   return Center(
@@ -223,21 +226,21 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.sync_alt_rounded, size: 40, color: AppColors.textSecondary),
+                          Icon(Icons.sync_alt_rounded, size: 40, color: colors.textSecondary),
                           const SizedBox(height: 10),
                           Text(
                             'No transfers recorded yet',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
+                              color: colors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Use "Transfer" to move funds between bank accounts & e-wallets (e.g. reload TnG or ATM cash).',
+                            'Use "Transfer" to move funds between accounts.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            style: TextStyle(fontSize: 12, color: colors.textSecondary),
                           ),
                         ],
                       ),
@@ -257,26 +260,21 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
                     final toName = item.toAccount?.name ?? 'Account';
                     final note = item.transfer.note;
 
-                    return Container(
+                    return SurfaceCard(
+                      raised: true,
                       padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceHigh,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: AppColors.accent.withValues(alpha: 0.25),
-                        ),
-                      ),
+                      borderColor: colors.accent.withValues(alpha: 0.25),
                       child: Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: AppColors.accent.withValues(alpha: 0.15),
+                              color: colors.accent.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(
                               Icons.sync_alt_rounded,
-                              color: AppColors.accent,
+                              color: colors.accent,
                               size: 18,
                             ),
                           ),
@@ -286,21 +284,23 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '$fromName ➔ $toName',
+                                  '$fromName -> $toName',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
-                                    color: AppColors.textPrimary,
+                                    color: colors.textPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
                                 if (note != null && note.isNotEmpty) ...[
                                   Text(
-                                    '📝 "$note"',
+                                    '"$note"',
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
-                                      color: AppColors.accent,
+                                      color: colors.accent,
                                     ),
                                   ),
                                   const SizedBox(height: 2),
@@ -309,7 +309,7 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
                                   DateFormat('dd MMM yyyy, h:mm a').format(item.transfer.date),
                                   style: TextStyle(
                                     fontSize: 11,
-                                    color: AppColors.textSecondary,
+                                    color: colors.textSecondary,
                                   ),
                                 ),
                               ],
@@ -324,34 +324,42 @@ class AccountDetailsHistorySheet extends ConsumerWidget {
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   color: isOutgoing
-                                      ? AppColors.danger
-                                      : (isIncoming ? AppColors.success : AppColors.accent),
+                                      ? colors.danger
+                                      : (isIncoming ? colors.success : colors.accent),
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.delete_outline_rounded, size: 16, color: AppColors.textSecondary),
+                                icon: Icon(Icons.delete_outline_rounded, size: 16, color: colors.textSecondary),
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(),
                                 tooltip: 'Revert transfer',
                                 onPressed: () async {
                                   final confirm = await showDialog<bool>(
                                     context: context,
-                                    builder: (ctx) => AlertDialog(
-                                      backgroundColor: AppColors.surface,
-                                      title: Text('Revert Transfer?', style: TextStyle(color: AppColors.textPrimary)),
-                                      content: Text(
-                                        'This will undo the transfer and restore the previous balances in both accounts.',
-                                        style: TextStyle(color: AppColors.textSecondary),
-                                      ),
-                                      actions: [
-                                        TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
-                                          onPressed: () => Navigator.of(ctx).pop(true),
-                                          child: const Text('Revert'),
+                                    builder: (ctx) {
+                                      final dialogColors = AppColors.of(ctx);
+                                      return AlertDialog(
+                                        backgroundColor: dialogColors.surface,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                        title: Text('Revert Transfer?', style: TextStyle(color: dialogColors.textPrimary)),
+                                        content: Text(
+                                          'Undo this transfer and restore previous balances in both accounts?',
+                                          style: TextStyle(color: dialogColors.textSecondary),
                                         ),
-                                      ],
-                                    ),
+                                        actions: [
+                                          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: dialogColors.danger,
+                                              foregroundColor: dialogColors.onDanger,
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                            ),
+                                            onPressed: () => Navigator.of(ctx).pop(true),
+                                            child: const Text('Revert'),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   );
                                   if (confirm == true) {
                                     await ref.read(accountRepositoryProvider).deleteTransfer(item.transfer.id);

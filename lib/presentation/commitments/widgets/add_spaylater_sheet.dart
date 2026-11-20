@@ -41,11 +41,11 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
   final _priceController = TextEditingController();
   final _customMonthlyController = TextEditingController();
 
-  int _selectedTenure = 3; // 1, 3, 6, 12
+  int _selectedTenure = 3;
   int _monthsAlreadyPaid = 0;
   bool _includeShopeeFee = true;
-  int _dueDay = 10; // Shopee default cycle 1
-  int _shopeeCycle = 0; // 0: 1st->10th, 1: 11th->20th, 2: 21st->1st, 3: 25th->5th, 4: manual
+  int _dueDay = 10;
+  int _shopeeCycle = 0;
   int _manualDueDay = 10;
   final _manualDueDayController = TextEditingController(text: '10');
   String _selectedCategoryTag = '🎧 Tech';
@@ -111,16 +111,11 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
     super.dispose();
   }
 
-  double get _purchasePrice {
-    return double.tryParse(_priceController.text.trim()) ?? 0.0;
-  }
+  double get _purchasePrice => double.tryParse(_priceController.text.trim()) ?? 0.0;
 
   double get _calculatedMonthly {
     if (_purchasePrice <= 0) return 0.0;
-    if (_selectedTenure == 1) {
-      return _purchasePrice;
-    }
-    // Shopee charges ~1.5% per month for installment plans
+    if (_selectedTenure == 1) return _purchasePrice;
     final feeMultiplier = _includeShopeeFee ? (1 + (0.015 * _selectedTenure)) : 1.0;
     final totalWithFee = _purchasePrice * feeMultiplier;
     return totalWithFee / _selectedTenure;
@@ -148,9 +143,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
     return remaining > 0 ? remaining : 1;
   }
 
-  double get _remainingCost {
-    return _activeMonthly * _remainingTenure;
-  }
+  double get _remainingCost => _activeMonthly * _remainingTenure;
 
   Future<void> _saveSpayLaterItem() async {
     final rawName = _nameController.text.trim();
@@ -194,7 +187,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
             totalAmountSen: totalSen,
             monthlyPaymentSen: monthlySen,
             remainingAmountSen: remainingSen,
-            interestRateAnnual: _includeShopeeFee ? 0.18 : 0.0, // 1.5% x 12
+            interestRateAnnual: _includeShopeeFee ? 0.18 : 0.0,
             totalTenureMonths: _selectedTenure,
             remainingTenureMonths: _remainingTenure,
             dueDayOfMonth: _dueDay,
@@ -202,15 +195,16 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
     }
 
     if (mounted) {
+      final colors = AppColors.of(context);
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: AppColors.surfaceHigh,
+          backgroundColor: colors.surfaceHigh,
           content: Text(
             widget.isEditing
                 ? 'Updated $rawName (RM ${_activeMonthly.toStringAsFixed(2)}/mo, $_remainingTenure months left)'
                 : 'Added $rawName (RM ${_activeMonthly.toStringAsFixed(2)}/mo, $_remainingTenure months left)',
-            style: TextStyle(color: AppColors.textPrimary),
+            style: TextStyle(color: colors.textPrimary),
           ),
         ),
       );
@@ -219,6 +213,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final dashboardAsync = ref.watch(dashboardStateProvider);
 
@@ -230,7 +225,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
         bottom: 24 + bottomInset,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colors.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SingleChildScrollView(
@@ -243,8 +238,8 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                 width: 44,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: AppColors.outline,
-                  borderRadius: BorderRadius.circular(10),
+                  color: colors.outline,
+                  borderRadius: BorderRadius.circular(6),
                 ),
               ),
             ),
@@ -255,7 +250,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: const Color(0xFFEE4D2D).withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: const Color(0xFFEE4D2D).withValues(alpha: 0.4),
                     ),
@@ -268,13 +263,11 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.isEditing
-                            ? 'Edit SPayLater Purchase'
-                            : 'Add SPayLater Purchase',
+                        widget.isEditing ? 'Edit SPayLater Purchase' : 'Add SPayLater Purchase',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -282,7 +275,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                         'Track item, months left & allowance impact',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: colors.textSecondary,
                         ),
                       ),
                     ],
@@ -296,7 +289,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
             const SizedBox(height: 8),
@@ -313,22 +306,21 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                     avatar: Icon(
                       AppIcons.getSpayLaterTagIcon(tag),
                       size: 14,
-                      color: isSelected ? AppColors.accent : AppColors.textSecondary,
+                      color: isSelected ? colors.accent : colors.textSecondary,
                     ),
                     label: Text(tag, style: const TextStyle(fontSize: 12)),
                     selected: isSelected,
-                    selectedColor: AppColors.accent.withValues(alpha: 0.25),
-                    backgroundColor: AppColors.surfaceHigh,
+                    selectedColor: colors.accent.withValues(alpha: 0.25),
+                    backgroundColor: colors.surfaceHigh,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                     labelStyle: TextStyle(
-                      color: isSelected ? AppColors.accent : AppColors.textSecondary,
+                      color: isSelected ? colors.accent : colors.textSecondary,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                     side: BorderSide(
-                      color: isSelected ? AppColors.accent : AppColors.outline,
+                      color: isSelected ? colors.accent : colors.outline,
                     ),
-                    onSelected: (_) {
-                      setState(() => _selectedCategoryTag = tag);
-                    },
+                    onSelected: (_) => setState(() => _selectedCategoryTag = tag),
                   );
                 },
               ),
@@ -336,8 +328,9 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
             const SizedBox(height: 14),
             TextField(
               controller: _nameController,
-              style: TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: colors.textPrimary),
               decoration: _inputDecoration(
+                colors: colors,
                 hint: 'e.g. Mechanical Keyboard, Sneakers, Earbuds',
                 label: 'Item Name / Description',
                 icon: Icons.shopping_cart_outlined,
@@ -347,9 +340,10 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
             TextField(
               controller: _priceController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: colors.textPrimary),
               onChanged: (_) => setState(() {}),
               decoration: _inputDecoration(
+                colors: colors,
                 hint: 'e.g. 180.00',
                 label: 'Total Purchase Price (RM)',
                 icon: Icons.attach_money_rounded,
@@ -362,7 +356,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
             const SizedBox(height: 8),
@@ -380,22 +374,21 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                           if (_monthsAlreadyPaid >= _selectedTenure) {
                             _monthsAlreadyPaid = 0;
                           }
-                          // Automatically turn off Shopee fee for 1 month
                           if (_selectedTenure == 1) {
                             _includeShopeeFee = false;
                           }
                         });
                       },
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(10),
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? AppColors.accent.withValues(alpha: 0.2)
-                              : AppColors.surfaceHigh,
-                          borderRadius: BorderRadius.circular(14),
+                              ? colors.accent.withValues(alpha: 0.2)
+                              : colors.surfaceHigh,
+                          borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: isSelected ? AppColors.accent : AppColors.outline,
+                            color: isSelected ? colors.accent : colors.outline,
                             width: isSelected ? 1.5 : 1,
                           ),
                         ),
@@ -406,19 +399,19 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: isSelected
-                                    ? AppColors.accent
-                                    : AppColors.textPrimary,
+                                color: isSelected ? colors.accent : colors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               opt['sub'] as String,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 10,
                                 color: isSelected
-                                    ? AppColors.accent.withValues(alpha: 0.8)
-                                    : AppColors.textSecondary,
+                                    ? colors.accent.withValues(alpha: 0.8)
+                                    : colors.textSecondary,
                               ),
                             ),
                           ],
@@ -434,9 +427,9 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceHigh,
+                  color: colors.surfaceHigh,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.outline),
+                  border: Border.all(color: colors.outline),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -450,15 +443,15 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                              color: colors.textPrimary,
                             ),
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
                             'Standard Shopee BNPL installment charge',
                             style: TextStyle(
                               fontSize: 10,
-                              color: AppColors.textSecondary,
+                              color: colors.textSecondary,
                             ),
                           ),
                         ],
@@ -466,10 +459,8 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                     ),
                     Switch.adaptive(
                       value: _includeShopeeFee,
-                      activeColor: AppColors.accent,
-                      onChanged: (val) {
-                        setState(() => _includeShopeeFee = val);
-                      },
+                      activeColor: colors.accent,
+                      onChanged: (val) => setState(() => _includeShopeeFee = val),
                     ),
                   ],
                 ),
@@ -478,9 +469,9 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.surfaceHigh,
+                color: colors.surfaceHigh,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.outline),
+                border: Border.all(color: colors.outline),
               ),
               child: Row(
                 children: [
@@ -493,7 +484,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                            color: colors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -501,7 +492,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                           '$_monthsAlreadyPaid paid · $_remainingTenure months left',
                           style: TextStyle(
                             fontSize: 11,
-                            color: AppColors.accent,
+                            color: colors.accent,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -511,8 +502,8 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                   IconButton(
                     icon: const Icon(Icons.remove_circle_outline, size: 20),
                     color: _monthsAlreadyPaid > 0
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary.withValues(alpha: 0.4),
+                        ? colors.textPrimary
+                        : colors.textSecondary.withValues(alpha: 0.4),
                     onPressed: _monthsAlreadyPaid > 0
                         ? () => setState(() => _monthsAlreadyPaid--)
                         : null,
@@ -522,14 +513,14 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.add_circle_outline, size: 20),
                     color: _monthsAlreadyPaid < (_selectedTenure - 1)
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary.withValues(alpha: 0.4),
+                        ? colors.textPrimary
+                        : colors.textSecondary.withValues(alpha: 0.4),
                     onPressed: _monthsAlreadyPaid < (_selectedTenure - 1)
                         ? () => setState(() => _monthsAlreadyPaid++)
                         : null,
@@ -541,9 +532,9 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.surfaceHigh,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.outline),
+                color: colors.surfaceHigh,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: colors.outline),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -551,25 +542,32 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.calendar_today_rounded, size: 16, color: Color(0xFFEE4D2D)),
-                          SizedBox(width: 8),
-                          Text(
-                            'Shopee Due Date Cycle',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            const Icon(Icons.calendar_today_rounded, size: 16, color: Color(0xFFEE4D2D)),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Shopee Due Date Cycle',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.textPrimary,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
                           color: const Color(0xFFEE4D2D).withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
                           'Due on ${_dueDay == 1 ? "1st" : _dueDay == 2 ? "2nd" : _dueDay == 3 ? "3rd" : "${_dueDay}th"}',
@@ -585,36 +583,41 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                   const SizedBox(height: 6),
                   Text(
                     'Select your Shopee bill cycle or set manually:',
-                    style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                    style: TextStyle(fontSize: 11, color: colors.textSecondary),
                   ),
                   const SizedBox(height: 10),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      _buildShopeeCycleChip(0, 'Bill: 1st', 'Due: 10th', 10),
-                      _buildShopeeCycleChip(1, 'Bill: 11th', 'Due: 20th', 20),
-                      _buildShopeeCycleChip(2, 'Bill: 21st', 'Due: 1st', 1),
-                      _buildShopeeCycleChip(3, 'Bill: 25th', 'Due: 5th', 5),
+                      _buildShopeeCycleChip(colors, 0, 'Bill: 1st', 'Due: 10th', 10),
+                      _buildShopeeCycleChip(colors, 1, 'Bill: 11th', 'Due: 20th', 20),
+                      _buildShopeeCycleChip(colors, 2, 'Bill: 21st', 'Due: 1st', 1),
+                      _buildShopeeCycleChip(colors, 3, 'Bill: 25th', 'Due: 5th', 5),
                       ChoiceChip(
                         label: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.tune_rounded, size: 12, color: _shopeeCycle == 4 ? AppColors.accent : AppColors.textSecondary),
+                            Icon(
+                              Icons.tune_rounded,
+                              size: 12,
+                              color: _shopeeCycle == 4 ? colors.accent : colors.textSecondary,
+                            ),
                             const SizedBox(width: 4),
                             const Text('Manual Set'),
                           ],
                         ),
                         selected: _shopeeCycle == 4,
-                        selectedColor: AppColors.accent.withValues(alpha: 0.25),
-                        backgroundColor: AppColors.surface,
+                        selectedColor: colors.accent.withValues(alpha: 0.25),
+                        backgroundColor: colors.surface,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                         labelStyle: TextStyle(
                           fontSize: 11,
-                          color: _shopeeCycle == 4 ? AppColors.accent : AppColors.textSecondary,
+                          color: _shopeeCycle == 4 ? colors.accent : colors.textSecondary,
                           fontWeight: _shopeeCycle == 4 ? FontWeight.bold : FontWeight.normal,
                         ),
                         side: BorderSide(
-                          color: _shopeeCycle == 4 ? AppColors.accent : AppColors.outline,
+                          color: _shopeeCycle == 4 ? colors.accent : colors.outline,
                         ),
                         onSelected: (_) => setState(() {
                           _shopeeCycle = 4;
@@ -628,13 +631,13 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                     TextField(
                       controller: _manualDueDayController,
                       keyboardType: TextInputType.number,
-                      style: TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: colors.textPrimary),
                       decoration: InputDecoration(
                         labelText: 'Manual Due Day of Month (1 - 31)',
-                        labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                        labelStyle: TextStyle(color: colors.textSecondary, fontSize: 12),
                         hintText: 'e.g. 15',
                         filled: true,
-                        fillColor: AppColors.surface,
+                        fillColor: colors.surface,
                         isDense: true,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                       ),
@@ -656,9 +659,10 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
             TextField(
               controller: _customMonthlyController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: colors.textPrimary),
               onChanged: (_) => setState(() {}),
               decoration: _inputDecoration(
+                colors: colors,
                 hint: _calculatedMonthly > 0 ? _calculatedMonthly.toStringAsFixed(2) : 'e.g. 52.25',
                 label: 'Exact Monthly Amount (Optional override)',
                 icon: Icons.edit_note_rounded,
@@ -673,30 +677,25 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                 final monthlyRinggit = _activeMonthly;
                 final monthlySen = Money.fromRinggit(monthlyRinggit).sen;
 
-                // Existing active SPayLater monthly commitments
                 final currentSpayLaterMonthlySen = dash.activeCommitments
                     .where((c) => c.type.toLowerCase() == 'spaylater')
                     .fold<int>(0, (sum, c) => sum + c.monthlyPaymentSen);
 
-                final newTotalSpayLaterSen =
-                    currentSpayLaterMonthlySen + monthlySen;
-                final itemImpactRatio = incomeSen > 0
-                    ? (monthlySen / incomeSen) * 100
-                    : 0.0;
-                final totalImpactRatio = incomeSen > 0
-                    ? (newTotalSpayLaterSen / incomeSen) * 100
-                    : 0.0;
+                final newTotalSpayLaterSen = currentSpayLaterMonthlySen + monthlySen;
+                final itemImpactRatio = incomeSen > 0 ? (monthlySen / incomeSen) * 100 : 0.0;
+                final totalImpactRatio =
+                    incomeSen > 0 ? (newTotalSpayLaterSen / incomeSen) * 100 : 0.0;
 
-                Color impactColor;
-                String impactStatus;
+                final Color impactColor;
+                final String impactStatus;
                 if (totalImpactRatio <= 10) {
-                  impactColor = AppColors.success;
+                  impactColor = colors.success;
                   impactStatus = 'Safe & Manageable';
                 } else if (totalImpactRatio <= 20) {
-                  impactColor = AppColors.warning;
+                  impactColor = colors.warning;
                   impactStatus = 'Moderate Burden';
                 } else {
-                  impactColor = AppColors.danger;
+                  impactColor = colors.danger;
                   impactStatus = 'High Burden on Allowance';
                 }
 
@@ -718,8 +717,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                           Expanded(
                             child: Row(
                               children: [
-                                Icon(Icons.analytics_rounded,
-                                    color: impactColor, size: 18),
+                                Icon(Icons.analytics_rounded, color: impactColor, size: 18),
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
@@ -727,7 +725,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
-                                      color: AppColors.textPrimary,
+                                      color: colors.textPrimary,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -737,11 +735,10 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                           ),
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
                               color: impactColor.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               impactStatus,
@@ -761,16 +758,16 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Monthly Installment',
-                                  style: TextStyle(
-                                      fontSize: 10,
-                                      color: AppColors.textSecondary)),
+                              Text(
+                                'Monthly Installment',
+                                style: TextStyle(fontSize: 10, color: colors.textSecondary),
+                              ),
                               Text(
                                 'RM ${monthlyRinggit.toStringAsFixed(2)} / mo',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
+                                  color: colors.textPrimary,
                                 ),
                               ),
                             ],
@@ -778,16 +775,16 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text('Total with Fees',
-                                  style: TextStyle(
-                                      fontSize: 10,
-                                      color: AppColors.textSecondary)),
+                              Text(
+                                'Total with Fees',
+                                style: TextStyle(fontSize: 10, color: colors.textSecondary),
+                              ),
                               Text(
                                 'RM ${_totalCost.toStringAsFixed(2)}',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
+                                  color: colors.textPrimary,
                                 ),
                               ),
                             ],
@@ -813,18 +810,16 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
             ElevatedButton(
               onPressed: _saveSpayLaterItem,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                foregroundColor: Colors.white,
+                backgroundColor: colors.accent,
+                foregroundColor: colors.onAccent,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 elevation: 0,
               ),
               child: Text(
-                widget.isEditing
-                    ? 'Save Changes'
-                    : 'Track SPayLater Purchase',
+                widget.isEditing ? 'Save Changes' : 'Track SPayLater Purchase',
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
               ),
             ),
@@ -835,6 +830,7 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
   }
 
   InputDecoration _inputDecoration({
+    required AppPalette colors,
     required String hint,
     required String label,
     required IconData icon,
@@ -842,46 +838,65 @@ class _AddSpayLaterSheetState extends ConsumerState<AddSpayLaterSheet> {
   }) {
     return InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+      labelStyle: TextStyle(color: colors.textSecondary, fontSize: 13),
       hintText: hint,
-      hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+      hintStyle: TextStyle(color: colors.textSecondary, fontSize: 13),
       prefixText: prefixText,
-      prefixStyle: TextStyle(
-          color: AppColors.textPrimary, fontWeight: FontWeight.bold),
-      prefixIcon: Icon(icon, color: AppColors.accent, size: 20),
+      prefixStyle: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.bold),
+      prefixIcon: Icon(icon, color: colors.accent, size: 20),
       filled: true,
-      fillColor: AppColors.surfaceHigh,
+      fillColor: colors.surfaceHigh,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: AppColors.outline),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: colors.outline),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: AppColors.outline),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: colors.outline),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: AppColors.accent, width: 2),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: colors.accent, width: 2),
       ),
     );
   }
 
-  Widget _buildShopeeCycleChip(int cycleIndex, String billLabel, String dueLabel, int targetDueDay) {
+  Widget _buildShopeeCycleChip(
+    AppPalette colors,
+    int cycleIndex,
+    String billLabel,
+    String dueLabel,
+    int targetDueDay,
+  ) {
     final isSelected = _shopeeCycle == cycleIndex;
     return ChoiceChip(
       label: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(billLabel, style: TextStyle(fontSize: 10, color: isSelected ? const Color(0xFFEE4D2D) : AppColors.textSecondary)),
-          Text(dueLabel, style: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.bold : FontWeight.w600, color: isSelected ? AppColors.textPrimary : AppColors.textPrimary)),
+          Text(
+            billLabel,
+            style: TextStyle(
+              fontSize: 10,
+              color: isSelected ? const Color(0xFFEE4D2D) : colors.textSecondary,
+            ),
+          ),
+          Text(
+            dueLabel,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+              color: colors.textPrimary,
+            ),
+          ),
         ],
       ),
       selected: isSelected,
       selectedColor: const Color(0xFFEE4D2D).withValues(alpha: 0.25),
-      backgroundColor: AppColors.surface,
+      backgroundColor: colors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
       side: BorderSide(
-        color: isSelected ? const Color(0xFFEE4D2D) : AppColors.outline,
+        color: isSelected ? const Color(0xFFEE4D2D) : colors.outline,
         width: isSelected ? 1.5 : 1.0,
       ),
       onSelected: (_) {

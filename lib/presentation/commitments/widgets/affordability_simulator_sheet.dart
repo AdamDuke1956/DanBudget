@@ -40,6 +40,7 @@ class _AffordabilitySimulatorSheetState
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final stateAsync = ref.watch(dashboardStateProvider);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
@@ -51,7 +52,7 @@ class _AffordabilitySimulatorSheetState
         bottom: 24 + bottomInset,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colors.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: stateAsync.when(
@@ -94,25 +95,25 @@ class _AffordabilitySimulatorSheetState
 
           final dailyDiff = currentDaily.sen - simulatedSafe.safeDailyAmount.sen;
 
-          Color verdictColor;
-          IconData verdictIcon;
-          String verdictTitle;
-          String verdictDesc;
+          final Color verdictColor;
+          final IconData verdictIcon;
+          final String verdictTitle;
+          final String verdictDesc;
 
           if (simulatedDsr <= 35) {
-            verdictColor = AppColors.success;
+            verdictColor = colors.success;
             verdictIcon = Icons.check_circle_rounded;
             verdictTitle = 'Affordable';
             verdictDesc =
                 'DSR stays at ${simulatedDsr.toStringAsFixed(1)}% (under the 35% safe limit).';
           } else if (simulatedDsr <= 50) {
-            verdictColor = AppColors.warning;
+            verdictColor = colors.warning;
             verdictIcon = Icons.warning_rounded;
             verdictTitle = 'Moderate Stretch';
             verdictDesc =
                 'DSR rises to ${simulatedDsr.toStringAsFixed(1)}% and trims your Wants budget.';
           } else {
-            verdictColor = AppColors.danger;
+            verdictColor = colors.danger;
             verdictIcon = Icons.error_rounded;
             verdictTitle = 'High Debt Load';
             verdictDesc =
@@ -129,17 +130,15 @@ class _AffordabilitySimulatorSheetState
                     width: 44,
                     height: 5,
                     decoration: BoxDecoration(
-                      color: AppColors.outline,
-                      borderRadius: BorderRadius.circular(10),
+                      color: colors.outline,
+                      borderRadius: BorderRadius.circular(6),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
-
                 Row(
                   children: [
-                    Icon(Icons.calculate_outlined,
-                        color: AppColors.accent, size: 22),
+                    Icon(Icons.calculate_outlined, color: colors.accent, size: 22),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -147,7 +146,7 @@ class _AffordabilitySimulatorSheetState
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ),
                     ),
@@ -156,26 +155,24 @@ class _AffordabilitySimulatorSheetState
                 const SizedBox(height: 4),
                 Text(
                   'Check how a new instalment affects your DSR and daily budget.',
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 12, color: colors.textSecondary),
                 ),
                 const SizedBox(height: 16),
-
                 Row(
                   children: [
                     Expanded(
                       flex: 2,
                       child: TextField(
                         controller: _titleController,
-                        style: TextStyle(color: AppColors.textPrimary),
+                        style: TextStyle(color: colors.textPrimary),
                         decoration: InputDecoration(
                           labelText: 'Purchase Name',
-                          labelStyle: TextStyle(
-                              color: AppColors.textSecondary, fontSize: 12),
+                          labelStyle: TextStyle(color: colors.textSecondary, fontSize: 12),
                           filled: true,
-                          fillColor: AppColors.surfaceHigh,
+                          fillColor: colors.surfaceHigh,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: AppColors.outline),
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(color: colors.outline),
                           ),
                         ),
                       ),
@@ -185,23 +182,21 @@ class _AffordabilitySimulatorSheetState
                       flex: 2,
                       child: TextField(
                         controller: _monthlyCostController,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         style: TextStyle(
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                         onChanged: (_) => setState(() {}),
                         decoration: InputDecoration(
                           labelText: 'Monthly (RM)',
-                          labelStyle: TextStyle(
-                              color: AppColors.textSecondary, fontSize: 12),
+                          labelStyle: TextStyle(color: colors.textSecondary, fontSize: 12),
                           prefixText: 'RM ',
                           filled: true,
-                          fillColor: AppColors.surfaceHigh,
+                          fillColor: colors.surfaceHigh,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: AppColors.outline),
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(color: colors.outline),
                           ),
                         ),
                       ),
@@ -209,7 +204,6 @@ class _AffordabilitySimulatorSheetState
                   ],
                 ),
                 const SizedBox(height: 16),
-
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
@@ -239,7 +233,7 @@ class _AffordabilitySimulatorSheetState
                         verdictDesc,
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                           height: 1.35,
                         ),
                       ),
@@ -247,33 +241,31 @@ class _AffordabilitySimulatorSheetState
                   ),
                 ),
                 const SizedBox(height: 16),
-
                 Row(
                   children: [
                     Expanded(
                       child: _buildMetricComparison(
+                        colors: colors,
                         title: 'Debt Service Ratio',
                         current: '${currentDsr.toStringAsFixed(1)}%',
                         simulated: '${simulatedDsr.toStringAsFixed(1)}%',
-                        isIncreaseBad: true,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: _buildMetricComparison(
+                        colors: colors,
                         title: 'Safe Daily Spend',
                         current: currentDaily.formatted,
                         simulated: simulatedSafe.safeDailyAmount.formatted,
                         diffLabel: dailyDiff > 0
                             ? '-${Money(dailyDiff).formatted}/day'
                             : 'No drop',
-                        isIncreaseBad: false,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 20),
-
                 Row(
                   children: [
                     Expanded(
@@ -281,12 +273,12 @@ class _AffordabilitySimulatorSheetState
                         onPressed: () => Navigator.of(context).pop(),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: BorderSide(color: AppColors.cardBorder),
+                          side: BorderSide(color: colors.cardBorder),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                        child: Text('Cancel',
-                            style: TextStyle(color: AppColors.textSecondary)),
+                        child: Text('Cancel', style: TextStyle(color: colors.textSecondary)),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -297,9 +289,7 @@ class _AffordabilitySimulatorSheetState
                           if (proposedSen <= 0) return;
                           final tenure =
                               int.tryParse(_tenureController.text.trim()) ?? 12;
-                          await ref
-                              .read(commitmentRepositoryProvider)
-                              .addCommitment(
+                          await ref.read(commitmentRepositoryProvider).addCommitment(
                                 title: _titleController.text.trim(),
                                 type: 'spaylater',
                                 totalAmountSen: proposedSen * tenure,
@@ -314,20 +304,24 @@ class _AffordabilitySimulatorSheetState
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                    'Added ${_titleController.text.trim()} to commitments'),
+                                  'Added ${_titleController.text.trim()} to commitments',
+                                ),
                               ),
                             );
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: AppColors.onPrimary,
+                          backgroundColor: colors.primary,
+                          foregroundColor: colors.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                        child: const Text('Add to Commitments',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: const Text(
+                          'Add to Commitments',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                   ],
@@ -341,49 +335,64 @@ class _AffordabilitySimulatorSheetState
   }
 
   Widget _buildMetricComparison({
+    required AppPalette colors,
     required String title,
     required String current,
     required String simulated,
     String? diffLabel,
-    required bool isIncreaseBad,
   }) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.surfaceHigh,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        color: colors.surfaceHigh,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colors.cardBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+          Text(title, style: TextStyle(fontSize: 11, color: colors.textSecondary)),
           const SizedBox(height: 6),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(current,
+              Flexible(
+                child: Text(
+                  current,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                      decoration: TextDecoration.lineThrough)),
-              Icon(Icons.arrow_forward_rounded,
-                  size: 14, color: AppColors.textSecondary),
-              Text(simulated,
+                    fontSize: 13,
+                    color: colors.textSecondary,
+                    decoration: TextDecoration.lineThrough,
+                  ),
+                ),
+              ),
+              Icon(Icons.arrow_forward_rounded, size: 14, color: colors.textSecondary),
+              Flexible(
+                child: Text(
+                  simulated,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary)),
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: colors.textPrimary,
+                  ),
+                ),
+              ),
             ],
           ),
           if (diffLabel != null) ...[
             const SizedBox(height: 4),
-            Text(diffLabel,
-                style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.danger)),
+            Text(
+              diffLabel,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: colors.danger,
+              ),
+            ),
           ],
         ],
       ),

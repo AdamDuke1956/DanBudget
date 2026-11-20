@@ -116,9 +116,7 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
     final remainingRinggit = double.tryParse(_remainingAmountController.text.trim());
     final remainingSen = (remainingRinggit != null && remainingRinggit >= 0)
         ? Money.fromRinggit(remainingRinggit).sen
-        : (widget.isEditing
-            ? widget.existingCommitment!.remainingAmountSen
-            : totalSen);
+        : (widget.isEditing ? widget.existingCommitment!.remainingAmountSen : totalSen);
 
     if (widget.isEditing) {
       await ref.read(commitmentRepositoryProvider).updateCommitment(
@@ -147,15 +145,16 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
     }
 
     if (mounted) {
+      final colors = AppColors.of(context);
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: AppColors.surfaceHigh,
+          backgroundColor: colors.surfaceHigh,
           content: Text(
             widget.isEditing
                 ? 'Updated $title (RM ${monthlyRinggit.toStringAsFixed(2)}/mo)'
                 : 'Added $title (RM ${monthlyRinggit.toStringAsFixed(2)}/mo)',
-            style: TextStyle(color: AppColors.textPrimary),
+            style: TextStyle(color: colors.textPrimary),
           ),
         ),
       );
@@ -164,6 +163,7 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
@@ -174,7 +174,7 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
         bottom: 24 + bottomInset,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colors.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SingleChildScrollView(
@@ -187,25 +187,21 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
                 width: 44,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: AppColors.outline,
-                  borderRadius: BorderRadius.circular(10),
+                  color: colors.outline,
+                  borderRadius: BorderRadius.circular(6),
                 ),
               ),
             ),
             const SizedBox(height: 16),
-
             Text(
-              widget.isEditing
-                  ? 'Edit Commitment'
-                  : 'Add Commitment / Installment',
+              widget.isEditing ? 'Edit Commitment' : 'Add Commitment / Installment',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
             const SizedBox(height: 14),
-
             SizedBox(
               height: 44,
               child: ListView.separated(
@@ -220,18 +216,19 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
                     avatar: Icon(
                       typeIcon,
                       size: 15,
-                      color: isSelected ? AppColors.accent : AppColors.textSecondary,
+                      color: isSelected ? colors.accent : colors.textSecondary,
                     ),
                     label: Text(t['label']!),
                     selected: isSelected,
-                    selectedColor: AppColors.accent.withValues(alpha: 0.22),
-                    backgroundColor: AppColors.surfaceHigh,
+                    selectedColor: colors.accent.withValues(alpha: 0.22),
+                    backgroundColor: colors.surfaceHigh,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                     labelStyle: TextStyle(
-                      color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                      color: isSelected ? colors.textPrimary : colors.textSecondary,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                     side: BorderSide(
-                      color: isSelected ? AppColors.accent : AppColors.outline,
+                      color: isSelected ? colors.accent : colors.outline,
                     ),
                     onSelected: (_) {
                       setState(() {
@@ -246,7 +243,6 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
               ),
             ),
             const SizedBox(height: 14),
-
             if (_selectedType == 'spaylater')
               Container(
                 margin: const EdgeInsets.only(bottom: 14),
@@ -271,15 +267,15 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
+                              color: colors.textPrimary,
                             ),
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
-                            'Use the SPayLater tracker to calculate months left, Shopee fees & allowance impact.',
+                            'Use the SPayLater tracker for months left, fees & allowance impact.',
                             style: TextStyle(
                               fontSize: 11,
-                              color: AppColors.textSecondary,
+                              color: colors.textSecondary,
                             ),
                           ),
                         ],
@@ -303,30 +299,30 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.accent,
+                          color: colors.accent,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-
             TextField(
               controller: _titleController,
-              style: TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: colors.textPrimary),
               decoration: _inputDecoration(
+                colors: colors,
                 hint: 'e.g. iPhone 15 SPayLater, Myvi Hire Purchase',
                 label: 'Commitment Name',
                 icon: Icons.label_rounded,
               ),
             ),
             const SizedBox(height: 12),
-
             TextField(
               controller: _monthlyPaymentController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: colors.textPrimary),
               decoration: _inputDecoration(
+                colors: colors,
                 hint: 'e.g. 250.00',
                 label: 'Monthly Installment (RM)',
                 icon: Icons.payments_rounded,
@@ -334,12 +330,12 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
               ),
             ),
             const SizedBox(height: 12),
-
             TextField(
               controller: _totalAmountController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: colors.textPrimary),
               decoration: _inputDecoration(
+                colors: colors,
                 hint: 'e.g. 3000.00',
                 label: 'Total Loan / Original Principal (RM)',
                 icon: Icons.account_balance_rounded,
@@ -347,13 +343,13 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
               ),
             ),
             const SizedBox(height: 12),
-
             if (widget.isEditing) ...[
               TextField(
                 controller: _remainingAmountController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                style: TextStyle(color: AppColors.textPrimary),
+                style: TextStyle(color: colors.textPrimary),
                 decoration: _inputDecoration(
+                  colors: colors,
                   hint: 'e.g. 1500.00',
                   label: 'Current Remaining Balance (RM)',
                   icon: Icons.price_change_rounded,
@@ -362,15 +358,15 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
               ),
               const SizedBox(height: 12),
             ],
-
             Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _tenureMonthsController,
                     keyboardType: TextInputType.number,
-                    style: TextStyle(color: AppColors.textPrimary),
+                    style: TextStyle(color: colors.textPrimary),
                     decoration: _inputDecoration(
+                      colors: colors,
                       hint: '12',
                       label: 'Total Tenure (Mo)',
                       icon: Icons.timelapse_rounded,
@@ -383,8 +379,9 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
                     child: TextField(
                       controller: _remainingTenureMonthsController,
                       keyboardType: TextInputType.number,
-                      style: TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: colors.textPrimary),
                       decoration: _inputDecoration(
+                        colors: colors,
                         hint: '6',
                         label: 'Months Left',
                         icon: Icons.hourglass_bottom_rounded,
@@ -396,8 +393,9 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
                     child: TextField(
                       controller: _dueDayController,
                       keyboardType: TextInputType.number,
-                      style: TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: colors.textPrimary),
                       decoration: _inputDecoration(
+                        colors: colors,
                         hint: '10',
                         label: 'Due Day (1-28)',
                         icon: Icons.event_rounded,
@@ -411,8 +409,9 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
               TextField(
                 controller: _dueDayController,
                 keyboardType: TextInputType.number,
-                style: TextStyle(color: AppColors.textPrimary),
+                style: TextStyle(color: colors.textPrimary),
                 decoration: _inputDecoration(
+                  colors: colors,
                   hint: '10',
                   label: 'Due Day of Month (1-31)',
                   icon: Icons.event_rounded,
@@ -421,44 +420,47 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
             ],
             if (_selectedType == 'spaylater') ...[
               const SizedBox(height: 10),
-              Text('Shopee Bill Cycles:', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+              Text('Shopee Bill Cycles:', style: TextStyle(fontSize: 11, color: colors.textSecondary)),
               const SizedBox(height: 4),
               Wrap(
                 spacing: 6,
                 runSpacing: 6,
                 children: [
                   ActionChip(
-                    label: const Text('Bill: 1st ➜ Due: 10th', style: TextStyle(fontSize: 11)),
-                    backgroundColor: AppColors.surfaceHigh,
+                    label: const Text('Bill: 1st -> Due: 10th', style: TextStyle(fontSize: 11)),
+                    backgroundColor: colors.surfaceHigh,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                     onPressed: () => setState(() => _dueDayController.text = '10'),
                   ),
                   ActionChip(
-                    label: const Text('Bill: 11th ➜ Due: 20th', style: TextStyle(fontSize: 11)),
-                    backgroundColor: AppColors.surfaceHigh,
+                    label: const Text('Bill: 11th -> Due: 20th', style: TextStyle(fontSize: 11)),
+                    backgroundColor: colors.surfaceHigh,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                     onPressed: () => setState(() => _dueDayController.text = '20'),
                   ),
                   ActionChip(
-                    label: const Text('Bill: 21st ➜ Due: 1st', style: TextStyle(fontSize: 11)),
-                    backgroundColor: AppColors.surfaceHigh,
+                    label: const Text('Bill: 21st -> Due: 1st', style: TextStyle(fontSize: 11)),
+                    backgroundColor: colors.surfaceHigh,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                     onPressed: () => setState(() => _dueDayController.text = '1'),
                   ),
                   ActionChip(
-                    label: const Text('Bill: 25th ➜ Due: 5th', style: TextStyle(fontSize: 11)),
-                    backgroundColor: AppColors.surfaceHigh,
+                    label: const Text('Bill: 25th -> Due: 5th', style: TextStyle(fontSize: 11)),
+                    backgroundColor: colors.surfaceHigh,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                     onPressed: () => setState(() => _dueDayController.text = '5'),
                   ),
                 ],
               ),
             ],
             const SizedBox(height: 20),
-
             ElevatedButton(
               onPressed: _saveCommitment,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                foregroundColor: Colors.white,
+                backgroundColor: colors.accent,
+                foregroundColor: colors.onAccent,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 elevation: 0,
               ),
               child: Text(
@@ -473,6 +475,7 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
   }
 
   InputDecoration _inputDecoration({
+    required AppPalette colors,
     required String hint,
     required String label,
     required IconData icon,
@@ -480,26 +483,26 @@ class _AddCommitmentSheetState extends ConsumerState<AddCommitmentSheet> {
   }) {
     return InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+      labelStyle: TextStyle(color: colors.textSecondary, fontSize: 13),
       hintText: hint,
-      hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+      hintStyle: TextStyle(color: colors.textSecondary, fontSize: 13),
       prefixText: prefixText,
-      prefixStyle: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
-      prefixIcon: Icon(icon, color: AppColors.accent, size: 20),
+      prefixStyle: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.bold),
+      prefixIcon: Icon(icon, color: colors.accent, size: 20),
       filled: true,
-      fillColor: AppColors.surfaceHigh,
+      fillColor: colors.surfaceHigh,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: AppColors.outline),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: colors.outline),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: AppColors.outline),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: colors.outline),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: AppColors.accent, width: 2),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: colors.accent, width: 2),
       ),
     );
   }
