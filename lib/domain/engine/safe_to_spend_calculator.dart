@@ -83,16 +83,16 @@ abstract final class SafeToSpendCalculator {
     final bool isDeficit = disposableSen <= 0;
 
     // Check if actual cash on hand is lower than the remaining theoretical budget
-    final bool isConstrained = liquidOnHand != null &&
-        liquidOnHand.sen > 0 &&
-        liquidOnHand.sen < disposableSen;
+    final bool isConstrained =
+        liquidOnHand != null && liquidOnHand.sen < disposableSen;
 
     final int spendableSen = isConstrained ? liquidOnHand.sen : disposableSen;
 
     // If workdaysOnly mode is active, divide by workdays if today is a workday or positive workdays
     final int divisor = (workdaysOnly && workdays > 0) ? workdays : days;
-    final int dailySen =
-        (!isDeficit && divisor > 0) ? (spendableSen / divisor).floor() : 0;
+    final int dailySen = (!isDeficit && spendableSen > 0 && divisor > 0)
+        ? (spendableSen / divisor).floor()
+        : 0;
 
     final bool isWk = todayIsWorkday ??
         (currentDate.weekday >= DateTime.monday &&

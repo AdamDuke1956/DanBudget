@@ -20,6 +20,17 @@ class ExpenseRepository {
         .getSingleOrNull();
   }
 
+  /// Watch total amount (in sen) of all expenses on or after [start].
+  Stream<int> watchTotalSpentSince(DateTime start) {
+    final query = _db.selectOnly(_db.expensesTable)
+      ..addColumns([_db.expensesTable.amountSen.sum()])
+      ..where(_db.expensesTable.date.isBiggerOrEqualValue(start));
+
+    return query.watchSingle().map(
+          (row) => row.read(_db.expensesTable.amountSen.sum()) ?? 0,
+        );
+  }
+
   /// Watch recent expenses with their category and account info joined.
   Stream<List<ExpenseWithCategory>> watchRecentExpenses({int limit = 50}) {
     final query = _db.select(_db.expensesTable).join([

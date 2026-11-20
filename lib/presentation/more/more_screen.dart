@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +8,7 @@ import '../../core/theme/app_theme.dart';
 import '../../data/local/app_database.dart';
 import '../../data/providers/dashboard_provider.dart';
 import '../../data/providers/database_providers.dart';
-import '../../data/repositories/tax_repository.dart';
+import '../../data/services/backup_service.dart';
 import '../plan/widgets/salary_edit_sheet.dart';
 import '../tax/tax_optimizer_screen.dart';
 import 'widgets/checklist_section.dart';
@@ -398,7 +397,7 @@ class MoreScreen extends ConsumerWidget {
                       padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
                       child: Center(
                         child: Text(
-                          'DanBudget v1.6.5 • 100% Offline',
+                          'DanBudget v1.6.6 • 100% Offline',
                           style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.textSecondary.withValues(alpha: 0.6)),
                         ),
                       ),
@@ -475,59 +474,10 @@ class MoreScreen extends ConsumerWidget {
   }
 
   void _exportDataAsJson(BuildContext context, WidgetRef ref, DashboardState state) async {
-    final expenses = await ref.read(expenseRepositoryProvider).getAllExpenses();
-    final commitments = state.activeCommitments;
-    final checklist = await ref.read(checklistRepositoryProvider).watchChecklistItems().first;
+    final db = ref.read(databaseProvider);
     final taxRepo = ref.read(taxRepositoryProvider);
-    final taxProfiles = await taxRepo.getAllProfiles();
-    final taxClaims = await taxRepo.getAllReceiptClaims();
-
-    final data = {
-      'exportedAt': DateTime.now().toIso8601String(),
-      'version': '1.6.5',
-      'appName': 'DanBudget',
-      'profile': {
-        'name': state.profile.name,
-        'grossSalarySen': state.profile.grossSalarySen,
-        'fixedAllowanceSen': state.profile.fixedAllowanceSen,
-        'currentSavingsSen': state.profile.currentSavingsSen,
-        'paydayDayOfMonth': state.profile.paydayDayOfMonth,
-        'epfRate': state.profile.epfRate,
-      },
-      'expenses': expenses
-          .map((e) => {
-                'id': e.expense.id,
-                'amountSen': e.expense.amountSen,
-                'category': e.category.name,
-                'date': e.expense.date.toIso8601String(),
-                'note': e.expense.note,
-                'isCommitment': e.expense.isCommitmentPayment,
-              })
-          .toList(),
-      'commitments': commitments
-          .map((c) => {
-                'id': c.id,
-                'title': c.title,
-                'type': c.type,
-                'monthlyPaymentSen': c.monthlyPaymentSen,
-                'remainingTenureMonths': c.remainingTenureMonths,
-                'remainingAmountSen': c.remainingAmountSen,
-                'dueDayOfMonth': c.dueDayOfMonth,
-              })
-          .toList(),
-      'checklist': checklist
-          .map((i) => {
-                'id': i.id,
-                'title': i.title,
-                'category': i.category,
-                'isCompleted': i.isCompleted,
-              })
-          .toList(),
-      'taxProfiles': taxProfiles.map((p) => p.toJson()).toList(),
-      'taxReceiptClaims': taxClaims.map((c) => c.toJson()).toList(),
-    };
-
-    final jsonStr = const JsonEncoder.withIndent('  ').convert(data);
+    final payload = await BackupService.exportToBackupPayload(db, taxRepo: taxRepo);
+    final jsonStr = payload.jsonString;
 
     if (context.mounted) {
       showDialog(
@@ -552,7 +502,7 @@ class MoreScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Backup ready: ${expenses.length} expenses, ${commitments.length} commitments, and ${checklist.length} checklist items.',
+                  'Backup ready: ${payload.accountCount} accounts, ${payload.expenseCount} expenses, ${payload.commitmentCount} commitments, and ${payload.dailyPlanCount} daily plans.',
                   style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 10),
@@ -704,126 +654,9 @@ class MoreScreen extends ConsumerWidget {
 
   Future<void> _restoreDataFromJson(BuildContext context, WidgetRef ref, String jsonText) async {
     try {
-      final dynamic decoded = jsonDecode(jsonText);
-      if (decoded is! Map<String, dynamic>) {
-        throw const FormatException('Invalid backup format: root must be a JSON object.');
-      }
       final db = ref.read(databaseProvider);
-
-      await db.transaction(() async {
-        // 1. Profile
-        if (decoded['profile'] is Map<String, dynamic>) {
-          final p = decoded['profile'] as Map<String, dynamic>;
-          await (db.update(db.userProfileTable)..where((t) => t.id.equals(1))).write(
-            UserProfileTableCompanion(
-              name: drift.Value((p['name'] as String?) ?? ''),
-              grossSalarySen: drift.Value((p['grossSalarySen'] as num?)?.toInt() ?? 300000),
-              fixedAllowanceSen: drift.Value((p['fixedAllowanceSen'] as num?)?.toInt() ?? 0),
-              currentSavingsSen: drift.Value((p['currentSavingsSen'] as num?)?.toInt() ?? 0),
-              paydayDayOfMonth: drift.Value((p['paydayDayOfMonth'] as num?)?.toInt() ?? 25),
-              epfRate: drift.Value((p['epfRate'] as num?)?.toDouble() ?? 0.11),
-              isOnboarded: const drift.Value(true),
-              updatedAt: drift.Value(DateTime.now()),
-            ),
-          );
-        }
-
-        // 2. Commitments
-        if (decoded['commitments'] is List) {
-          await db.delete(db.commitmentsTable).go();
-          for (final item in decoded['commitments'] as List) {
-            if (item is Map<String, dynamic>) {
-              final remaining = (item['remainingAmountSen'] as num?)?.toInt() ?? 0;
-              await db.into(db.commitmentsTable).insert(
-                CommitmentsTableCompanion.insert(
-                  title: item['title'] ?? 'Commitment',
-                  type: item['type'] ?? 'other',
-                  totalAmountSen: (item['totalAmountSen'] as num?)?.toInt() ?? remaining,
-                  monthlyPaymentSen: (item['monthlyPaymentSen'] as num?)?.toInt() ?? 0,
-                  remainingAmountSen: remaining,
-                  remainingTenureMonths: drift.Value((item['remainingTenureMonths'] as num?)?.toInt() ?? 1),
-                  dueDayOfMonth: drift.Value((item['dueDayOfMonth'] as num?)?.toInt() ?? 1),
-                ),
-              );
-            }
-          }
-        }
-
-        // 3. Expenses
-        if (decoded['expenses'] is List) {
-          await db.delete(db.expensesTable).go();
-          final categories = await db.select(db.expenseCategoriesTable).get();
-          final catMap = {for (var c in categories) c.name.toLowerCase(): c.id};
-          final defaultCatId = categories.isNotEmpty ? categories.first.id : 'food';
-
-          for (final item in decoded['expenses'] as List) {
-            if (item is Map<String, dynamic>) {
-              final catName = (item['category'] as String?)?.toLowerCase() ?? '';
-              final categoryId = catMap[catName] ?? defaultCatId;
-              final date = item['date'] != null
-                  ? DateTime.tryParse(item['date']) ?? DateTime.now()
-                  : DateTime.now();
-
-              await db.into(db.expensesTable).insert(
-                ExpensesTableCompanion.insert(
-                  amountSen: (item['amountSen'] as num?)?.toInt() ?? 0,
-                  categoryId: categoryId,
-                  date: date,
-                  note: drift.Value(item['note'] as String?),
-                  isCommitmentPayment: drift.Value((item['isCommitment'] as bool?) ?? false),
-                ),
-              );
-            }
-          }
-        }
-
-        // 4. Checklist
-        if (decoded['checklist'] is List) {
-          for (final item in decoded['checklist'] as List) {
-            if (item is Map<String, dynamic> && item['id'] != null) {
-              final id = item['id'].toString();
-              final isCompleted = (item['isCompleted'] as bool?) ?? false;
-              await (db.update(db.checklistItemsTable)..where((t) => t.id.equals(id))).write(
-                ChecklistItemsTableCompanion(
-                  isCompleted: drift.Value(isCompleted),
-                  completedAt: drift.Value(isCompleted ? DateTime.now() : null),
-                ),
-              );
-            }
-          }
-        }
-      });
-
-      // 5. Tax Profiles & Receipt Claims (v1.6.0+)
       final taxRepo = ref.read(taxRepositoryProvider);
-      if (decoded['taxProfiles'] is List || decoded['taxReceiptClaims'] is List) {
-        await taxRepo.clearAllTaxData();
-        if (decoded['taxProfiles'] is List) {
-          for (final item in decoded['taxProfiles'] as List) {
-            if (item is Map<String, dynamic>) {
-              await taxRepo.saveTaxYearProfile(TaxYearProfileData.fromJson(item));
-            }
-          }
-        }
-        if (decoded['taxReceiptClaims'] is List) {
-          for (final item in decoded['taxReceiptClaims'] as List) {
-            if (item is Map<String, dynamic>) {
-              final claim = TaxReceiptClaimData.fromJson(item);
-              await taxRepo.addReceiptClaim(
-                assessmentYear: claim.assessmentYear,
-                expenseId: claim.expenseId,
-                title: claim.title,
-                amountSen: claim.amountSen,
-                bucket: claim.bucket,
-                subBucketId: claim.subBucketId,
-                receiptRef: claim.receiptRef,
-                claimedDate: claim.claimedDate,
-                isAutoClassified: claim.isAutoClassified,
-              );
-            }
-          }
-        }
-      }
+      await BackupService.restoreFromJson(db, jsonText, taxRepo: taxRepo);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
