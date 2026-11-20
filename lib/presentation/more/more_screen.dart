@@ -8,6 +8,7 @@ import '../../core/theme/app_theme.dart';
 import '../../data/local/app_database.dart';
 import '../../data/providers/dashboard_provider.dart';
 import '../../data/providers/database_providers.dart';
+import '../../data/services/backup_file_service.dart';
 import '../../data/services/backup_service.dart';
 import '../plan/widgets/salary_edit_sheet.dart';
 import '../tax/tax_optimizer_screen.dart';
@@ -347,7 +348,7 @@ class MoreScreen extends ConsumerWidget {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Stored locally on your device. No cloud sync or tracking.',
+                                    'Stored locally on your device. Save .json backups to Downloads/DanBudget so they survive app uninstalls.',
                                     style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.35),
                                   ),
                                   const SizedBox(height: 12),
@@ -473,119 +474,32 @@ class MoreScreen extends ConsumerWidget {
     );
   }
 
-  void _exportDataAsJson(BuildContext context, WidgetRef ref, DashboardState state) async {
+  Future<void> _exportDataAsJson(BuildContext context, WidgetRef ref, DashboardState state) async {
     final db = ref.read(databaseProvider);
     final taxRepo = ref.read(taxRepositoryProvider);
     final payload = await BackupService.exportToBackupPayload(db, taxRepo: taxRepo);
     final jsonStr = payload.jsonString;
+    final fileName = BackupFileService.buildFileName();
+    final previewStr = jsonStr.length > 3000
+        ? '${jsonStr.substring(0, 3000)}\n...\n[Full ${jsonStr.length} chars will be saved to $fileName]'
+        : jsonStr;
 
-    if (context.mounted) {
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          backgroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Row(
-            children: [
-              Icon(Icons.shield_outlined, color: AppColors.primary),
-              const SizedBox(width: 8),
-              Text(
-                '100% Local Backup',
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Backup ready: ${payload.accountCount} accounts, ${payload.expenseCount} expenses, ${payload.commitmentCount} commitments, and ${payload.dailyPlanCount} daily plans.',
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.warning.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.shield_outlined, size: 16, color: AppColors.warning),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Keep your exported JSON private. It contains personal income, debt, and expense records.',
-                          style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  height: 160,
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceHigh,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: SingleChildScrollView(
-                    child: Text(
-                      jsonStr,
-                      style: TextStyle(fontFamily: 'monospace', fontSize: 10, color: AppColors.textPrimary),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text('Close', style: TextStyle(color: AppColors.textSecondary)),
-            ),
-            ElevatedButton.icon(
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: jsonStr));
-                Navigator.of(ctx).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Copied backup to clipboard. Paste securely and avoid pasting in untrusted apps.'),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.copy_rounded, size: 16),
-              label: const Text('Copy JSON'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-  }
+    if (!context.mounted) return;
 
-  void _showRestoreDialog(BuildContext context, WidgetRef ref) {
-    final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.restore_page_outlined, color: AppColors.primary),
+            Icon(Icons.shield_outlined, color: AppColors.primary),
             const SizedBox(width: 8),
-            Text(
-              'Restore Backup',
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+            Expanded(
+              child: Text(
+                '100% Local Backup',
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
@@ -596,35 +510,44 @@ class MoreScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Paste your exported JSON backup text below to restore your profile, expenses, commitments, and checklist.',
+                'Backup ready: ${payload.accountCount} accounts, ${payload.expenseCount} expenses, ${payload.commitmentCount} commitments, and ${payload.dailyPlanCount} daily plans.',
                 style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
               ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: controller,
-                maxLines: 6,
-                style: TextStyle(fontFamily: 'monospace', fontSize: 11, color: AppColors.textPrimary),
-                decoration: InputDecoration(
-                  hintText: 'Paste JSON backup here...',
-                  hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.5)),
-                  filled: true,
-                  fillColor: AppColors.surfaceHigh,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.folder_outlined, size: 16, color: AppColors.warning),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Saved to Downloads/DanBudget/$fileName so it stays safe even if you uninstall the app.',
+                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: () async {
-                  final clip = await Clipboard.getData('text/plain');
-                  if (clip?.text != null) {
-                    controller.text = clip!.text!;
-                  }
-                },
-                icon: const Icon(Icons.paste_rounded, size: 16),
-                label: const Text('Paste from Clipboard', style: TextStyle(fontSize: 12)),
+              const SizedBox(height: 10),
+              Container(
+                height: 140,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceHigh,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: SingleChildScrollView(
+                  child: Text(
+                    previewStr,
+                    style: TextStyle(fontFamily: 'monospace', fontSize: 10, color: AppColors.textPrimary),
+                  ),
+                ),
               ),
             ],
           ),
@@ -632,18 +555,233 @@ class MoreScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
+            child: Text('Close', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton.icon(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: jsonStr));
+              Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Copied backup to clipboard. For long backups, prefer saving the .json file.'),
+                ),
+              );
+            },
+            icon: const Icon(Icons.copy_rounded, size: 15),
+            label: const Text('Copy'),
+          ),
+          OutlinedButton.icon(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              await _saveBackupFile(
+                context,
+                jsonStr: jsonStr,
+                fileName: fileName,
+                usePicker: true,
+              );
+            },
+            icon: const Icon(Icons.folder_open_rounded, size: 15),
+            label: const Text('Save As...'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.textPrimary,
+              side: BorderSide(color: AppColors.cardBorder),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              await _saveBackupFile(
+                context,
+                jsonStr: jsonStr,
+                fileName: fileName,
+                usePicker: false,
+              );
+            },
+            icon: const Icon(Icons.save_alt_rounded, size: 16),
+            label: const Text('Save .json File'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.onPrimary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _saveBackupFile(
+    BuildContext context, {
+    required String jsonStr,
+    required String fileName,
+    required bool usePicker,
+  }) async {
+    try {
+      final result = usePicker
+          ? await BackupFileService.saveWithPicker(
+              jsonContent: jsonStr,
+              fileName: fileName,
+            )
+          : await BackupFileService.saveToDownloadsFolder(
+              jsonContent: jsonStr,
+              fileName: fileName,
+            );
+
+      if (!context.mounted || result.cancelled) return;
+
+      if (result.saved) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFF10B981),
+            content: Text('Backup saved to ${result.location ?? fileName}'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFFEF4444),
+            content: Text('Failed to save backup file: $e'),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showRestoreDialog(BuildContext context, WidgetRef ref) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.restore_page_outlined, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Restore Backup',
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Choose a saved .json backup file from Downloads/DanBudget (or any folder) to restore your data.',
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    try {
+                      final picked = await BackupFileService.pickJsonFile();
+                      if (picked.cancelled || !picked.picked) return;
+                      final content = picked.content?.trim() ?? '';
+                      if (content.isEmpty) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              backgroundColor: Color(0xFFEF4444),
+                              content: Text('Selected backup file is empty.'),
+                            ),
+                          );
+                        }
+                        return;
+                      }
+                      if (ctx.mounted) Navigator.of(ctx).pop();
+                      if (context.mounted) {
+                        await _restoreDataFromJson(
+                          context,
+                          ref,
+                          content,
+                          sourceLabel: picked.fileName,
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: const Color(0xFFEF4444),
+                            content: Text('Could not open backup file: $e'),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.upload_file_rounded, size: 18),
+                  label: const Text('Choose .json File'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.onPrimary,
+                    minimumSize: const Size(0, 44),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Or paste JSON text below:',
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: controller,
+                  maxLines: 5,
+                  style: TextStyle(fontFamily: 'monospace', fontSize: 11, color: AppColors.textPrimary),
+                  decoration: InputDecoration(
+                    hintText: 'Paste JSON backup here...',
+                    hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.5)),
+                    filled: true,
+                    fillColor: AppColors.surfaceHigh,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () async {
+                      final clip = await Clipboard.getData('text/plain');
+                      if (clip?.text != null) {
+                        controller.text = clip!.text!;
+                      }
+                    },
+                    icon: const Icon(Icons.paste_rounded, size: 16),
+                    label: const Text('Paste from Clipboard', style: TextStyle(fontSize: 12)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
             child: Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
           ),
-          ElevatedButton(
+          OutlinedButton(
             onPressed: () async {
               final text = controller.text.trim();
               if (text.isEmpty) return;
               Navigator.of(ctx).pop();
               await _restoreDataFromJson(context, ref, text);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.onPrimary,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              side: BorderSide(color: AppColors.primary.withValues(alpha: 0.5)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             child: const Text('Restore Now'),
           ),
@@ -652,17 +790,25 @@ class MoreScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _restoreDataFromJson(BuildContext context, WidgetRef ref, String jsonText) async {
+  Future<void> _restoreDataFromJson(
+    BuildContext context,
+    WidgetRef ref,
+    String jsonText, {
+    String? sourceLabel,
+  }) async {
     try {
       final db = ref.read(databaseProvider);
       final taxRepo = ref.read(taxRepositoryProvider);
       await BackupService.restoreFromJson(db, jsonText, taxRepo: taxRepo);
 
       if (context.mounted) {
+        final msg = sourceLabel != null
+            ? 'Backup restored from $sourceLabel!'
+            : 'Backup restored successfully! All data has been loaded.';
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Color(0xFF10B981),
-            content: Text('Backup restored successfully! All data has been loaded.'),
+          SnackBar(
+            backgroundColor: const Color(0xFF10B981),
+            content: Text(msg),
           ),
         );
       }
