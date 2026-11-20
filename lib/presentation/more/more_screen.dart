@@ -505,106 +505,115 @@ class MoreScreen extends ConsumerWidget {
         ),
         content: SizedBox(
           width: double.maxFinite,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Backup ready: ${payload.accountCount} accounts, ${payload.expenseCount} expenses, ${payload.commitmentCount} commitments, and ${payload.dailyPlanCount} daily plans.',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppColors.warning.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Backup ready: ${payload.accountCount} accounts, ${payload.expenseCount} expenses, ${payload.commitmentCount} commitments, and ${payload.dailyPlanCount} daily plans.',
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
-                child: Row(
-                  children: [
-                    Icon(Icons.folder_outlined, size: 16, color: AppColors.warning),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Saved to Downloads/DanBudget/$fileName so it stays safe even if you uninstall the app.',
-                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.folder_outlined, size: 16, color: AppColors.warning),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Saved to Downloads/DanBudget/$fileName so it stays safe even if you uninstall the app.',
+                          style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                height: 140,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceHigh,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: SingleChildScrollView(
-                  child: Text(
-                    previewStr,
-                    style: TextStyle(fontFamily: 'monospace', fontSize: 10, color: AppColors.textPrimary),
+                    ],
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 10),
+                Container(
+                  height: 120,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceHigh,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Text(
+                      previewStr,
+                      style: TextStyle(fontFamily: 'monospace', fontSize: 10, color: AppColors.textPrimary),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('Close', style: TextStyle(color: AppColors.textSecondary)),
-          ),
-          TextButton.icon(
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: jsonStr));
-              Navigator.of(ctx).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Copied backup to clipboard. For long backups, prefer saving the .json file.'),
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text('Close', style: TextStyle(color: AppColors.textSecondary)),
+              ),
+              TextButton.icon(
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: jsonStr));
+                  Navigator.of(ctx).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Copied backup to clipboard. For long backups, prefer saving the .json file.'),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.copy_rounded, size: 15),
+                label: const Text('Copy'),
+              ),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  Navigator.of(ctx).pop();
+                  await _saveBackupFile(
+                    context,
+                    jsonStr: jsonStr,
+                    fileName: fileName,
+                    usePicker: true,
+                  );
+                },
+                icon: const Icon(Icons.folder_open_rounded, size: 15),
+                label: const Text('Save As...'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.textPrimary,
+                  side: BorderSide(color: AppColors.cardBorder),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-              );
-            },
-            icon: const Icon(Icons.copy_rounded, size: 15),
-            label: const Text('Copy'),
-          ),
-          OutlinedButton.icon(
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              await _saveBackupFile(
-                context,
-                jsonStr: jsonStr,
-                fileName: fileName,
-                usePicker: true,
-              );
-            },
-            icon: const Icon(Icons.folder_open_rounded, size: 15),
-            label: const Text('Save As...'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.textPrimary,
-              side: BorderSide(color: AppColors.cardBorder),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-          ),
-          ElevatedButton.icon(
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              await _saveBackupFile(
-                context,
-                jsonStr: jsonStr,
-                fileName: fileName,
-                usePicker: false,
-              );
-            },
-            icon: const Icon(Icons.save_alt_rounded, size: 16),
-            label: const Text('Save .json File'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.onPrimary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  Navigator.of(ctx).pop();
+                  await _saveBackupFile(
+                    context,
+                    jsonStr: jsonStr,
+                    fileName: fileName,
+                    usePicker: false,
+                  );
+                },
+                icon: const Icon(Icons.save_alt_rounded, size: 16),
+                label: const Text('Save .json File'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.onPrimary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ],
           ),
         ],
       ),
